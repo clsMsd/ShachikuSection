@@ -15,3 +15,16 @@ int main(void) {
 print("Hello world")
 ```
 
+# Javascript
+
+``` javascript
+console.log("Hello world");
+```
+
+# Scheme
+
+``` scheme
+(print "Hello world")
+```
+
+
