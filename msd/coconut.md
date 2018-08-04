@@ -2,7 +2,7 @@
 
 # Coconutとは？
 
-Coconut is a functional programming language that compiles to Python. Since all valid Python is valid Coconut, using Coconut will only extend and enhance what you're already capable of in Python.
+Coconut is a functional programming language that compiles to Python. Since all valid Python is valid Coconut, using Coconut will only extend and enhance what you're already capable of in Python. (http://coconut-lang.org/より引用)
 
 pythonのスーパーセットでpythonに関数型言語によくある機能(パターンマッチ、部分適用、パイプライン演算子  などなど)を加えた言語。coconutで書かれたプログラムはpythonのコードにトランスパイルされる。
 JavaScriptに対するTypeScript的なもの？
