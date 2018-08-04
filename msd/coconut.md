@@ -20,9 +20,9 @@ pip install coconut
 coconut hoge.coco # hoge.py が出力される
 python hoge.py
 ```
-トランスパイル後すぐに実行したい場合は —run オプションをつける
+トランスパイル後すぐに実行したい場合は --run オプションをつける
 ``` bash
-coconut hoge.coco —run
+coconut hoge.coco --run
 ```
 
 # 機能
@@ -84,19 +84,19 @@ add(1, 2)
 階乗を求める
 ``` python
 def fact(n):
-	match 0 in n:
-		return 1
-	else:
-		return n * fact(n - 1)
+    match 0 in n:
+        return 1
+    else:
+        return n * fact(n - 1)
 ```
 
 リストの長さを求める
 ``` python
 def length(lst):
-	match [head] + tail in lst:
-		return 1 + length(tail)
-	else:
-		return 0
+    match [head] + tail in lst:
+        return 1 + length(tail)
+    else:
+        return 0
 ```
 
 ## 部分適用（カリー化）
@@ -116,10 +116,10 @@ add2(3) #=> 6
 ```
 range(100)
 |> map$( x ->
-	“fizzbuzz” if x % 15 == 0 else
-	“fizz” if x % 5 == 0 else
-	“buzz” if x % 3 == 0 else
-	x)
+    “fizzbuzz” if x % 15 == 0 else
+    “fizz” if x % 5 == 0 else
+    “buzz” if x % 3 == 0 else
+    x)
 |> list
 |> print
 ```
@@ -157,8 +157,8 @@ p.x = 2  #=> Error
 
 ``` python
 data Person(name, age):
-	def greet(self):
-		print(“I’m %s. %d old.”, self.name, self.age)
+    def greet(self):
+        print(“I’m %s. %d old.”, self.name, self.age)
 
 p = Person(name=“tanaka”, age=25)
 p.greet()
@@ -201,8 +201,8 @@ vimでquickrunを使っている場合、.vimrc(neovimの場合はinit.vim)に�
 autocmd BufRead,BufNewFile *.coco setfiletype coco
 let g:quickrun_config = {}
 let g:quickrun_config.coco = {
-	\ ‘command’: ‘coconut’,
-	\ ‘exec’: ‘%c %o %s %a’,
-	\ ‘cmdopt’: ‘—run’,
-	\ }
+\ 'command': 'coconut',
+\ 'exec': '%c %o %s %a',
+\ 'cmdopt': '--run',
+\ }
 ```
