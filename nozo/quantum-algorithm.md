@@ -3,7 +3,14 @@
 参考:[IBM Quantum Computing で計算してみよう](https://www.ibm.com/developerworks/jp/cloud/library/cl-quantum-computing/index.html)
 
 ## 量子ビット
-![ブロッホ球](https://www.ibm.com/developerworks/jp/cloud/library/cl-quantum-computing/images/fig2-8.gif)
+量子ビットはブロッホ球と呼ばれる表現で状態を表す。
+Z軸は0と1の重み(確率)を、XY平面は位相を表す。
+
+![ブロッホ球](./takeuchi-4-16.png)
+
+球面を指す矢印がZ軸正の端のとき`|0>`、Z軸負の端のとき`|1>`と書く。
+
+![重ね合わせ](./takeuchi-4-19.png)
 
 ## 量子ゲート
 - Xゲート
