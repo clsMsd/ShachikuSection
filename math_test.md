@@ -18,3 +18,5 @@ $$ \sum_{n = 0}^{\infty}\frac{x^n}{n!}＝\lim_{n \to \infty} \left(1+\frac{x}{n}
 
 $$ i\hbar\frac{d}{dt}\ket{\psi(t)}=\hat{H}\ket{\psi(t)} $$
 
+$$ \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{x}} \right) - \frac{\partial L}{\partial x} = 0 $$
+
