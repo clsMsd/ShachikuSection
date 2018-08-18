@@ -131,6 +131,13 @@ _竹内繁樹. 量子コンピュータ 超並列計算のからくり. 図5-8�
 IBMがクラウド上で量子計算を実行することができるサービスを提供している。
 ビギナー向けにグラフィカルなインターフェースで量子回路を設計できる[Composer](https://quantumexperience.ng.bluemix.net/qx/editor)がある。
 
+[実際に4bitのGroverのアルゴリズム回路をComposerで構成したもの](https://quantumexperience.ng.bluemix.net/share/code/5b6993adb2e101003a4bacd6/execution/5b6994624217e60038b3f931)
+(この回路は書籍や論文を見て構成したわけではないので間違っている可能性もあります)
+
+![4bit-Grover回路](./4bit-grover-circuit.png)
+
+![4bit-Grover結果](./4bit-grover-output.png)
+
 # 参考文献
 - 竹内繁樹. 量子コンピュータ 超並列計算のからくり. 講談社, 2005.
 - [IBM Quantum Computing で計算してみよう](https://www.ibm.com/developerworks/jp/cloud/library/cl-quantum-computing/index.html)
