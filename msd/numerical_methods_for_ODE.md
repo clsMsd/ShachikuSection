@@ -142,10 +142,10 @@ class EulerStar(Star):
    color = (255, 0, 0)
    def update(self):
       ax, ay = force(self.x, self.y)
-      self.vx += ax * DELTA_T
-      self.vy += ay * DELTA_T
-      self.x += self.vx * DELTA_T
-      self.y += self.vy * DELTA_T
+      self.vx += DELTA_T * ax
+      self.vy += DELTA_T * ay
+      self.x += DELTA_T * self.vx
+      self.y += DELTA_T * self.vy
 
 class RungeStar(Star):
    color = (0, 255, 0)
@@ -158,9 +158,9 @@ class RungeStar(Star):
       kx2, ky2 = vx0 + kvx1 * DELTA_T/2, vy0 + kvy1 * DELTA_T/2
       kvx2, kvy2 = force(x0 + kx1 * DELTA_T/2, y0 + ky1 * DELTA_T/2)
       kx3, ky3 = vx0 + kvx2 * DELTA_T/2, vy0 + kvy2 * DELTA_T/2
-      kvx3, kvy3 = force(x0 + kx2 * DELTA_T/2, x0 + ky2 * DELTA_T/2)
+      kvx3, kvy3 = force(x0 + kx2 * DELTA_T/2, y0 + ky2 * DELTA_T/2)
       kx4, ky4 = vx0 + kvx3 * DELTA_T, vy0 + kvy3 * DELTA_T
-      kvx4, kvy4 = force(x0 + kx3 * DELTA_T, y0 + kx3 * DELTA_T)
+      kvx4, kvy4 = force(x0 + kx3 * DELTA_T, y0 + ky3 * DELTA_T)
 
       self.x += DELTA_T * (kx1 + 2*kx2 + 2*kx3 + kx4) / 6
       self.y += DELTA_T * (ky1 + 2*ky2 + 2*ky3 + ky4) / 6
