@@ -4,17 +4,30 @@ $$
 $$
 
 ## データ型と関数の定義
+データ型と関数は一般的な関数型言語と同様に定義することができる。
 
+### データ型
+次の定義は`bool`型の定義で、値`true`と`false`が`bool`型に属することを示す。
 ```
 Inductive bool : Type :=
   | true : bool
   | false : bool.
 ```
+次の定義は自然数`nat`型の定義である。
 ```
 Inductive nat : Type :=
   | O : nat
   | S : nat → nat.
 ```
+値`O`が0を表し、1以降を次のように表す。
+```
+1 := S O
+2 := S (S O)
+3 := S (S (S O))
+...
+```
+
+### 関数
 ```
 Definition negb (b:bool) : bool :=
   match b with
@@ -36,6 +49,8 @@ Fixpoint plus (n : nat) (m : nat) : nat :=
   end.
 ```
 ## 定理の証明
+Coqでは定義したデータ型と関数によって定理をつくり、それを証明する。
+
 ### intro tactic
 ### simpl tactic
 ### rewrite tactic
