@@ -57,6 +57,15 @@ Fixpoint plus (n : nat) (m : nat) : nat :=
 ## 定理の証明
 Coqでは定義したデータ型と関数によって定理をつくり、それを証明する。
 
+```
+Theorem plus_O_n : ∀ n : nat, 0 + n = n.
+Proof.
+  intros n.
+  simpl.
+  reflexivity.
+Qed.
+```
+
 ### intro tactic
 ### simpl tactic
 ### rewrite tactic
