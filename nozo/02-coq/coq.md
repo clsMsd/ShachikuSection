@@ -3,12 +3,10 @@
 
 テストはプログラムへの入力のうちいくつかをピックアップしてその出力が期待したものであることを検証する手法であることに対して、証明は例えば「任意の自然数を入力したとき出力はある性質を満たす」といった検証が可能である。
 
-$$
-\frac{\frac{\displaystyle \frac{P \land Q}{P} \qquad \frac{P \land Q}{Q}}{\displaystyle Q \land P} \qquad Q \land P \to R}{R}
-$$
+Coq(https://coq.inria.fr)
 
 ## データ型と関数の定義
-データ型と関数は一般的な関数型言語と同様に定義することができる。
+Coqでは、データ型と関数を一般的な関数型言語と同様に定義することができる。
 
 ### データ型
 次の定義は`bool`型の定義で、値`true`と`false`が`bool`型に属することを示す。
@@ -32,6 +30,7 @@ Inductive nat : Type :=
 ```
 
 ### 関数
+`bool`型の関数の定義
 ```
 Definition negb (b:bool) : bool :=
   match b with
@@ -45,6 +44,8 @@ Definition andb (b1:bool) (b2:bool) : bool :=
   | false ⇒ false
   end.
 ```
+
+`nat`型の加算の定義
 ```
 Fixpoint plus (n : nat) (m : nat) : nat :=
   match n with
@@ -52,6 +53,7 @@ Fixpoint plus (n : nat) (m : nat) : nat :=
     | S n' ⇒ S (plus n' m)
   end.
 ```
+
 ## 定理の証明
 Coqでは定義したデータ型と関数によって定理をつくり、それを証明する。
 
