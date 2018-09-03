@@ -45,7 +45,7 @@ Definition andb (b1:bool) (b2:bool) : bool :=
   end.
 ```
 
-`nat`型の加算の定義
+`nat`型の加算の定義。`plus`のように再帰的な定義の場合`Fixpoint`という宣言で定義する。
 ```
 Fixpoint plus (n : nat) (m : nat) : nat :=
   match n with
