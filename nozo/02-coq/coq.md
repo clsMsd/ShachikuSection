@@ -55,27 +55,34 @@ Fixpoint plus (n : nat) (m : nat) : nat :=
 ```
 
 ## 定理の証明
-Coqでは定義したデータ型と関数によって定理をつくり、それを証明する。
+Coqでは定義したデータ型と関数によって定理を設定して、それを証明する。
 例えば、「任意の自然数nについて0+n=nが成り立つ」という定理は次のように書ける。
 ```
-Theorem plus_O_n : ∀ n : nat, 0 + n = n.
+Theorem plus_O_n : ∀ n : nat, plus 0 n = n.
 ```
 `∀`は全称量化子と呼ばれ、全ての`∀ n : nat`は「任意の自然数n」という意味になる。
 
+定理が書けたら次は証明を行う。
 ```
-Theorem plus_O_n : ∀ n : nat, 0 + n = n.
+Theorem plus_O_n : ∀ n : nat, plus 0 n = n.
 Proof.
   intros n.
   simpl.
   reflexivity.
 Qed.
 ```
+証明は`Proof`と`Qed`の間にあるTacticと呼ばれるコマンド列によって表される。
+ユーザーはこのTacticコマンドを使ってCoqと対話的に証明を進める。
 
-### intro tactic
-### simpl tactic
-### rewrite tactic
-### destruct tactic
-## 例題：自然数の加算における交換則の証明
-### induction tactic
+上の例のTacticコマンドについて1ステップずつ見ていく。
+### intro Tactic
+### simpl Tactic
+`simpl`は関数定義に基づいて式を簡約するTacticである。
+ここで簡約する式は`plus 0 n`で、これは`plus`の関数定義より`n`に書き換えられる。
+
+### reflexivity Tactic
+
+## 例題：自然数の加算における交換則の証明(induction Tactic)
+
 # 参考文献
 - Software Foundations, https://softwarefoundations.cis.upenn.edu/
