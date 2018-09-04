@@ -81,6 +81,8 @@ Qed.
 ここで簡約する式は`plus 0 n`で、これは`plus`の関数定義より`n`に書き換えられる。
 
 ### reflexivity Tactic
+`reflexivity`は等式の両辺が同値であることをチェックするTacticである。
+ここでは`n = n`について`reflexivity`を適用するのでチェックは通る。
 
 ## 例題：自然数の加算における交換則の証明(induction Tactic)
 
