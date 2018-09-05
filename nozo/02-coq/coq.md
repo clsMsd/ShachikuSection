@@ -89,6 +89,13 @@ Qed.
 
 以上の3ステップで定理plus_O_nの証明が完了した。この証明を言葉で書くと「nを任意の自然数であると仮定したとき、0+n=nという式はn=nに簡約され、n=nの両辺は同値であることから任意の自然数nについて0+n=nが成り立つ」となる。
 
+## (rewrite Tactic)
+```
+Theorem plus_id_example : ∀ n m:nat,
+  n = m →
+  n + n = m + m.
+```
+
 ## 例題：自然数の加算における交換則の証明(induction Tactic)
 
 # 参考文献
