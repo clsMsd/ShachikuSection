@@ -25,6 +25,18 @@ Qed.
 `destruct`Tacticは場合分けのためのコマンドで、ある値についてその値の型を構成する要素について場合分けを行う。
 上の証明では`bool`型の値`b`と`c`についてそれぞれ`destruct b`で「`b`がTrueの場合」と「`b`がFalseの場合」に、`destruct c`で「`c`がTrueの場合」と「`c`がFalseの場合」に場合分けしている。
 
+場合分けされた値はそれぞれの場合の具体値が割り当てられ、場合毎のサブゴールが生成される。
+```
+destruct 変数
+  - 変数に具体値が入ったサブゴール
+  - 変数に具体値が入ったサブゴール
+  ...
+```
+
+上の証明では例えば１つ目の場合は「`b`と`c`がTrue」であり、サブゴールは`andb True True = andb True True`となる。
+このサブゴールは`simpl`すると`True = True`となり`reflexivity`で示せる。
+
+他の場合も`simpl`と`reflexivity`で示すことができ、すべてのサブゴールが示せたら証明終了めある。
 
 ```
 Theorem plus_1_neq_0 : ∀ n : nat, beq_nat (n + 1) 0 = false.
