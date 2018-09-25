@@ -120,7 +120,5 @@ Proof.
 
 すると等式の左辺と右辺が同値となり`reflexivity`により証明終了となる。
 
-## 例題：自然数の加算における交換則の証明(induction Tactic)
-
 # 参考文献
 - Software Foundations, https://softwarefoundations.cis.upenn.edu/
