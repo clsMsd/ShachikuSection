@@ -1,9 +1,13 @@
 # coq演習問題
 ## destruct Tactic
+次の定理は「全ての`bool`型の値b,cについて、b ∧ c = c ∧ bが成り立つ」という意味の定理である。
+```
+Theorem andb_commutative : ∀ b c : bool, andb b c = andb c b.
+```
+この定理は`andb`関数について簡約できる部分がないため`simpl`Tacticは使えない。
+また、この定理から得られる仮定は`∀ b c : bool`であり`rewrite`Tacticを使った変換もできない。
 
-```
-Theorem andb_commutative : ∀ b c, andb b c = andb c b.
-```
+こういった場合、`destruct`Tacticを使う。
 
 ```
 Theorem plus_1_neq_0 : ∀ n : nat, beq_nat (n + 1) 0 = false.
