@@ -8,6 +8,21 @@ Theorem andb_commutative : ∀ b c : bool, andb b c = andb c b.
 また、この定理から得られる仮定は`∀ b c : bool`であり`rewrite`Tacticを使った変換もできない。
 
 こういった場合、`destruct`Tacticを使う。
+証明は次のように書ける。
+```
+Theorem andb_commutative : ∀ b c : bool, andb b c = andb c b.
+Proof.
+  intros b c. destruct b.
+  - destruct c.
+    + reflexivity.
+    + reflexivity.
+  - destruct c.
+    + reflexivity.
+    + reflexivity.
+Qed.
+```
+
+`destruct`Tacticは場合分けのためのコマンドで、
 
 ```
 Theorem plus_1_neq_0 : ∀ n : nat, beq_nat (n + 1) 0 = false.
