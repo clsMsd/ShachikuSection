@@ -51,3 +51,7 @@ Theorem plus_n_O_secondtry : ∀ n:nat, n = n + 0.
 ```
 Theorem plus_comm : ∀ n m : nat, n + m = m + n.
 ```
+
+# 参考文献
+- Software Foundations, https://softwarefoundations.cis.upenn.edu/
+
