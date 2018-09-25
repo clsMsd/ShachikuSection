@@ -14,15 +14,17 @@ Theorem andb_commutative : ∀ b c : bool, andb b c = andb c b.
 Proof.
   intros b c. destruct b.
   - destruct c.
-    + reflexivity.
-    + reflexivity.
+    + simpl. reflexivity.
+    + simpl. reflexivity.
   - destruct c.
-    + reflexivity.
-    + reflexivity.
+    + simpl. reflexivity.
+    + simpl. reflexivity.
 Qed.
 ```
 
-`destruct`Tacticは場合分けのためのコマンドで、
+`destruct`Tacticは場合分けのためのコマンドで、ある値についてその値の型を構成する要素について場合分けを行う。
+上の証明では`bool`型の値`b`と`c`についてそれぞれ`destruct b`で「`b`がTrueの場合」と「`b`がFalseの場合」に、`destruct c`で「`c`がTrueの場合」と「`c`がFalseの場合」に場合分けしている。
+
 
 ```
 Theorem plus_1_neq_0 : ∀ n : nat, beq_nat (n + 1) 0 = false.
