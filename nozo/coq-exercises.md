@@ -38,12 +38,14 @@ destruct 変数
 
 他の場合も`simpl`と`reflexivity`で示すことができ、すべてのサブゴールが示せたら証明終了めある。
 
+### 演習
 ```
 Theorem plus_1_neq_0 : ∀ n : nat, beq_nat (n + 1) 0 = false.
 ```
 
 ## induction Tactic
-
+`destruct`でも証明できないものもある。
+次の定理は「全ての自然数`n`についてn = n + 0が成り立つ」という意味の定理である。
 ```
 Theorem plus_n_O_secondtry : ∀ n:nat, n = n + 0.
 ```
