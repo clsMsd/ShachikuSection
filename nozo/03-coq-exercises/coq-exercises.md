@@ -1,6 +1,6 @@
 # coq演習問題
 ## destruct Tactic
-次の定理は「全ての`bool`型の値b,cについて、b ∧ c = c ∧ bが成り立つ」という意味の定理である。
+次の定理は「全ての`bool`型の値`b`,`c`について、`andb b c = andb c b`が成り立つ」という意味の定理である。
 ```
 Theorem andb_commutative : ∀ b c : bool, andb b c = andb c b.
 ```
