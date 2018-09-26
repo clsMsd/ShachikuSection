@@ -50,6 +50,19 @@ Theorem plus_1_neq_0 : ∀ n : nat, beq_nat (n + 1) 0 = false.
 Theorem plus_n_O_secondtry : ∀ n:nat, n = n + 0.
 ```
 
+この定理は`destruct`を使っても下の証明のように行き詰まる。
+```
+Theorem plus_n_O_secondtry : ∀ n:nat,
+  n = n + 0.
+Proof.
+  intros n. destruct n as [| n'].
+  - (* n = 0 の場合 *)
+    reflexivity.
+  - (* n = S n' の場合 *)
+    simpl. (* ここで行き詰まる *)
+Abort.
+```
+
 ```
 Theorem plus_comm : ∀ n m : nat, n + m = m + n.
 ```
