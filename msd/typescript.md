@@ -97,7 +97,7 @@ const s: string = null //strictNullChecksがtrueだとコンパイルエラー
 let a = 1
 a = "aaa" // noImplicitAnyがtrueだとコンパイルエラー
 ```
-- strictFunctionTypes: `false`にすると関数の型がBivariantに、`true`にするとContravariantになる、らしい。
+- strictFunctionTypes: `false`にすると関数の型が引数に対してBivariantに、`true`にするとContravariantになる、らしい(戻り値に対してはCovariantで固定)。
 
 ```typescript
 interface Animal {}
