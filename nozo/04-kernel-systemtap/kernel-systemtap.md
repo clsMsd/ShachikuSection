@@ -2,6 +2,18 @@
 SystemTapはアプリケーションを動的に解析することができるツールでLinuxカーネルの動作を詳しく観察したりすることができる。
 用途としてはパフォーマンスの解析などに使われ、システムのボトルネックを特定したりする。
 
+実行環境
+```
+$ uname -a
+Linux fluorite 4.9.0-8-amd64 #1 SMP Debian 4.9.110-3+deb9u6 (2018-10-08) x86_64 GNU/Linux
+$ stap --version
+Systemtap translator/driver (version 3.1/0.168, Debian version 3.1-2)
+Copyright (C) 2005-2017 Red Hat, Inc. and others
+This is free software; see the source for copying conditions.
+tested kernel versions: 2.6.18 ... 4.10-rc8
+enabled features: AVAHI LIBSQLITE3 NLS NSS
+```
+
 ## SystemTapスクリプト
 SystemTapはユーザーが作成するスクリプトを実行するだけでカーネルの解析が可能で、カーネル本体のコードをいじったりして再コンパイルしなくてよい。
 
@@ -91,6 +103,75 @@ Pass 5: run completed in 0usr/2120sys/24243real ms.
 
 ## サンプルスクリプト
 [Exampleページ](https://www.sourceware.org/systemtap/examples/keyword-index.html)にたくさんのSystemTapスクリプトがあるのでいくつか紹介する。
+
+### 変数の監視
+以下のプログラムは第１引数にプローブが渡され、第２引数で指定された種類の変数リストを表示するスクリプトである。
+`$1`や`$2`はシェルスクリプトと同じようにスクリプトの引数を表す。
+```
+#! /usr/bin/env stap
+
+global var, varerr
+
+probe $1 {
+  if (@defined($2)) {
+     try {
+         newvar = $2;
+         if (var[tid()] != newvar) {
+            printf("%s[%d] %s %s:\n", execname(), tid(), pp(), @2);
+            println(newvar);
+            var[tid()] = newvar;
+         }
+     } catch { varerr ++ }  # error during $2 resolution or perhaps var[] assignment
+  }
+}
+
+probe kprocess.release { # if using per-thread checking
+  delete var[$p->pid] # thread
+}
+
+probe never {
+  var[0]=""  # assigns a type to var in case no probes match $1 above
+}
+
+probe error,end {
+  if (varerr) printf("%s %s access errors: %d", @1, @2, varerr);
+}
+```
+
+例えば第１引数に`'kernel.function("sys_*@fs/open.c:*")'`を、第２引数に`'$$parms'`を渡したときの実行結果は以下のようになる。
+```
+$ sudo stap -w varwatch.stp 'kernel.function("sys_*@fs/open.c:*")' '$$parms' -c "ls > /dev/null
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a35aa mode=0x0
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a5d30 mode=0x4
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f6bd24a3a49 flags=0x80000 mode=0x1
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a35aa mode=0x0
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f6bd26a74a0 flags=0x80000 mode=0x7f6bd26ab170
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x559c01b42b78 flags=0x241 mode=0x1b6
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x1
+...
+```
+
+カーネルソースの`fs/open.c:1074`の関数は以下である。`$$parms`は関数の引数を取得するので`filename`と`flags`と`mode`の中身が表示されている。
+```
+SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
+{
+        if (force_o_largefile())
+                flags |= O_LARGEFILE;
+
+        return do_sys_open(AT_FDCWD, filename, flags, mode);
+}
+```
 
 ## 参考文献
 - SystemTap, https://sourceware.org/systemtap/
