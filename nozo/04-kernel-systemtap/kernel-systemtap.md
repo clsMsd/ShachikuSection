@@ -2,6 +2,18 @@
 SystemTapはアプリケーションを動的に解析することができるツールでLinuxカーネルの動作を詳しく観察したりすることができる。
 用途としてはパフォーマンスの解析などに使われ、システムのボトルネックを特定したりする。
 
+実行環境
+```
+$ uname -a
+Linux fluorite 4.9.0-8-amd64 #1 SMP Debian 4.9.110-3+deb9u6 (2018-10-08) x86_64 GNU/Linux
+$ stap --version
+Systemtap translator/driver (version 3.1/0.168, Debian version 3.1-2)
+Copyright (C) 2005-2017 Red Hat, Inc. and others
+This is free software; see the source for copying conditions.
+tested kernel versions: 2.6.18 ... 4.10-rc8
+enabled features: AVAHI LIBSQLITE3 NLS NSS
+```
+
 ## SystemTapスクリプト
 SystemTapはユーザーが作成するスクリプトを実行するだけでカーネルの解析が可能で、カーネル本体のコードをいじったりして再コンパイルしなくてよい。
 
@@ -93,7 +105,8 @@ Pass 5: run completed in 0usr/2120sys/24243real ms.
 [Exampleページ](https://www.sourceware.org/systemtap/examples/keyword-index.html)にたくさんのSystemTapスクリプトがあるのでいくつか紹介する。
 
 ### 変数の監視
-
+以下のプログラムは第１引数にプローブが渡され、第２引数で指定された種類の変数リストを表示するスクリプトである。
+`$1`や`$2`はシェルスクリプトと同じようにスクリプトの引数を表す。
 ```
 #! /usr/bin/env stap
 
@@ -125,6 +138,7 @@ probe error,end {
 }
 ```
 
+例えば第１引数に`'kernel.function("sys_*@fs/open.c:*")'`を、第２引数に`'$$parms'`を渡したときの実行結果は以下のようになる。
 ```
 $ sudo stap -w varwatch.stp 'kernel.function("sys_*@fs/open.c:*")' '$$parms' -c "ls > /dev/null
 sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
