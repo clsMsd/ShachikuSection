@@ -162,6 +162,17 @@ fd=0x1
 ...
 ```
 
+カーネルソースの`fs/open.c:1074`の関数は以下である。`$$parms`は関数の引数を取得するので`filename`と`flags`と`mode`の中身が表示されている。
+```
+SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
+{
+        if (force_o_largefile())
+                flags |= O_LARGEFILE;
+
+        return do_sys_open(AT_FDCWD, filename, flags, mode);
+}
+```
+
 ## 参考文献
 - SystemTap, https://sourceware.org/systemtap/
 - SYSTEMTAP ビギナーズガイド, https://access.redhat.com/documentation/ja-jp/red_hat_enterprise_linux/7/html-single/systemtap_beginners_guide/index
