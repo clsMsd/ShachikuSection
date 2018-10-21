@@ -92,6 +92,62 @@ Pass 5: run completed in 0usr/2120sys/24243real ms.
 ## サンプルスクリプト
 [Exampleページ](https://www.sourceware.org/systemtap/examples/keyword-index.html)にたくさんのSystemTapスクリプトがあるのでいくつか紹介する。
 
+### 変数の監視
+
+```
+#! /usr/bin/env stap
+
+global var, varerr
+
+probe $1 {
+  if (@defined($2)) {
+     try {
+         newvar = $2;
+         if (var[tid()] != newvar) {
+            printf("%s[%d] %s %s:\n", execname(), tid(), pp(), @2);
+            println(newvar);
+            var[tid()] = newvar;
+         }
+     } catch { varerr ++ }  # error during $2 resolution or perhaps var[] assignment
+  }
+}
+
+probe kprocess.release { # if using per-thread checking
+  delete var[$p->pid] # thread
+}
+
+probe never {
+  var[0]=""  # assigns a type to var in case no probes match $1 above
+}
+
+probe error,end {
+  if (varerr) printf("%s %s access errors: %d", @1, @2, varerr);
+}
+```
+
+```
+$ sudo stap -w varwatch.stp 'kernel.function("sys_*@fs/open.c:*")' '$$parms' -c "ls > /dev/null
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a35aa mode=0x0
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a5d30 mode=0x4
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f6bd24a3a49 flags=0x80000 mode=0x1
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a35aa mode=0x0
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f6bd26a74a0 flags=0x80000 mode=0x7f6bd26ab170
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x559c01b42b78 flags=0x241 mode=0x1b6
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x1
+...
+```
+
 ## 参考文献
 - SystemTap, https://sourceware.org/systemtap/
 - SYSTEMTAP ビギナーズガイド, https://access.redhat.com/documentation/ja-jp/red_hat_enterprise_linux/7/html-single/systemtap_beginners_guide/index
