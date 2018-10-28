@@ -1,0 +1,79 @@
+$ sudo stap -w varwatch.stp 'kernel.function("sys_*@fs/open.c:*")' '$$parms' -c "ls > /dev/null
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a35aa mode=0x0
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a5d30 mode=0x4
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f6bd24a3a49 flags=0x80000 mode=0x1
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+sh[3870] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f6bd24a35aa mode=0x0
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f6bd26a74a0 flags=0x80000 mode=0x7f6bd26ab170
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+sh[3870] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x559c01b42b78 flags=0x241 mode=0x1b6
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x1
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f11143705aa mode=0x0
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f1114372d30 mode=0x4
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f1114370a49 flags=0x80000 mode=0x1
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f11143705aa mode=0x0
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f11145744a0 flags=0x80000 mode=0x7f1114578170
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f11143705aa mode=0x0
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f1114574990 flags=0x80000 mode=0x7f1114578170
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f11143705aa mode=0x0
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f1114574e70 flags=0x80000 mode=0x7f11145744c8
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f11143705aa mode=0x0
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f1114575360 flags=0x80000 mode=0x7f11145744c8
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f11143705aa mode=0x0
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f11145758d0 flags=0x80000 mode=0x7f1114574e98
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f11141492e7 flags=0x0 mode=0x1b6
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_access@./fs/open.c:431") $$parms:
+filename=0x7f111414932b mode=0x0
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x7f1113ef4870 flags=0x80000 mode=0xffffffff
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_open@./fs/open.c:1074") $$parms:
+filename=0x562dd7048c80 flags=0x90800 mode=0x1
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x3
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x1
+ls[3873] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0x2
+sh[3870] kernel.function("SyS_close@./fs/open.c:1135") $$parms:
+fd=0xa

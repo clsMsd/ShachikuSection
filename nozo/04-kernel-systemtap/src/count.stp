@@ -1,0 +1,14 @@
+global counts
+
+probe syscall.*
+{
+  counts[execname()] ++
+  
+}
+
+probe end
+{
+  printf("==TOTAL==\n")
+  foreach (name in counts)
+    printf("%s : %d \n", name, counts[name])
+}
