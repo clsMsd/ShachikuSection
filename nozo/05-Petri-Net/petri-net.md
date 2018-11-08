@@ -39,4 +39,5 @@ Petri Nets は token の移動によって計算を表す。
 
 ## 参考文献
 - Petri Nets World, http://www.informatik.uni-hamburg.de/TGI/PetriNets/
+- Murata, Tadao. "Petri nets: Properties, analysis and applications." Proceedings of the IEEE 77.4 (1989): 541-580.
 - Oris Tool - Analysis of Timed and Stochastic Petri Nets, https://www.oris-tool.org/
