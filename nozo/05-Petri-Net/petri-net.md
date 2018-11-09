@@ -14,11 +14,13 @@ Petri Nets は２種類のノード Place/Transition と，それらを接続す
 ![](./img/pn0.PNG)
 
 ### Petri Nets の計算
-Petri Nets は token の移動によって計算を表す。
-- Transition のすべての入力側の Place に１個以上の token があるとき
-- Transition のすべての入力側の Place の token を１個消費して、Transition のすべての出力側の Place に１個 token を生成する
+Petri Nets は次の１つのルールに従って Place 上の token が移動することで計算が進む。
+
+- Transition のすべての入力側の Place に１個以上の token があるとき、それらの token を１個消費してTransition のすべての出力側の Place に１個 token を生成する
 
 ![](./img/pn1.PNG)
+
+このような token の移動を繰り返すことで Petri Nets の状態が変化していく。
 
 ## 例題
 ### 生産者 / 消費者モデル
@@ -31,6 +33,8 @@ Petri Nets は token の移動によって計算を表す。
 ![](./img/phi.PNG)
 
 ## 非決定実行による検証
+Petri Netsの特徴のひとつとして token の移動が非決定的であることが挙げられる。
+
 ![](./img/statespace.PNG)
 
 ## Petri Netsの派生
