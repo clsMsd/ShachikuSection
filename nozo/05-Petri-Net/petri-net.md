@@ -27,15 +27,27 @@ Petri Nets は次の１つのルールに従って Place 上の token が移動�
 ![](./img/prod-cons.PNG)
 
 ### 通信モデル
+Murata, Tadao. "Petri nets: Properties, analysis and applications." Proceedings of the IEEE 77.4 (1989): 541-580. Fig. 9.より
+
 ![](./img/simpl-com.PNG)
 
 ### 食事する哲学者
+[食事する哲学者の問題(Wikipedia)](https://ja.wikipedia.org/wiki/%E9%A3%9F%E4%BA%8B%E3%81%99%E3%82%8B%E5%93%B2%E5%AD%A6%E8%80%85%E3%81%AE%E5%95%8F%E9%A1%8C)
+
 ![](./img/phi.PNG)
 
 ## 非決定実行による検証
-Petri Netsの特徴のひとつとして token の移動が非決定的であることが挙げられる。
+Petri Netsの特徴のひとつとして計算の非決定性が挙げられる。
+token を移動させるルールを適用できる箇所が複数あるとき、それらのすべての箇所がルールを適用する選択肢となり得るという性質である。
+
+そうした Petri Nets の非決定的な実行経路についてすべて網羅したグラフ構造を状態遷移図と呼ぶ。
+例えば次は通信モデルの状態遷移図である。
 
 ![](./img/statespace.PNG)
+
+状態遷移図の各ノードは Petri Nets のある時点での状態(tokenの配置状態)を表し、その時点の状態において適用できるルールの数だけ遷移先のノードが存在する。
+
+状態遷移図からはそのモデルがとりうるすべての状態を知ることができ、行き詰った状態（例えばデッドロック）の検証や起きてはならない状態の検出などに用いることができる。
 
 ## Petri Netsの派生
 - Coloured Petri net
