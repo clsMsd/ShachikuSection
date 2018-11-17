@@ -190,3 +190,13 @@ var aarr: [Animal] = darr
 
 aarr[0] = Cat() // 実態がAnimal型の配列なのでCat型を突っ込んでも安全
 ```
+
+## inheritance
+
+class Animal {
+    getPartner(a: Animal): Animal {}
+}
+
+class Dog extends Animal {
+    getPartner(a: Animal): Animal {}
+}
