@@ -125,8 +125,7 @@ pan: elapsed time 0 seconds
 エラーが起きた場所を見てみる。
 
 ```
-$ spin -p -g -t incde
-c.pml
+$ spin -p -g -t incdec.pml
 using statement merging
   1:    proc  0 (inc:1) incdec.pml:6 (state 1)  [((x<5))]
   2:    proc  0 (inc:1) incdec.pml:6 (state 2)  [x = (x+1)]
