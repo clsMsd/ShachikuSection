@@ -7,23 +7,23 @@ https://github.com/facebook/react/
 Webの歴史
 1. ネットワーク上で文書を閲覧・共有するためにwwwが生まれる。  
 webサーバーはリクエストに応じてあらかじめ用意されたhtmlを返す。
-2. wwwの普及とともにいろいろなwebサービスが生まれる。
-webサーバーはリクエストに応じて動的にhtmlを生成して返す。
-3. htmlとjavascriptの高機能化により、ブラウザ上で高度なアプリが動かせるようになる。
-webサーバーはhtmlやjsなどの静的なリソースを返すとともに、APIを公開し動的に生成されたjsonなどの形式のデータを返す。
-
-3. のタイプのwebページをSingle Page Applicationという(SPA)。
-ReactはSPAをつくるためのライブラリ。
-SPAをつくるためのjsのライブラリはいろいろある(あった)
-Angular
-Backbone.js
-Knockout.js
-Riot.js
-Ember.js
-Mithril.js
-jQuery
-などなど。
-
+2. wwwの普及とともにいろいろなwebサービスが生まれる。  
+webサーバーはリクエストに応じて動的にhtmlを生成して返す。  
+3. htmlとjavascriptの高機能化により、ブラウザ上で高度なアプリが動かせるようになる。  
+webサーバーはhtmlやjsなどの静的なリソースを返すとともに、APIを公開し動的に生成されたjsonなどの形式のデータを返す。  
+  
+3のタイプのwebページをSingle Page Applicationという(SPA)。  
+ReactはSPAをつくるためのライブラリ。  
+SPAをつくるためのjsのライブラリはいろいろある(あった)  
+Angular  
+Backbone.js  
+Knockout.js  
+Riot.js  
+Ember.js  
+Mithril.js  
+jQuery  
+などなど。  
+  
 最近ではもっぱらReactとVueの2強である。
 
 ## 環境構築
@@ -41,7 +41,7 @@ cd tssample
 
 ## Hello World
 tssampleディレクトリに移動して、`npm start`を実行してみよう。
-3000番ポートに開発サーバーが起動するので、ブラウザで`localhost:300`を開くと以下のような画面が表示される。
+3000番ポートに開発サーバーが起動するので、ブラウザで`localhost:3000`を開くと以下のような画面が表示される。
 
 public/index.html
 ```html
