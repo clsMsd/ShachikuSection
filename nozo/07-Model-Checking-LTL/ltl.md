@@ -15,7 +15,7 @@ proctype gcd(int x, y) {
 
 init { run gcd (72,16) }
 ```
-http://www.ueda.info.waseda.ac.jp/oess/RS2018/Html/class_rsc/materials/RS2018-spin1-e.pdfより引用
+http://www.ueda.info.waseda.ac.jp/oess/RS2018/Html/class_rsc/materials/RS2018-spin1-e.pdf より引用
 
 例えば上のGCDを計算するプログラムについて次のコマンドを実行すると各プロセスの状態遷移が表示される。
 ```
@@ -45,6 +45,10 @@ pan: rate         0 states/second
 ![](./img/state.png)
 
 ## SaftyとLiveness
+- Safty
+望ましくない状態へ到達しない
+- Liveness
+望ましくない経路が
 
 「Pを満たす状態からQを満たす状態へ到達可能である」を検証しようとするにはどうしたらよいか？
 
