@@ -4,28 +4,33 @@
 Promelaのプログラムは有限オートマトンで表すことができる。
 
 ```
-active proctype p() {
-  int x=0;
-
+proctype gcd(int x, y) {
   do
-    :: x < 5 -> x++
-    :: else  -> break
+    :: x > y -> x = x - y
+    :: x < y -> y = y - x
+    :: else -> break
   od;
-
-  printf("%d\n", x);
+  printf("%d %d\n", x, y)
 }
+
+init { run gcd (72,16) }
 ```
 
 上のプログラムについて次のコマンドを実行すると各プロセスの状態遷移が表示される。
 ```
-$ spin -o3 -search state.pml
+$ spin -o3 -search gcd.pml
 $ ./pan -d
-proctype p
-        state   5 -(tr   3)-> state   2  [id   0 tp   2] [----L] state.pml:5 => ((x<5))
-        state   5 -(tr   2)-> state   8  [id   2 tp   2] [----L] state.pml:5 => else
-        state   2 -(tr   4)-> state   5  [id   1 tp   2] [----L] state.pml:5 => x = (x+1)
-        state   8 -(tr   5)-> state   9  [id   7 tp   2] [----L] state.pml:9 => printf('%d\n',x)
-        state   9 -(tr   6)-> state   0  [id   8 tp 3500] [--e-L] state.pml:10 => -end-
+proctype gcd
+        state   7 -(tr   5)-> state   2  [id   0 tp   2] [----L] gcd.pml:3 => ((x>y))
+        state   7 -(tr   7)-> state   4  [id   2 tp   2] [----L] gcd.pml:3 => ((x<y))
+        state   7 -(tr   2)-> state  10  [id   4 tp   2] [----L] gcd.pml:3 => else
+        state   2 -(tr   6)-> state   7  [id   1 tp   2] [----L] gcd.pml:3 => x = (x-y)
+        state   4 -(tr   8)-> state   7  [id   3 tp   2] [----L] gcd.pml:4 => y = (y-x)
+        state  10 -(tr   9)-> state  11  [id   9 tp   2] [----L] gcd.pml:7 => printf('%d %d\n',x,y)
+        state  11 -(tr  10)-> state   0  [id  10 tp 3500] [--e-L] gcd.pml:8 => -end-
+init
+        state   1 -(tr   3)-> state   2  [id  11 tp   2] [----L] gcd.pml:10 => (run gcd(72,16))
+        state   2 -(tr   4)-> state   0  [id  12 tp 3500] [--e-L] gcd.pml:10 => -end-
 
 Transition Type: A=atomic; D=d_step; L=local; G=global
 Source-State Labels: p=progress; e=end; a=accept;
