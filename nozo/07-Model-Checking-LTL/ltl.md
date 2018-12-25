@@ -18,19 +18,17 @@ active proctype p() {
 
 上のプログラムについて次のコマンドを実行すると各プロセスの状態遷移が表示される。
 ```
-$ spin -search state.pml
+$ spin -o3 -search state.pml
 $ ./pan -d
 proctype p
-        state   5 -(tr   3)-> state   5  [id   0 tp   2] [----L] state.pml:5 => ((x<5))
+        state   5 -(tr   3)-> state   2  [id   0 tp   2] [----L] state.pml:5 => ((x<5))
         state   5 -(tr   2)-> state   8  [id   2 tp   2] [----L] state.pml:5 => else
-        state   8 -(tr   4)-> state   9  [id   7 tp   2] [----L] state.pml:9 => printf('%d\n',x)
-        state   9 -(tr   5)-> state   0  [id   8 tp 3500] [--e-L] state.pml:10 => -end-
+        state   2 -(tr   4)-> state   5  [id   1 tp   2] [----L] state.pml:5 => x = (x+1)
+        state   8 -(tr   5)-> state   9  [id   7 tp   2] [----L] state.pml:9 => printf('%d\n',x)
+        state   9 -(tr   6)-> state   0  [id   8 tp 3500] [--e-L] state.pml:10 => -end-
 
 Transition Type: A=atomic; D=d_step; L=local; G=global
 Source-State Labels: p=progress; e=end; a=accept;
-Note: statement merging was used. Only the first
-      stmnt executed in each merge sequence is shown
-      (use spin -a -o3 to disable statement merging)
 
 pan: elapsed time 2.06e+07 seconds
 pan: rate         0 states/second
