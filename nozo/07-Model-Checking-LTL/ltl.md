@@ -15,8 +15,9 @@ proctype gcd(int x, y) {
 
 init { run gcd (72,16) }
 ```
+http://www.ueda.info.waseda.ac.jp/oess/RS2018/Html/class_rsc/materials/RS2018-spin1-e.pdfより引用
 
-上のプログラムについて次のコマンドを実行すると各プロセスの状態遷移が表示される。
+例えば上のGCDを計算するプログラムについて次のコマンドを実行すると各プロセスの状態遷移が表示される。
 ```
 $ spin -o3 -search gcd.pml
 $ ./pan -d
