@@ -38,7 +38,7 @@ pan: rate         0 states/second
 
 `pan -D`とするとdot形式で出力してくれる。
 
-![./img/state.png]()
+![](./img/state.png)
 
 ## SaftyとLiveness
 
