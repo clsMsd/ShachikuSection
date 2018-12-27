@@ -157,34 +157,21 @@ pan: elapsed time 0 seconds
 ### Safty
 望ましくない事象が発生しないという性質。
 - 例) デッドロックが発生しない
-- プログラムの各状態について検証する
+- assertによる検証によって保証される
 
 ### Liveness
 期待する事象がいずれは発生するという性質。
 - 例) あるリクエストについて、いずれレスポンスが返ってくる
-- プログラムの経路について検証する
+- ラベルによるサイクル検証によって保証される
 
+## Never claims
+never claimは「決して起きてはいけない挙動」を記述することができる。
 
-SpinではSaftyを満たすかどうかを`assert`によって検証する。
-LivenessについてはNever claimsによって検証する。
-
-### ラベル
-「Pを満たす状態からQを満たす状態へ到達可能である」を検証しようとするにはどうしたらよいか？
-
-例えば次のような「Pが成り立ったあとQが成り立たない状態が繰り返される」ことが検出されたら上の性質は成り立たないことが検証できそうである。
-⇒ しかし、「Pが成り立ったあとQと!Qを繰り返す」でもこのmonitorに引っかかってしまう。
 ```
-active proctype monitor () {
-        (P) ->
-accept: do
-        :: !(Q)
-        od
+never {
 }
 ```
-### Never claims
-SPINには決して起きない挙動を記述するためにNever Claimsと呼ばれる記法がある。
 
-A never claim causes an error if a model completely matches the finite or infinite behavior specified in the claim {...}.
 
 ## 線形時相論理
 LTL(Linear-time Temporal Logic)とは、時間の概念が取り入れられた論理である。
@@ -204,7 +191,6 @@ LTLの構文をいかに示す。
 | `<> φ` | いつか`φ`が成り立つ |
 | `X  φ` | 次に`φ`が成り立つ |
 | `φ U Ψ` | `Ψ`が成り立つまで`φ`が成り立つ |
-
 
 ## Channel Communication
 Channel Communicationは並行処理においてプロセス間でデータの受け渡しをする仕組みである。
