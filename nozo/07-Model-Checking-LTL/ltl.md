@@ -44,6 +44,113 @@ pan: rate         0 states/second
 
 ![](./img/state.png)
 
+gcdのプログラムを次のように間違って書いてしまうと無限ループが発生してしまう。
+```
+proctype gcd(int x, y) {
+  do
+    :: x > y -> x = x - y
+    :: x < y -> y = y     /* 無限ループ */
+    :: else -> break
+  od;
+  printf("%d %d\n", x, y)
+}
+
+init { run gcd (72,16) }
+```
+
+実行結果。
+```
+$ spin -p -l -u20 gcd-bug.p
+ml 
+  0:    proc  - (:root:) creates proc  0 (:init:)
+Starting gcd with pid 1
+  1:    proc  0 (:init::1) creates proc  1 (gcd)
+  1:    proc  0 (:init::1) gcd-accept.pml:10 (state 1)  [(run gcd(72,16))]
+  2:    proc  1 (gcd:1) gcd-accept.pml:3 (state 1)      [((x>y))]
+  3:    proc  1 (gcd:1) gcd-accept.pml:3 (state 2)      [x = (x-y)]
+                gcd(1):x = 56
+  4:    proc  1 (gcd:1) gcd-accept.pml:7 (state 8)      [.(goto)]
+  5:    proc  1 (gcd:1) gcd-accept.pml:3 (state 1)      [((x>y))]
+  6:    proc  1 (gcd:1) gcd-accept.pml:3 (state 2)      [x = (x-y)]
+                gcd(1):x = 40
+  7:    proc  1 (gcd:1) gcd-accept.pml:7 (state 8)      [.(goto)]
+  8:    proc  1 (gcd:1) gcd-accept.pml:3 (state 1)      [((x>y))]
+  9:    proc  1 (gcd:1) gcd-accept.pml:3 (state 2)      [x = (x-y)]
+                gcd(1):x = 24
+ 10:    proc  1 (gcd:1) gcd-accept.pml:7 (state 8)      [.(goto)]
+ 11:    proc  1 (gcd:1) gcd-accept.pml:3 (state 1)      [((x>y))]
+ 12:    proc  1 (gcd:1) gcd-accept.pml:3 (state 2)      [x = (x-y)]
+                gcd(1):x = 8
+ 13:    proc  1 (gcd:1) gcd-accept.pml:7 (state 8)      [.(goto)]
+ 14:    proc  1 (gcd:1) gcd-accept.pml:4 (state 3)      [((x<y))]
+ 15:    proc  1 (gcd:1) gcd-accept.pml:4 (state 4)      [y = y]
+                gcd(1):y = 16
+ 16:    proc  1 (gcd:1) gcd-accept.pml:7 (state 8)      [.(goto)]
+ 17:    proc  1 (gcd:1) gcd-accept.pml:4 (state 3)      [((x<y))]
+ 18:    proc  1 (gcd:1) gcd-accept.pml:4 (state 4)      [y = y]
+                gcd(1):y = 16
+ 19:    proc  1 (gcd:1) gcd-accept.pml:7 (state 8)      [.(goto)]
+ 20:    proc  1 (gcd:1) gcd-accept.pml:4 (state 3)      [((x<y))]
+-------------
+depth-limit (-u20 steps) reached
+#processes: 2
+ 20:    proc  1 (gcd:1) gcd-accept.pml:4 (state 4)
+ 20:    proc  0 (:init::1) gcd-accept.pml:10 (state 2) <valid end state>
+2 processes created
+```
+
+このような無限ループが発生するようなプログラムを`accept`ラベルによって検証できる。
+次のように検証したいループに`accept`ラベルを配置する。
+```
+proctype gcd(int x, y) {
+accept:
+  do
+    :: x > y -> x = x - y
+    :: x < y -> y = y     /* 無限ループ */
+    :: else -> break
+  od;
+  printf("%d %d\n", x, y)
+}
+
+init { run gcd (72,16) }
+```
+
+そして、次のコマンドで検証する。
+```
+$ spin -search -a gcd-accept.pml
+pan:1: acceptance cycle (at depth 5)
+pan: wrote gcd-accept.pml.trail
+
+(Spin Version 6.4.5 -- 1 January 2016)
+Warning: Search not completed
+        + Partial Order Reduction
+
+Full statespace search for:
+        never claim             - (none specified)
+        assertion violations    +
+        acceptance   cycles     + (fairness disabled)
+        invalid end states      +
+
+State-vector 28 byte, depth reached 5, errors: 1
+        6 states, stored
+        0 states, matched
+        6 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:         0 (resolved)
+
+Stats on memory usage (in Megabytes):
+    0.000       equivalent memory usage for states (stored*(State-vector + overhead))
+    0.291       actual memory usage for states
+  128.000       memory used for hash table (-w24)
+    0.534       memory used for DFS stack (-m10000)
+  128.730       total actual memory usage
+
+
+
+pan: elapsed time 0 seconds
+```
+検証出力に`pan:1: acceptance cycle (at depth 5)`が表示され`errors: 1`と検出することができる。
+
 ## SaftyとLiveness
 プログラムの検証について述べるとき、SaftyとLivenessと呼ばれる性質がある。
 
