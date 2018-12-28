@@ -172,7 +172,6 @@ never {
 }
 ```
 
-
 ## 線形時相論理
 LTL(Linear-time Temporal Logic)とは、時間の概念が取り入れられた論理である。
 LTLの構文をいかに示す。
@@ -191,6 +190,11 @@ LTLの構文をいかに示す。
 | `<> φ` | いつか`φ`が成り立つ |
 | `X  φ` | 次に`φ`が成り立つ |
 | `φ U Ψ` | `Ψ`が成り立つまで`φ`が成り立つ |
+
+![](./img/Gp.png)
+![](./img/Fp.png)
+![](./img/Xp.png)
+![](./img/p1Up2.png)
 
 ## Channel Communication
 Channel Communicationは並行処理においてプロセス間でデータの受け渡しをする仕組みである。
