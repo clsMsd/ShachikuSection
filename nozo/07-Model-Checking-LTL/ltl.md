@@ -256,3 +256,4 @@ depth-limit (-u10 steps) reached
 ## 参考文献
 - 早稲田大学 高信頼ソフトウェア, http://www.ueda.info.waseda.ac.jp/oess/RS2018/
 - SPIN model checker, http://spinroot.com/spin/whatispin.html
+- LTL2BA, http://www.lsv.fr/~gastin/ltl2ba/index.php
