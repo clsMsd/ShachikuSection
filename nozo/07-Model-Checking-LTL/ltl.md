@@ -1,5 +1,10 @@
 前回のPromelaによるModel Checkingの話の続き
 
+```
+$ spin -V
+Spin Version 6.4.5 -- 1 January 2016
+```
+
 ## プログラムの状態遷移
 Promelaのプログラムは有限オートマトンで表すことができる。
 
@@ -17,7 +22,7 @@ init { run gcd (72,16) }
 ```
 http://www.ueda.info.waseda.ac.jp/oess/RS2018/Html/class_rsc/materials/RS2018-spin1-e.pdf より引用
 
-例えば上のGCDを計算するプログラムについて次のコマンドを実行すると各プロセスの状態遷移が表示される。
+例えば上のGCDを計算するプログラムについて次のように実行すると各プロセスの状態遷移が表示される。
 ```
 $ spin -o3 -search gcd.pml
 $ ./pan -d
@@ -40,7 +45,7 @@ pan: elapsed time 2.06e+07 seconds
 pan: rate         0 states/second
 ```
 
-`pan -D`とするとdot形式で出力してくれる。
+`./pan -D`とするとdot形式で出力してくれる。
 
 ![](./img/state.png)
 
@@ -59,9 +64,9 @@ init { run gcd (72,16) }
 ```
 
 実行結果。
+`x = 8`, `y = 16`の状態になると常に`y = y`が実行され続けてしまう。
 ```
-$ spin -p -l -u20 gcd-bug.p
-ml 
+$ spin -p -l -u20 gcd-bug.pml 
   0:    proc  - (:root:) creates proc  0 (:init:)
 Starting gcd with pid 1
   1:    proc  0 (:init::1) creates proc  1 (gcd)
@@ -100,7 +105,7 @@ depth-limit (-u20 steps) reached
 ```
 
 このような無限ループが発生するようなプログラムを`accept`ラベルによって検証できる。
-次のように検証したいループに`accept`ラベルを配置する。
+次のようにプログラム中に`accept`ラベルを配置する。
 ```
 proctype gcd(int x, y) {
 accept:
@@ -115,10 +120,13 @@ accept:
 init { run gcd (72,16) }
 ```
 
-そして、次のコマンドで検証する。
+`accept`ラベルを含むプログラムの状態遷移図を出力するとラベルのついた状態が赤く表示される。
+![](./img/state-accept.png)
+
+SPINは`accept`ラベルがついた状態を含む無限ループが存在するかどうかを検証することができる。
 ```
-$ spin -search -a gcd-accept.pml
-pan:1: acceptance cycle (at depth 5)
+$ spin -o3 -search -a gcd-accept.pml
+pan:1: acceptance cycle (at depth 9)
 pan: wrote gcd-accept.pml.trail
 
 (Spin Version 6.4.5 -- 1 January 2016)
@@ -131,15 +139,15 @@ Full statespace search for:
         acceptance   cycles     + (fairness disabled)
         invalid end states      +
 
-State-vector 28 byte, depth reached 5, errors: 1
-        6 states, stored
+State-vector 28 byte, depth reached 10, errors: 1
+       11 states, stored
         0 states, matched
-        6 transitions (= stored+matched)
+       11 transitions (= stored+matched)
         0 atomic steps
 hash conflicts:         0 (resolved)
 
 Stats on memory usage (in Megabytes):
-    0.000       equivalent memory usage for states (stored*(State-vector + overhead))
+    0.001       equivalent memory usage for states (stored*(State-vector + overhead))
     0.291       actual memory usage for states
   128.000       memory used for hash table (-w24)
     0.534       memory used for DFS stack (-m10000)
@@ -147,9 +155,38 @@ Stats on memory usage (in Megabytes):
 
 
 
-pan: elapsed time 0 seconds
+pan: elapsed time 0.01 seconds
 ```
-検証出力に`pan:1: acceptance cycle (at depth 5)`が表示され`errors: 1`と検出することができる。
+検証出力に`pan:1: acceptance cycle (at depth 9)`と表示され`accept`ラベルを含む無限ループがあることが検出された。
+
+`-t`をつけて実行シミュレーションすると検出された無限ループの場所が表示される。
+```
+$ spin -p -t -l gcd-accept.pml
+Starting gcd with pid 1
+  1:    proc  0 (:init::1) gcd-accept.pml:11 (state 1)  [(run gcd(72,16))]
+  2:    proc  1 (gcd:1) gcd-accept.pml:4 (state 1)      [((x>y))]
+  3:    proc  1 (gcd:1) gcd-accept.pml:4 (state 2)      [x = (x-y)]
+                gcd(1):x = 56
+  4:    proc  1 (gcd:1) gcd-accept.pml:4 (state 1)      [((x>y))]
+  5:    proc  1 (gcd:1) gcd-accept.pml:4 (state 2)      [x = (x-y)]
+                gcd(1):x = 40
+  6:    proc  1 (gcd:1) gcd-accept.pml:4 (state 1)      [((x>y))]
+  7:    proc  1 (gcd:1) gcd-accept.pml:4 (state 2)      [x = (x-y)]
+                gcd(1):x = 24
+  8:    proc  1 (gcd:1) gcd-accept.pml:4 (state 1)      [((x>y))]
+  9:    proc  1 (gcd:1) gcd-accept.pml:4 (state 2)      [x = (x-y)]
+                gcd(1):x = 8
+  <<<<<START OF CYCLE>>>>>
+ 10:    proc  1 (gcd:1) gcd-accept.pml:5 (state 3)      [((x<y))]
+ 11:    proc  1 (gcd:1) gcd-accept.pml:5 (state 4)      [y = y]
+                gcd(1):y = 16
+spin: trail ends after 11 steps
+#processes: 2
+ 11:    proc  1 (gcd:1) gcd-accept.pml:3 (state 7)
+                gcd(1):y = 16
+ 11:    proc  0 (:init::1) gcd-accept.pml:11 (state 2) <valid end state>
+2 processes created
+```
 
 ## SaftyとLiveness
 プログラムの検証について述べるとき、SaftyとLivenessと呼ばれる性質がある。
