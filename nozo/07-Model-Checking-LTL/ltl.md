@@ -188,18 +188,23 @@ spin: trail ends after 11 steps
 2 processes created
 ```
 
-## SaftyとLiveness
-プログラムの検証について述べるとき、SaftyとLivenessと呼ばれる性質がある。
+## システムの性質
+モデル検査で検証されるシステムの性質には次のようなものがある。
 
-### Safty
+### 到達可能性(Reachability)
+
+### 安全性(Safty)
 望ましくない事象が発生しないという性質。
 - 例) デッドロックが発生しない
 - assertによる検証によって保証される
 
-### Liveness
+### 活性(Liveness)
 期待する事象がいずれは発生するという性質。
 - 例) あるリクエストについて、いずれレスポンスが返ってくる
 - ラベルによるサイクル検証によって保証される
+
+### 公平性(Fairness)
+
 
 ## Never claims
 never claimは「決して起きてはいけない挙動」を記述することができる。
@@ -211,8 +216,7 @@ never {
 
 ## 線形時相論理
 LTL(Linear-time Temporal Logic)とは、時間の概念が取り入れられた論理である。
-LTLの構文をいかに示す。
-命題論理に`[]`, `<>`, `X`, `U`という論理演算子が加わっている。
+`[]`, `<>`, `X`, `U`という論理演算子がある。
 ```
 φ,Ψ ::= ¬ φ | φ ∧ Ψ | φ ∨ Ψ | φ ⇒ Ψ
       | [] φ  (always φ)
@@ -228,6 +232,7 @@ LTLの構文をいかに示す。
 | `X  φ` | 次に`φ`が成り立つ |
 | `φ U Ψ` | `Ψ`が成り立つまで`φ`が成り立つ |
 
+### LTL式とBüchi Automata
 ![](./img/Gp.png)
 ![](./img/Fp.png)
 ![](./img/Xp.png)
@@ -235,5 +240,6 @@ LTLの構文をいかに示す。
 
 ## 参考文献
 - 早稲田大学 高信頼ソフトウェア, http://www.ueda.info.waseda.ac.jp/oess/RS2018/
+- 吉岡信和; 青木利晃; 田原康之. SPIN による設計モデル検証―モデル検査の実践ソフトウェア検証 (トップエスイー実践講座). 2008.
 - SPIN model checker, http://spinroot.com/spin/whatispin.html
 - LTL2BA, http://www.lsv.fr/~gastin/ltl2ba/index.php
