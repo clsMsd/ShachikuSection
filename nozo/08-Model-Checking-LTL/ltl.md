@@ -48,9 +48,41 @@ never claimは「決して起きてはいけない挙動」をオートマトン
 このnever claimによってプログラムが受理されてしまった場合、そのプログラムは満たしてほしくない性質を持つことがわかる。
 
 ```
-never {
+never{
+BLUE_RED:
+  if
+    :: state1 == BLUE && state2 == RED  -> goto BLUE_RED
+    :: state1 == RED  && state2 == RED  -> goto RED_RED
+    :: else -> goto accept
+  fi;
+
+RED_RED:
+  if
+    :: state1 == RED  && state2 == RED  -> goto RED_RED
+    :: state1 == RED  && state2 == BLUE -> goto RED_BLUE
+    :: else -> goto accept
+  fi;
+
+RED_BLUE:
+  if
+    :: state1 == RED  && state2 == BLUE -> goto RED_BLUE
+    :: state1 == RED  && state2 == RED  -> goto RED_RED2
+    :: else -> goto accept
+  fi;
+
+RED_RED2:
+  if
+    :: state1 == RED  && state2 == RED  -> goto RED_RED2
+    :: state1 == BLUE && state2 == RED  -> goto BLUE_RED
+    :: else -> goto accept
+  fi;
+
+accept:
+  skip;
+  goto accept
 }
 ```
+吉岡信和; 青木利晃; 田原康之. SPIN による設計モデル検証―モデル検査の実践ソフトウェア検証 (トップエスイー実践講座). 2008. pp89. 図4.21
 
 
 ## 線形時相論理
