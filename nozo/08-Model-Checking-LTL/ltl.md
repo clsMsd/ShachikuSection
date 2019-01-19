@@ -143,6 +143,8 @@ Never Claimプロセスをオートマトンとして出力したものを下図
 SPINはモデルとして記述されたプロセスと並行にNever Claimプロセスを実行して、`accept`ラベルを無限回通るような実行があったときエラーとして報告する。
 言い換えるとNever Claimプロセスであらわされたオートマトンに受理される実行列が存在するときエラーとして報告される。
 
+SPINで検証するときは上記のNever Calimを信号機のモデルに追加して、以下のコマンドで検証する。
+
 ```
 $ spin -o3 -search -a signal.pml 
 warning: for p.o. reduction to be valid the never claim must be stutter-invariant
@@ -185,6 +187,10 @@ unreached in claim never_0
 pan: elapsed time 0 seconds
 ```
 
+検証結果は`errors: 0`であり、Never Claimに受理されるような実行列は存在しないつまり「決して起きてはいけない振る舞い」は発生しないことがわかる。
+
+わざと`mutex1`に対する`lock`, `unlock`を取り除いたプログラムに同じNever Claimを検証した結果を以下に示す。
+
 ```
 $ spin -o3 -search -a signal-err.pml 
 warning: for p.o. reduction to be valid the never claim must be stutter-invariant
@@ -219,6 +225,59 @@ Stats on memory usage (in Megabytes):
 
 
 pan: elapsed time 0 seconds
+```
+
+検証結果は`errors: 1`であり`pan:1: acceptance cycle (at depth 12)`とも表示される。
+Never Claimに受理されるような実行列は存在することがわかる。
+
+Never Claimに受理された実行列を以下に示す。
+
+```
+$ spin -p -t -g signal-err.pml
+starting claim 2
+Never claim moves to line 35    [(((state1==BLUE)&&(state2==RED)))]
+  2:    proc  0 (signal1:1) signal-err.pml:16 (state 1) [state1 = RED]
+                state1 = RED
+Never claim moves to line 36    [(((state1==RED)&&(state2==RED)))]
+  4:    proc  0 (signal1:1) signal-err.pml:11 (state 2) [mutex2 = UNLOCKED]
+                mutex2 = UNLOCKED
+Never claim moves to line 42    [(((state1==RED)&&(state2==RED)))]
+  6:    proc  1 (signal2:1) signal-err.pml:7 (state 3)  [((mutex2==UNLOCKED))]
+  6:    proc  1 (signal2:1) signal-err.pml:7 (state 2)  [mutex2 = LOCKED]
+                mutex2 = LOCKED
+  8:    proc  1 (signal2:1) signal-err.pml:26 (state 5) [state2 = BLUE]
+                state2 = BLUE
+Never claim moves to line 43    [(((state1==RED)&&(state2==BLUE)))]
+ 10:    proc  0 (signal1:1) signal-err.pml:19 (state 4) [state1 = BLUE]
+                state1 = BLUE
+Never claim moves to line 51    [else]
+ 12:    proc  1 (signal2:1) signal-err.pml:27 (state 6) [state2 = RED]
+                state2 = RED
+  <<<<<START OF CYCLE>>>>>
+Never claim moves to line 62    [(1)]
+ 14:    proc  0 (signal1:1) signal-err.pml:16 (state 1) [state1 = RED]
+                state1 = RED
+ 16:    proc  0 (signal1:1) signal-err.pml:11 (state 2) [mutex2 = UNLOCKED]
+                mutex2 = UNLOCKED
+ 18:    proc  1 (signal2:1) signal-err.pml:7 (state 3)  [((mutex2==UNLOCKED))]
+ 18:    proc  1 (signal2:1) signal-err.pml:7 (state 2)  [mutex2 = LOCKED]
+                mutex2 = LOCKED
+ 20:    proc  1 (signal2:1) signal-err.pml:26 (state 5) [state2 = BLUE]
+                state2 = BLUE
+ 22:    proc  1 (signal2:1) signal-err.pml:27 (state 6) [state2 = RED]
+                state2 = RED
+ 24:    proc  0 (signal1:1) signal-err.pml:19 (state 4) [state1 = BLUE]
+                state1 = BLUE
+spin: trail ends after 24 steps
+#processes: 2
+                mutex1 = LOCKED
+                mutex2 = LOCKED
+                state1 = BLUE
+                state2 = RED
+ 24:    proc  1 (signal2:1) signal-err.pml:24 (state 7)
+ 24:    proc  0 (signal1:1) signal-err.pml:15 (state 5)
+ 24:    proc  - (never_0:1) signal-err.pml:62 (state 33)
+2 processes created
 ```
 
 ## 線形時相論理
