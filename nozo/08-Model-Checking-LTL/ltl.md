@@ -185,6 +185,41 @@ unreached in claim never_0
 pan: elapsed time 0 seconds
 ```
 
+```
+$ spin -o3 -search -a signal-err.pml 
+warning: for p.o. reduction to be valid the never claim must be stutter-invariant
+(never claims generated from LTL formulae are stutter-invariant)
+pan:1: acceptance cycle (at depth 12)
+pan: wrote signal-err.pml.trail
+
+(Spin Version 6.4.5 -- 1 January 2016)
+Warning: Search not completed
+        + Partial Order Reduction
+
+Full statespace search for:
+        never claim             + (never_0)
+        assertion violations    + (if within scope of claim)
+        acceptance   cycles     + (fairness disabled)
+        invalid end states      - (disabled by never claim)
+
+State-vector 36 byte, depth reached 23, errors: 1
+       14 states, stored
+        1 states, matched
+       15 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:         0 (resolved)
+
+Stats on memory usage (in Megabytes):
+    0.001       equivalent memory usage for states (stored*(State-vector + overhead))
+    0.287       actual memory usage for states
+  128.000       memory used for hash table (-w24)
+    0.534       memory used for DFS stack (-m10000)
+  128.730       total actual memory usage
+
+
+
+pan: elapsed time 0 seconds
+```
 
 ## 線形時相論理
 LTL(Linear-time Temporal Logic)とは、時間の概念が取り入れられた論理である。
