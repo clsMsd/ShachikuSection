@@ -222,6 +222,9 @@ pan: elapsed time 0 seconds
 ```
 
 ## 線形時相論理
+Never Claimを記述することで振る舞いの検証を行うことができたが、検証したい性質をNever Claimとして書き起こすことは容易ではない。
+そこでSPINではLTLと呼ばれる論理式で検証したい性質を表し、そこからNever Claimを自動生成する手法がある。
+
 LTL(Linear-time Temporal Logic)とは、時間の概念が取り入れられた論理である。
 `[]`, `<>`, `X`, `U`という論理演算子がある。
 ```
@@ -239,17 +242,25 @@ LTL(Linear-time Temporal Logic)とは、時間の概念が取り入れられた�
 | `X  φ` | 次に`φ`が成り立つ |
 | `φ U Ψ` | `Ψ`が成り立つまで`φ`が成り立つ |
 
-### LTL式とBüchi Automata
 ![](./img/Gp.png)
 ![](./img/Fp.png)
 ![](./img/Xp.png)
 ![](./img/p1Up2.png)
 
-### LTL式で書ける性質
-|性質|LTL式|
-----|----
-|応答性|`[](req -> <> ack)`|
-|進行性|`[]<>myTurn`|
+例えば信号機のモデルにおいて「２つの信号機が同時に青にならない」という性質は以下のようなLTL式で表現できる。
+```
+[]!(state1 == BLUE && state2 == BLUE)
+```
+
+
+### LTL式で表すことができる性質
+並行・分散システムにおける代表的な性質をLTL式で表したものを以下に示す。
+
+|性質|LTL式|説明|
+----|----|----|
+|排他制御|`[]¬(crit1 ∧ crit2)`||
+|応答性|`[](req -> <> ack)`||
+|進行性|`[]<>myTurn`||
 
 ## 参考文献
 - 早稲田大学 高信頼ソフトウェア, http://www.ueda.info.waseda.ac.jp/oess/RS2018/
