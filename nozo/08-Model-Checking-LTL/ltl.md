@@ -242,10 +242,24 @@ LTL(Linear-time Temporal Logic)とは、時間の概念が取り入れられた�
 | `X  φ` | 次に`φ`が成り立つ |
 | `φ U Ψ` | `Ψ`が成り立つまで`φ`が成り立つ |
 
-![](./img/Gp.png)
-![](./img/Fp.png)
-![](./img/Xp.png)
-![](./img/p1Up2.png)
+SPINでは以下のようにLTL式からNever Claimを生成することができる。
+```
+$ spin -f '[]p'
+never  {    /* []p */
+accept_init:
+T0_init:
+        do
+        :: ((p)) -> goto T0_init
+        od;
+}
+```
+
+それぞれのLTL式から生成されたNever Claimを表すオートマトンを以下に示す。
+
+|LTL式|`[] φ`|`<> φ`|`X  φ`|`φ U Ψ`|
+-----|----|----|----|---- 
+|オートマトン|![](./img/Gp.png)|![](./img/Fp.png)|![](./img/Xp.png)|![](./img/p1Up2.png)|
+
 
 例えば信号機のモデルにおいて「２つの信号機が同時に青にならない」という性質は以下のようなLTL式で表現できる。
 ```
