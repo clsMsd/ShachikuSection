@@ -339,6 +339,7 @@ accept_all:
 }
 ```
 
+生成されたNever Claimと`p`, `q`の定義を検証したいプログラムに追加する。
 ```
 #define p state1 == BLUE
 #define q state2 == BLUE
@@ -353,6 +354,8 @@ accept_all:
   skip
 }
 ```
+
+そして以下のコマンドで検証する。
 
 ```
 $ spin -o3 -search -a signal-ltl.pml 
@@ -397,14 +400,7 @@ unreached in claim never_0
 pan: elapsed time 0 seconds
 ```
 
-### LTL式で表すことができる性質
-並行・分散システムにおける代表的な性質をLTL式で表したものを以下に示す。
-
-|性質|LTL式|説明|
-----|----|----|
-|排他制御|`[]¬(crit1 ∧ crit2)`||
-|応答性|`[](req -> <> ack)`||
-|進行性|`[]<>myTurn`||
+検証結果から`errors: 0`であり、LTL式で記述された性質をこのモデルは満たしていることがわかる。
 
 ## 参考文献
 - 早稲田大学 高信頼ソフトウェア, http://www.ueda.info.waseda.ac.jp/oess/RS2018/
