@@ -260,12 +260,83 @@ T0_init:
 -----|----|----|----|---- 
 |オートマトン|![](./img/Gp.png)|![](./img/Fp.png)|![](./img/Xp.png)|![](./img/p1Up2.png)|
 
-
 例えば信号機のモデルにおいて「２つの信号機が同時に青にならない」という性質は以下のようなLTL式で表現できる。
 ```
-[]!(state1 == BLUE && state2 == BLUE)
+p : state1 == BLUE
+q : state2 == BLUE
+[]!(p && q)
+```
+このLTL式の性質が**満たされない**ときエラーとして報告してほしい場合、このLTL式を否定した`!([]!(p && q))`から生成されたNever Claimを使う。
+```
+$ spin -f '!([]!(p && q))'
+never  {    /* !([]!(p && q)) */
+T0_init:
+        do
+        :: atomic { ((p && q)) -> assert(!((p && q))) }
+        :: (1) -> goto T0_init
+        od;
+accept_all:
+        skip
+}
 ```
 
+```
+#define p state1 == BLUE
+#define q state2 == BLUE
+
+never  {    /* !([]!(p && q)) */
+T0_init:
+  do
+    :: atomic { ((p && q)) -> assert(!((p && q))) }
+    :: (1) -> goto T0_init
+  od;
+accept_all:
+  skip
+}
+```
+
+```
+$ spin -o3 -search -a signal-ltl.pml 
+warning: for p.o. reduction to be valid the never claim must be stutter-invariant
+(never claims generated from LTL formulae are stutter-invariant)
+
+(Spin Version 6.4.5 -- 1 January 2016)
+        + Partial Order Reduction
+
+Full statespace search for:
+        never claim             + (never_0)
+        assertion violations    + (if within scope of claim)
+        acceptance   cycles     + (fairness disabled)
+        invalid end states      - (disabled by never claim)
+
+State-vector 36 byte, depth reached 15, errors: 0
+        8 states, stored
+        1 states, matched
+        9 transitions (= stored+matched)
+        0 atomic steps
+hash conflicts:         0 (resolved)
+
+Stats on memory usage (in Megabytes):
+    0.000       equivalent memory usage for states (stored*(State-vector + overhead))
+    0.289       actual memory usage for states
+  128.000       memory used for hash table (-w24)
+    0.534       memory used for DFS stack (-m10000)
+  128.730       total actual memory usage
+
+
+unreached in proctype signal1
+        signal-ltl.pml:21, state 12, "-end-"
+        (1 of 12 states)
+unreached in proctype signal2
+        signal-ltl.pml:30, state 12, "-end-"
+        (1 of 12 states)
+unreached in claim never_0
+        signal-ltl.pml:38, state 2, "assert(!(((state1==BLUE)&&(state2==BLUE))))"
+        signal-ltl.pml:43, state 10, "-end-"
+        (2 of 10 states)
+
+pan: elapsed time 0 seconds
+```
 
 ### LTL式で表すことができる性質
 並行・分散システムにおける代表的な性質をLTL式で表したものを以下に示す。
