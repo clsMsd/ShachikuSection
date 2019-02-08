@@ -104,11 +104,12 @@ P^3_0 \xrightarrow{H} C^3_1 \xrightarrow{R_1} P^3_1 \xrightarrow{H} C^3_2 \xrigh
 $$
   
 完成したレインボーテーブル  
+
 |Start(PlainText)|Goal(Hashed)|
 |:---|:---|
-|P^1_0|P^1_n|
-|P^2_0|P^2_n|
-|P^3_0|P^3_n|
+|$P^1_0$|$P^1_n$|
+|$P^2_0$|$P^2_n$|
+|$P^3_0$|$P^3_n$|
 
 ##### 使い方
 今、あるハッシュ値$c_x$についてハッシュ化する前の平文$p_x$を求めたい。
