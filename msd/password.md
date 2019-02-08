@@ -94,13 +94,13 @@ a, b, c, ... と考えられうる平文全てに対してハッシュ値を計�
 平文とハッシュ値のチェーン
 
 $$
-P^1_0 \xrightarrow{H} C^1_1 \xrightarrow{R_1} P^1_1 \xrightarrow{H} C^1_2 \xrightarrow{R_2} P^1_2 ... \xrightarrow{R_n} P^1_n 
+P^1_0 \xrightarrow{H} C^1_1 \xrightarrow{R_1} P^1_1 \xrightarrow{H} C^1_2 \xrightarrow{R_2} P^1_2 ... P^1_{n-1} \xrightarrow{H} C^1_n  \xrightarrow{R_n} P^1_n 
 $$
 $$
-P^2_0 \xrightarrow{H} C^2_1 \xrightarrow{R_1} P^2_1 \xrightarrow{H} C^2_2 \xrightarrow{R_2} P^2_2 ... \xrightarrow{R_n} P^2_n
+P^2_0 \xrightarrow{H} C^2_1 \xrightarrow{R_1} P^2_1 \xrightarrow{H} C^2_2 \xrightarrow{R_2} P^2_2 ... P^2_{n-1} \xrightarrow{H} C^2_n  \xrightarrow{R_n} P^2_n
 $$
 $$
-P^3_0 \xrightarrow{H} C^3_1 \xrightarrow{R_1} P^3_1 \xrightarrow{H} C^3_2 \xrightarrow{R_2} P^3_2 ... \xrightarrow{R_n} P^3_n 
+P^3_0 \xrightarrow{H} C^3_1 \xrightarrow{R_1} P^3_1 \xrightarrow{H} C^3_2 \xrightarrow{R_2} P^3_2 ... P^3_{n-1} \xrightarrow{H} C^3_n \xrightarrow{R_n} P^3_n 
 $$
   
 完成したレインボーテーブル  
@@ -128,7 +128,7 @@ $$ c_x \xrightarrow{R_n} p^1_n $$
 $$ c_x \xrightarrow{R_{n-1}} p^2_{n-1} \xrightarrow{H} c^2_n \xrightarrow{R_{n-1}} p^2_n $$
 
 次にレインボーテーブルの中に$p^2_{n}$が存在するか調べる。  
-レインボーテーブルの中に$P^2_{n}$が見つからなかった場合、求める平文は$P_{n-2}$のいずれかではないことがわかる。
+レインボーテーブルの中に$p^2_{n}$が見つからなかった場合、求める平文は$P_{n-2}$のいずれかではないことがわかる。
 
 次はまた同様に$c_x$に$R_{n-2}$を適用し、ハッシュ化と還元を繰り返して長さ3のチェーンを作る。
 
