@@ -125,7 +125,7 @@ $$ c_x \xrightarrow{R_n} p^1_n $$
 
 次に、$c_x$に還元関数$R_{n-1}$を適用し、得られた平文$p^2_{n-1}$にハッシュ関数を適用し、得られたハッシュ値$c^2_{n}$に還元関数$R_n$を適用し長さ2のチェーンを作る。
 
-$$ c_x \xrightarrow{R_{n-1}} p^2_{n-1} \xrightarrow{H} c^2_n \xrightarrow{R_{n-1}} p^2_n $$
+$$ c_x \xrightarrow{R_{n-1}} p^2_{n-1} \xrightarrow{H} c^2_n \xrightarrow{R_{n}} p^2_n $$
 
 次にレインボーテーブルの中に$p^2_{n}$が存在するか調べる。  
 レインボーテーブルの中に$p^2_{n}$が見つからなかった場合、求める平文は$P_{n-2}$のいずれかではないことがわかる。
