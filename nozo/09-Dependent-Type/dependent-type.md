@@ -34,13 +34,18 @@ mkSingle : (x : Bool) -> isSingleton x
 mkSingle True = 0
 mkSingle False = []
 ```
+`mkSingle`関数の返り値の型に`isSingleton`関数が現れていることに注目したい。
+`isSingleton`関数には`mkSingle`関数の引数である`Bool`型の値`x`が渡されている。
+`mkSingle`関数に値`True`が渡されると返り値の型は`Nat`となり、値`False`が渡されると返り値の型は`List Nat`となる。
 
+返り値の型だけでなく、引数の型にも関数が現れることも可能である。
 ```Idris
 sum : (single : Bool) -> isSingleton single -> Nat
 sum True x = x
 sum False [] = 0
 sum False (x :: xs) = x + sum False xs
 ```
+`sum`関数の第１引数に渡される値によって第２引数の型が決定される。
 
 ## 長さ付きリスト型
 
