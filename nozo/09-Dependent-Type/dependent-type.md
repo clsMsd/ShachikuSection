@@ -48,6 +48,8 @@ sum False (x :: xs) = x + sum False xs
 `sum`関数の第１引数に渡される値によって第２引数の型が決定される。
 
 ## 長さ付きリスト型
+もう少し実用的な例を見てみる。
+次のプログラムは長さ付きリスト型の宣言である。
 
 ```Idris
 data Vect : Nat -> Type -> Type where
@@ -55,10 +57,53 @@ data Vect : Nat -> Type -> Type where
    (::) : a -> Vect k a -> Vect (S k) a
 ```
 
+例えば長さ2の`Int`型のリストは次のように書ける。
+```Idris
+v1 : Vect 2 Int
+v1 = 1 :: 2 :: Nil
+```
+`v1`の型にはリストの長さを表す値が現れている。
+
+
 ```Idris
 (++) : Vect n a -> Vect m a -> Vect (n + m) a
 (++) Nil       ys = ys
 (++) (x :: xs) ys = x :: (xs ++ ys)
+```
+
+```Idris
+(++) : Vect n a -> Vect m a -> Vect (n + m) a
+(++) Nil       ys = ys
+(++) (x :: xs) ys = x :: (xs ++ xs) -- BROKEN
+```
+
+```
+idris --check vector.idr 
+vector.idr:7:23-24:
+  |
+7 | (++) (x :: xs) ys = x :: (xs ++ xs)
+  |                       ~~
+When checking right hand side of Main.++ with expected type
+        Vect (S k + m) a
+
+When checking an application of constructor Main.:::
+        Type mismatch between
+                Vect (k + k) a (Type of xs ++ xs)
+        and
+                Vect (plus k m) a (Expected type)
+        
+        Specifically:
+                Type mismatch between
+                        plus k k
+                and
+                        plus k m
+```
+
+## The Finite Sets
+```
+data Fin : Nat -> Type where
+  FZ : Fin (S k)
+  FS : Fin k -> Fin (S k)
 ```
 
 ## 参考文献
