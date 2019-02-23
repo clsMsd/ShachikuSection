@@ -59,8 +59,8 @@ data Vect : Nat -> Type -> Type where
 
 例えば長さ2の`Int`型のリストは次のように書ける。
 ```Idris
-v1 : Vect 2 Int
-v1 = 1 :: 2 :: Nil
+v1 : Vect 3 Int
+v1 = 1 :: 2 :: 3 :: Nil
 ```
 `v1`の型にはリストの長さを表す値が現れている。
 
@@ -111,10 +111,49 @@ ys        : Vect m a
 関数の型の定義によるとこの部分の型は`Vect (k + m)`であるべきなので型がマッチせずエラーとなっている。
 
 ## The Finite Sets
+
 ```
 data Fin : Nat -> Type where
   FZ : Fin (S k)
   FS : Fin k -> Fin (S k)
+```
+
+```
+indexFin : Fin n -> Vect n a -> a
+indexFin FZ     (x :: xs) = x
+indexFin (FS k) (x :: xs) = indexFin k xs
+```
+
+```
+res0 : Int
+res0 = indexFin FZ v1
+```
+
+```
+res3 : Int
+res3 = indexFin (FS (FS (FS FZ))) v1
+```
+
+```
+$ idris --check vector.idr 
+vector.idr:24:8-36:
+   |
+24 | res3 = indexFin (FS (FS (FS FZ))) v1
+   |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When checking right hand side of res3 with expected type
+        Int
+
+When checking an application of function Main.indexFin:
+        Type mismatch between
+                Vect 3 Int (Type of v1)
+        and
+                Vect (S (S (S (S k)))) Int (Expected type)
+        
+        Specifically:
+                Type mismatch between
+                        0
+                and
+                        S k
 ```
 
 ## 参考文献
