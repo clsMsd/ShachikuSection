@@ -7,6 +7,12 @@ IdrisはHaskellライクな構文をもつ関数型プログラミング言語�
 
 [Idris - A Language with Dependent Types](https://www.idris-lang.org/)
 
+このページのidrisのバージョンは以下のものである。
+```
+$ idris --version
+1.3.1-git:PRE
+```
+
 ## First Class Types
 依存型を持たない型システムでは型は値につくものであり、言語の中で型と値は明確に区別される。
 ```
