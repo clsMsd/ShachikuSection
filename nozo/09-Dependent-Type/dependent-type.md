@@ -64,21 +64,25 @@ v1 = 1 :: 2 :: Nil
 ```
 `v1`の型にはリストの長さを表す値が現れている。
 
-
+２つの長さ付きリストを結合する関数は次のように書ける。
 ```Idris
 (++) : Vect n a -> Vect m a -> Vect (n + m) a
 (++) Nil       ys = ys
 (++) (x :: xs) ys = x :: (xs ++ ys)
 ```
+引数の型を見ると長さ`n`のリストと長さ`m`のリストを受け取ることがわかる。
+返り値の型は`Vect (n + m) a`となっており長さが`n + m`のリストが返ってくることが型レベルで保証される。
 
+型で返り値のリストの長さが保証されていると、次のようなプログラムのバグが型チェックで検証できる。
 ```Idris
 (++) : Vect n a -> Vect m a -> Vect (n + m) a
 (++) Nil       ys = ys
 (++) (x :: xs) ys = x :: (xs ++ xs) -- BROKEN
 ```
 
+型チェックを実行すると次のようなエラーが出力される。
 ```
-idris --check vector.idr 
+$ idris --check vector.idr 
 vector.idr:7:23-24:
   |
 7 | (++) (x :: xs) ys = x :: (xs ++ xs)
@@ -98,6 +102,13 @@ When checking an application of constructor Main.:::
                 and
                         plus k m
 ```
+エラーが出た行の`(++)`関数の引数の型は`xs`の長さを`k`とすると次のような関係になる。
+```
+(x :: xs) : Vect (k + 1) a
+ys        : Vect m a
+```
+すると`x :: (xs ++ xs)`の`(xs ++ xs)`の部分の型は`Vect (k + k)`となってしまう。
+関数の型の定義によるとこの部分の型は`Vect (k + m)`であるべきなので型がマッチせずエラーとなっている。
 
 ## The Finite Sets
 ```
