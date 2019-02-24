@@ -183,6 +183,7 @@ indexFin (FS k) (x :: xs) = indexFin k xs
 
 範囲外へのアクセスを行うプログラムを記述すると型チェックの時点でエラーが報告される。
 ```Idris
+res_err : Int
 res_err = indexFin (FS (FS (FS FZ))) (1::2::3::Nil)
 ```
 型チェック実行結果。
