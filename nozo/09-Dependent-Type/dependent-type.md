@@ -22,9 +22,8 @@ True    : Bool
 \x -> x : A -> A
 ```
 
-依存型を持つ型システムは、型レベルに値が現れることを許容する。
-つまり、型と値の間に区別がなくなる。
-型と値を区別すること扱えることを型がFirst Classであると言う。
+依存型を持つ型システムは、型に値が現れたり型を値として扱うことを許容する。
+そのように型と値を区別することなく扱えることを型がFirst Classであると言う。
 
 例えば次の関数はBool型の値を入力に受け取り**型を返す**関数である。
 ```Idris
@@ -34,13 +33,13 @@ isSingleton False = List Nat
 ```
 引数に値`True`が渡されると型`Nat`を返し、値`False`が渡されると型`List Nat`を返している。
 
-この`isSingleton`関数を使うと次のような入力された値によって返す型が異なる関数を定義できる。
+この`isSingleton`関数を使うと引数の値によって返り値の型が異なる関数を定義できる。
 ```Idris
 mkSingle : (x : Bool) -> isSingleton x
 mkSingle True = 0
 mkSingle False = []
 ```
-`mkSingle`関数の返り値の型に`isSingleton`関数が現れていることに注目したい。
+`mkSingle`関数の返り値の**型に`isSingleton`関数が現れている**ことに注目したい。
 `isSingleton`関数には`mkSingle`関数の引数である`Bool`型の値`x`が渡されている。
 `mkSingle`関数に値`True`が渡されると返り値の型は`Nat`となり、値`False`が渡されると返り値の型は`List Nat`となる。
 
@@ -63,12 +62,12 @@ data Vect : Nat -> Type -> Type where
    (::) : a -> Vect k a -> Vect (S k) a
 ```
 
-例えば長さ2の`Int`型のリストは次のように書ける。
+例えば長さ３の`Int`型のリストは次のように書ける。
 ```Idris
-v1 : Vect 3 Int
-v1 = 1 :: 2 :: 3 :: Nil
+vec : Vect 3 Int
+vec = 1 :: 2 :: 3 :: Nil
 ```
-`v1`の型にはリストの長さを表す値が現れている。
+値`vec`の型にはリストの長さを表す値が現れている。
 
 ２つの長さ付きリストを結合する関数は次のように書ける。
 ```Idris
@@ -117,49 +116,56 @@ ys        : Vect m a
 関数の型の定義によるとこの部分の型は`Vect (k + m)`であるべきなので型がマッチせずエラーとなっている。
 
 ## The Finite Sets
-
+次の例は有限集合型である。
 ```
 data Fin : Nat -> Type where
   FZ : Fin (S k)
   FS : Fin k -> Fin (S k)
 ```
 
+集合型という名前から`{1,2,3}`のような何かの値のコレクション型だと思ってしまうがそうではない。
+```
+fin1 : Fin 3
+fin1 = FZ
+
+fin2 : Fin 3
+fin2 = FS FZ
+
+fin3 : Fin 3
+fin3 = FS (FS FZ)
+```
+
+```
+fin4 : Fin 3
+fin4 = FS (FS (FS FZ))
+```
+
+```
+$ idris --check vector.idr
+vector.idr:31:16-20:
+   |
+31 | fin4 = FS (FS (FS FZ))
+   |                ~~~~~
+When checking right hand side of fin4 with expected type
+        Fin 3
+
+When checking an application of constructor Main.FS:
+        Type mismatch between
+                Fin (S k) (Type of FZ)
+        and
+                Fin 0 (Expected type)
+        
+        Specifically:
+                Type mismatch between
+                        S k
+                and
+                        0
+```
+
 ```
 indexFin : Fin n -> Vect n a -> a
 indexFin FZ     (x :: xs) = x
 indexFin (FS k) (x :: xs) = indexFin k xs
-```
-
-```
-res0 : Int
-res0 = indexFin FZ v1
-```
-
-```
-res3 : Int
-res3 = indexFin (FS (FS (FS FZ))) v1
-```
-
-```
-$ idris --check vector.idr 
-vector.idr:24:8-36:
-   |
-24 | res3 = indexFin (FS (FS (FS FZ))) v1
-   |        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When checking right hand side of res3 with expected type
-        Int
-
-When checking an application of function Main.indexFin:
-        Type mismatch between
-                Vect 3 Int (Type of v1)
-        and
-                Vect (S (S (S (S k)))) Int (Expected type)
-        
-        Specifically:
-                Type mismatch between
-                        0
-                and
-                        S k
 ```
 
 ## 参考文献
