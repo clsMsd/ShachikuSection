@@ -122,31 +122,33 @@ data Fin : Nat -> Type where
   FZ : Fin (S k)
   FS : Fin k -> Fin (S k)
 ```
+集合型という名前から`{1,2,3}`のような何かの値のコレクションだと思ってしまうがそうではない。
 
-集合型という名前から`{1,2,3}`のような何かの値のコレクション型だと思ってしまうがそうではない。
+例えば型`Fin 3`の属する値は次の３つである。
 ```
+fin0 : Fin 3
+fin0 = FZ
+
 fin1 : Fin 3
-fin1 = FZ
+fin1 = FS FZ
 
 fin2 : Fin 3
-fin2 = FS FZ
+fin2 = FS (FS FZ)
+```
 
+値`FS (FS (FS FZ))`に`Fin 3`を型付けしようとするとエラーが出る。
+```
 fin3 : Fin 3
-fin3 = FS (FS FZ)
+fin3 = FS (FS (FS FZ))
 ```
-
-```
-fin4 : Fin 3
-fin4 = FS (FS (FS FZ))
-```
-
+型チェック実行結果。
 ```
 $ idris --check vector.idr
 vector.idr:31:16-20:
    |
-31 | fin4 = FS (FS (FS FZ))
+31 | fin3 = FS (FS (FS FZ))
    |                ~~~~~
-When checking right hand side of fin4 with expected type
+When checking right hand side of fin3 with expected type
         Fin 3
 
 When checking an application of constructor Main.FS:
@@ -162,10 +164,48 @@ When checking an application of constructor Main.FS:
                         0
 ```
 
+値`FS (FS (FS FZ))`が`Fin 3`型であるとすると、内側の`FZ`の型は`Fin 0`であるはずである。
+しかし、`Fin`型の定義より`Fin 0`型の値は存在しないため型エラーとして報告される。
+```
+(FS (FS (FS FZ))) : Fin 3
+    (FS (FS FZ))  : Fin 2
+        (FS FZ)   : Fin 1
+            FZ    : Fin 0
+```
+
+以上の特性から、`Fin n`型に属する値は`0`から`(n-1)`であることを型によって保証される。
+この特性を用いるとリストへの添字アクセス関数について範囲外へのアクセスが発生しないことを型レベルで保証できる。
 ```
 indexFin : Fin n -> Vect n a -> a
 indexFin FZ     (x :: xs) = x
 indexFin (FS k) (x :: xs) = indexFin k xs
+```
+
+範囲外へのアクセスを行うプログラムを記述すると型チェックの時点でエラーが報告される。
+```
+res_err = indexFin (FS (FS (FS FZ))) (1::2::3::Nil)
+```
+型チェック実行結果。
+```
+$ idris --check vector.idr
+vector.idr:41:46-47:
+   |
+41 | res_err = indexFin (FS (FS (FS FZ))) (1::2::3::Nil)
+   |                                              ~~
+When checking right hand side of res_err with expected type
+        Int
+
+When checking an application of constructor Main.:::
+        Type mismatch between
+                Vect 0 a (Type of [])
+        and
+                Vect (S k) Int (Expected type)
+        
+        Specifically:
+                Type mismatch between
+                        0
+                and
+                        S k
 ```
 
 ## 参考文献
