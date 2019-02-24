@@ -117,7 +117,7 @@ ys        : Vect m a
 
 ## The Finite Sets
 次の例は有限集合型である。
-```
+```Idris
 data Fin : Nat -> Type where
   FZ : Fin (S k)
   FS : Fin k -> Fin (S k)
@@ -125,7 +125,7 @@ data Fin : Nat -> Type where
 集合型という名前から`{1,2,3}`のような何かの値のコレクションだと思ってしまうがそうではない。
 
 例えば型`Fin 3`の属する値は次の３つである。
-```
+```Idris
 fin0 : Fin 3
 fin0 = FZ
 
@@ -137,7 +137,7 @@ fin2 = FS (FS FZ)
 ```
 
 値`FS (FS (FS FZ))`に`Fin 3`を型付けしようとするとエラーが出る。
-```
+```Idris
 fin3 : Fin 3
 fin3 = FS (FS (FS FZ))
 ```
@@ -175,14 +175,14 @@ When checking an application of constructor Main.FS:
 
 以上の特性から、`Fin n`型に属する値は`0`から`(n-1)`であることを型によって保証される。
 この特性を用いるとリストへの添字アクセス関数について範囲外へのアクセスが発生しないことを型レベルで保証できる。
-```
+```Idris
 indexFin : Fin n -> Vect n a -> a
 indexFin FZ     (x :: xs) = x
 indexFin (FS k) (x :: xs) = indexFin k xs
 ```
 
 範囲外へのアクセスを行うプログラムを記述すると型チェックの時点でエラーが報告される。
-```
+```Idris
 res_err = indexFin (FS (FS (FS FZ))) (1::2::3::Nil)
 ```
 型チェック実行結果。
