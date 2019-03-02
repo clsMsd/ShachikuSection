@@ -181,7 +181,7 @@ protocol Eq {
    static func equal(lhs: Self, rhs: Self) -> Bool
 }
 
-extension Int {
+extension Int: Eq {
    static func equal(lhs: Int, rhs: Int) -> Bool {
       return lhs == rhs
    }
