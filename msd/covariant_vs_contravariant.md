@@ -23,15 +23,15 @@ doEat(new Dog())    // Dog <: Animal なので、Animal型をDog型に置き換�
 
 ## 不変、共変、反変、双変
 
-Animal型とその部分型であるDog型と、型引数を受ける取るあるジェネリッククラス Container<T> があるとする。
-この場合、Container<Animal>型とContainer<Dog>型の間の関係は次のようなものが考えられる。
+Animal型とその部分型であるDog型と、型引数を受ける取るあるジェネリッククラス `Container<T>` があるとする。
+この場合、`Container<Animal>` 型と`Container<Dog>`型の間の関係は次のようなものが考えられる。
 
-1. 不変: Container<Animal> と Container<Dog>の間には特になんの関係もないとする
-1. 共変: Container<Animal> :> Container<Dog> とする。型引数の関係とジェネリック型の関係が同じなので共変という。
-1. 反変: Container<Animal> <: Container<Dog> とする。型引数の関係とジェネリック型の関係が逆転するので反変という。
-1. 双変: Container<Animal> :> Container<Dog> かつ Container<Animal> <: Container<Dog> とする。
+1. 不変: `Container<Animal>` と `Container<Dog>` の間には特になんの関係もないとする
+1. 共変: `Container<Animal>` :> `Container<Dog>` とする。型引数の関係とジェネリック型の関係が同じなので共変という。
+1. 反変: `Container<Animal>` <: `Container<Dog>` とする。型引数の関係とジェネリック型の関係が逆転するので反変という。
+1. 双変: `Container<Animal>` :> `Container<Dog>` かつ `Container<Animal>` <: `Container<Dog>` とする。
 
-不変の場合は型安全であり特に何も考えることはなくシンプルであるが、List<Animal> と List<Dog> を変換したりできないので不便である。
+不変の場合は型安全であり特に何も考えることはなくシンプルであるが、`List<Animal>` と `List<Dog>` を変換したりできないので不便である。
 双変の場合も考え方はシンプルであるが、型安全性がなくなってしまう。
 ここで共変と反変の関係について考えてみる。
 
