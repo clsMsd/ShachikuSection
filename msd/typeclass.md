@@ -544,7 +544,7 @@ class Point2D: Eq {
       self.y = y
    }
 
-   func isEqual(_ another: Self) -> Bool {
+   func isEqual(_ another: Point2D) -> Bool {
       return self.x == another.x && self.y == another.y
    }
 }
@@ -558,7 +558,7 @@ class Point3D: Eq {
       self.y = y
    }
 
-   func isEqual(_ another: Self) -> Bool {
+   func isEqual(_ another: Point3D) -> Bool {
       return self.x == another.x && self.y == another.y && self.z == another.z
    }
 }
