@@ -154,6 +154,42 @@ func max<T: Comparable>(_ a: T, _ b: T) -> T {
 ### 既存の型に後付できる
 インターフェースの場合、ある型があるインターフェースを実装するには、その型の宣言時にそのインターフェースを実装することを宣言しなくてはならない。
 
+```csharp
+interface Animal {
+   void cry();
+}
+
+class Dog {
+   public void cry() {
+      Sytem.out.print("Baw");
+   }
+}
+
+(new Dog()).cry()
+
+class Dog2 extends Dog implements Animal {
+
+}
+
+interface IEquatable {
+   bool equal(IEquatable eq)
+}
+
+class Complex: IEquatable {
+   int re;
+   int im;
+   Complex(int re, int re) {
+      this.re = re
+      this.im = im
+   }
+
+   public bool equal(IEquatable eq) {
+      return this.re == this.re &&
+   }
+}
+```
+
+
 ### 型クラスの方が表現力が強い
 インターフェースが表現できる型の制約は、その型がどのようなメソッド(とプロパティ)を持っているかということだけである。
 型クラスの場合、どのような関数の引数になれるかという制約を表すことができる。
@@ -181,7 +217,7 @@ protocol Eq {
    static func equal(lhs: Self, rhs: Self) -> Bool
 }
 
-extension Int: Eq {
+extension Int {
    static func equal(lhs: Int, rhs: Int) -> Bool {
       return lhs == rhs
    }
@@ -244,7 +280,6 @@ TypeScriptには言語機能としての機能は無いが、型クラス相当�
 class Point2D {
    constructor(public x: number, public y: number) {}
 }
-
 class Point3D {
    constructor(public x: number, public y: number, public z: number) {}
 }
@@ -253,11 +288,18 @@ class Point3D {
 const equal = <T>(lhs: T, rhs: T, equalImpl: (a: T, b: T) => Bool): Bool => equalImpl(lhs, rhs);
 
 // equalの実装
-const equalPoint2D = (a: Point2D, b: Point2D): boolean => a.x == b.x && a.y == b.y
-const equalPoint3D = (a: Point3D, b: Point3D): boolean => a.x == b.x && a.y == b.y && a.z == b.z
+const Point2DEqualImpl = (a: Point2D, b: Point2D): boolean => a.x == b.x && a.y == b.y
+const Point3DEqualImpl = (a: Point3D, b: Point3D): boolean => a.x == b.x && a.y == b.y && a.z == b.z
 
-console.log(equal(new Point2D(1, 1), new Point2D(1, 1), equalPoint2D));
-console.log(equal(new Point3D(1, 1, 1), new Point3D(1, 1, 2), equalPoint3D));
+const p1 = new Point2D(1, 1)
+const p2 = new Point2D(1, 1)
+
+console.log(equal(p1, p2, Point2DEqualImpl))
+
+const p3 = new Point3D(1, 1, 1)
+const p4 = new Point3D(1, 1, 2)
+
+console.log(equal(p3, p4, Point3DEqualImpl))
 ```
 
 このようにすれば、`equal`の実装(`equalImpl`)を持たない型の変数を引数に渡すことはできないので、
@@ -286,19 +328,19 @@ const equal = <T>(eq: Eq<T>) => (lhs: T, rhs: T) => eq(lhs, rhs)
 const p1 = new Point2D(1, 1)
 const p2 = new Point2D(1, 1)
 
-if (equal(Point2DEq)(p1, p2)) console.log("Equal")
+console.log(equal(Point2DEq)(p1, p2))
 
 const p3 = new Point3D(1, 1, 1)
 const p4 = new Point3D(1, 1, 2)
 
-if (equal(Point3DEq)(p3, p4)) console.log("Equal")
+console.log(equal(Point3DEq)(p3, p4))
 ```
 
 この方法の欠点として、引数として明示的に型ごとに違う関数の実装を渡さなくてはならないのでポリモーフィックではないという点がある。  
 
 ## Scalaで型クラス
 scalaにはimplicit parameter(暗黙の引数)という機能がある。  
-これは、関数呼び出しの際にimplicitが指定された引数があり、スコープ内にimplicit指定された変数・オブジェクトがある場合に  
+これは、関数呼び出しの際にimplicitが指定された引数があり、スコープ内にimplicit指定された変数・オブジェクトがあり両者の型が一致する場合に  
 その変数・オブジェクトが暗黙的に関数の引数として渡される、というものである。
 見るからにヤバそうな機能であるが、これを使うとHaskellと同等の型クラスの機能を実現することができる。
 
@@ -315,12 +357,6 @@ object traitest {
    implicit object Point2DEq extends Eq[Point2D] {
       def equal(lhs: Point2D, rhs: Point2D): Boolean = {
          lhs.x == rhs.x && lhs.y == rhs.y
-      }
-   }
-
-   object Point2DEq2 extends Eq[Point2D] {
-      def equal(lhs: Point2D, rhs: Point2D): Boolean = {
-         lhs.x == rhs.x
       }
    }
 
@@ -358,7 +394,7 @@ object traitest {
 
 ## Haskell流の型クラスとTypeScript流の型クラスの違い
 (便宜的にTypeScriptで例示した型クラスの実装方法をTypeScript流の型クラスと呼ぶ)  
-Haskell流の型クラスの欠点として、一つの型に対して一つの関数の組み合わしか型クラスになれないということが挙げられる。  
+Haskell流の型クラスの欠点として、一つの型に対して一つの関数の組み合わせしか型クラスになれないということが挙げられる。  
   
 例えば、モノイドを表す型クラスを作ったとする。
 
@@ -408,8 +444,141 @@ const NumMultMonoid: Monoid<number> = {
 const mappend = <T>(m: Monoid<T>) => (a: T, b: T) => m.mappend(a, b)
 ```
 
+scalaの場合は、基本的にはデフォルトの実装を使いながら、必要に応じて個々の実装を使うということができる。
+
+```scala
+trait Monoid [T] {
+   def mempty(): T
+   def mappend(lhs: T, rhs: T): T
+}
+
+object traitest {
+   implicit object IntAddMonoid extends Monoid[Int] {
+      def mempty(): Int = 0
+      def mappend(lhs: Int, rhs: Int): Int = lhs + rhs
+   }
+
+   object IntMultMonoid extends Monoid[Int] {
+      def mempty(): Int = 1
+      def mappend(lhs: Int, rhs: Int): Int = lhs * rhs
+   }
+
+   def mappend[T](lhs: T, rhs: T)(implicit monoid: Monoid[T]): T = {
+      monoid.mappend(lhs, rhs)
+   }
+
+   def main(args: Array[String]): Unit = {
+      println(mappend(1, 2))
+      println(mappend(1, 2)(IntMultMonoid))
+   }
+}
+```
+
+## Haskell流の型クラスとTypeScript流の型クラスの違い
+(便宜的にTypeScriptで例示した型クラスの実装方法をTypeScript流の型クラスと呼ぶ)  
+Haskell流の型クラスの欠点として、一つの型に対して一つの関数の組み合わしか型クラスになれないということが挙げられる。  
+  
+例えば、モノイドを表す型クラスを作ったとする。
+
+```haskell
+class Monoid a where
+   mempty :: a
+   mappend:: a -> a -> a
+```
+
+次に、Intをモノイドにしようと考える。  
+Intは足し算と掛け算についてモノイドであるが、このままではその両方をモノイドにすることができない。
+
+```haskell
+-- こういうことはできない
+instance Monoid Int where
+   mempty = 0
+   mappend x y = x + y
+
+instance Monoid Int where
+   mempty = 1
+   mappend x y = x * y
+```
+
+これはHaskellの型クラスがオーバーロード解決の仕組みを併せ持っているからである。  
+
+一方、TypeScript流の型クラスでは、関数呼び出しがポリモーフィックでない代わりに、1つの型に対して複数の関数の組み合わせを同じ型クラスにすることができる。
+
+```typescript
+type Monoid<T> = {
+   mempty: T
+   mappend: (a: T, b: T) => T
+}
+
+// 一つの型に対して、複数の演算をモノイドにできる
+// (number, +) のモノイド
+const NumAddMonoid: Monoid<number> = {
+   mempty: 0,
+   mappend: (a: number, b: number): number => a + b 
+}
+
+// (number, *) のモノイド
+const NumMultMonoid: Monoid<number> = {
+   mempty: 1,
+   mappend: (a: number, b: number): number => a * b 
+}
+
+const mappend = <T>(m: Monoid<T>) => (a: T, b: T) => m.mappend(a, b)
+```
 
 ## Selfを含むprotocolの落とし穴
+swiftではメソッドの引数・戻り値の型に`Self`を使っているprotocolは型として使うことができない(もう1つ、関連型を使っているprotocolも型となれない)。
+端的にいうと、interfaceと同等の機能しか使っていないprotocolは型として使えるが、そうでないprotocolは型として使えないと考えてよい。
+
+次のようなprotocolと、protocolに適合した型があったとする。
+```swift
+protocol Eq {
+   func isEqual(_ another: Self) -> Bool
+}
+
+class Point2D: Eq {
+   var x: Int
+   var y: Int
+   init(x: Int, y: Int) {
+      self.x = x
+      self.y = y
+   }
+
+   func isEqual(_ another: Self) -> Bool {
+      return self.x == another.x && self.y == another.y
+   }
+}
+
+class Point3D: Eq {
+   var x: Int
+   var y: Int
+   var z: Int
+   init(x: Int, y: Int) {
+      self.x = x
+      self.y = y
+   }
+
+   func isEqual(_ another: Self) -> Bool {
+      return self.x == another.x && self.y == another.y && self.z == another.z
+   }
+}
+```
+
+ここでもし`Eq`が型として使えたとすると、次のようなコードが書けることになる。
+
+```swift
+var p1: Eq = Point2D(1, 1)
+var p2: Eq = Point3D(1, 1, 1)
+p1.isEqual(p2)
+```
+
+結局のところ、interfaceとはクラス継承によるサブタイピングの特殊なケースであって、
+「あるinterfaceを実装した全てクラスに対して、同じ形のメソッド呼び出しが可能である」ことを保証するものである。
+(`Self`を含む)protocolのように、個々のクラスの実装によってメソッドの引数や戻り値の型を変えるのは
+interfaceによる多相性の仕組みとは真っ向から対立するものである。
+
+同様の理由で、`Self`を含むprotocolに適合したクラスは継承に制限がかかる。
+`Eq`プロトコルに適合した`Point2D`クラスと`Point2D`を継承した`ColoredPoint2D`クラスがあるとする。
 
 ```swift
 protocol Eq {
@@ -430,9 +599,7 @@ extension Point2D: Eq {
         return self.x == another.x && self.y == another.y
     }
 }
-```
 
-```swift
 class ColoredPoint2D: Point2D {
     var color: Int
     init (x: Int, y: Int, color: Int) {
@@ -442,12 +609,99 @@ class ColoredPoint2D: Point2D {
 }
 ```
 
+`ColoredPoint2D`も`Eq`に適合させようとして、次のようなコードを書くと、
+`Redundant conformance of 'ColoredPoint2D' to protocol Eq` というエラーメッセージが表示される。
 ```swift
 extension ColoredPoint2D: Eq {
     func isEqual(_ another: ColoredPoint2D) -> Bool {
         return super.isEqual(another) && self.color == another.color
     }
 }
+```
+
+要するに`ColoredPoint2D`は`Eq`に適合した`Point2D`を継承しているので、既に`Eq`に適合しているのである。
+しかし、ここで`ColoredPoint2D`の等値性判定のために`Point2D`の`isEqual`メソッドを使うことは妥当だろうか?
+`Point2D`の`isEqual`メソッドは座標での等値性判定しか行っていないので、`color`が違う`ColoredPoint2D`のインスタンスも同じものとみなされてしまう。
+
+では`ColoredPoint2D`の等値性判定のために`isEqual`をオーバーライドすればよいのでは?と思うかもしれない。
+```swift
+class ColoredPoint2D: Point2D {
+    var color: Int
+    init (x: Int, y: Int, color: Int) {
+        self.color = color
+        super.init(x: x, y: y)
+    }
+
+    override func isEqual(_ another: ColoredPoint2D) -> Bool {
+        return super.isEqual(another) && self.color == another.color
+    }
+}
+```
+しかし、これでは今度は`Method does not override any method from its superclass`というエラーメッセージが表示される。
+`func isEqual(_ another: ColoredPoint2D) -> Bool`と`func isEqual(_ another: Point2D) -> Bool` は
+メソッドの引数の型が違う(共変になっている)ので、メソッドをオーバーライドしたものとみなされていないのである。
+
+一般に親クラスのメソッドを子クラスでオーバーロードする場合には、引数の型は反変、戻り値の型は共変になっている必要がある
+(関数の型の部分型関係のときと同じ考え)。
+子クラスは親クラスの部分型になっていなければならない(リスコフの置換原則)、つまりプログラム中で親クラスのインスタンスが
+入っている箇所は子クラスのインスタンスを入れても正しく動作する必要がある。
+しかし、メソッドのオーバーロード時に上記した以外の型の変性を認めると、実行時に型エラーを起こすコードがコンパイルに通ってしまう。
+
+```swift
+// もしもswiftでメソッドの引数の共変性が認められていたら…
+class Point2D {
+   // 省略
+   func isEqual(_ another: Point2D) -> Bool {
+        return self.x == another.x && self.y == another.y
+    }
+}
+
+class ColoredPoint2D: Point2D {
+   // 省略
+   override func isEqual(_ another: ColoredPoint2D) -> Bool {
+        return super.isEqual(another) && self.color == another.color
+   }
+}
+
+var p1: Point2D = Point2D(1, 1) 
+var p2: Point2D = ColoredPoint2D(1, 1, 1)
+
+print(p2.isEqual(p1)) // Point2Dにcolorというプロパティは無いので実行時に型エラーが起きる
+```
+
+実際の言語で継承時のメソッドにどのような型の変性が認められるからはまちまちである
+(Java, Swiftでは上記の変性が認められている。C#ではメソッドの型は不変である。Eiffelでは引数の共変性が認められており型安全では無くなっている)。
+メソッドの型指定に`Self`を含むprotocolに適合したクラスは、クラスを継承した際にこのような型の変性を満たすことができなくなるので
+継承との相性が悪いのである。
+
+このような問題は動的型付け言語でも顕在化し、あまり考えずに次のようなpythonのコードを書くと実行時型エラーが発生する
+(まあ動的型付け言語は問題ばかりなのでこれくらは大した問題ではないかもしれない)
+
+```python
+class Point2D:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def equals(self, another):
+        return self.x == another.x and
+               self.y == another.y
+
+class ColoredPoint2D(Point2D):
+    def __init__(self, x, y, c):
+        self.x = x
+        self.y = y
+        self.c = c
+
+    def equals(self, another):
+        return self.x == another.x and
+               self.y == another.y and
+               self.c == another.c
+
+p1 = Point2D(1, 1)
+p2 = ColoredPoint2D(1, 1, "RED")
+print(p1.equals(p2)) # => true
+print(p2.equals(p1)) # 実行時エラー
 ```
 
 ## 参考資料
