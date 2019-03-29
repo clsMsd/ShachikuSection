@@ -45,8 +45,16 @@ Boot  grub  Microsoft
 ```
 UEFIアプリケーションはEFIファームウェアアーキテクチャ対応してコンパイルされている必要がある。
 
-## VMでUEFIのテスト
-[OVMF · tianocore/tianocore.github.io Wiki · GitHub](https://github.com/tianocore/tianocore.github.io/wiki/OVMF)
+## VMでUEFIの起動
+毎回実機でUEFIを確認するのは大変なので、VMでUEFI環境を構築する。
+
+> OVMF is an EDK II based project to enable UEFI support for Virtual Machines. OVMF contains sample UEFI firmware for QEMU and KVM.
+> 
+> [OVMF · tianocore/tianocore.github.io Wiki · GitHub](https://github.com/tianocore/tianocore.github.io/wiki/OVMF)
+
+OVMFはVM上で動作するUEFIファームウェアで、これをqemuで起動する。
+
+![](./img/ss0.jpg)
 
 ## UEFI shell
 
@@ -55,3 +63,4 @@ UEFIアプリケーションはEFIファームウェアアーキテクチャ対�
 ## 参考文献
 - [UEFI Forum](https://uefi.org/)
 - [UEFI - ArchWiki - Arch Linux](https://wiki.archlinux.jp/index.php/Unified_Extensible_Firmware_Interface)
+- [EDK II で UEFI アプリケーションを作る — osdev-jp](https://osdev-jp.readthedocs.io/ja/latest/2017/create-uefi-app-with-edk2.html)
