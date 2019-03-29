@@ -54,11 +54,37 @@ UEFIアプリケーションはEFIファームウェアアーキテクチャ対�
 
 OVMFはVM上で動作するUEFIファームウェアで、これをqemuで起動する。
 
+```
+qemu-system-x86_64 \                                                                                            
+    -drive if=pflash,format=raw,file=./OVMF_CODE.fd,readonly \                                                  
+    -drive if=pflash,format=raw,file=./OVMF_VARS.fd
+```
+
+VMを起動させるとUEFIメニュー画面が表示される。
+
 ![](./img/ss0.jpg)
 
 ## UEFI shell
+> UEFI シェルは、uefi ブートローダを含む、uefi アプリケーションを起動するためのファームウェア用のシェル/ターミナルです。それとは別に、シェルは、システムやファームウェアのメモリーマップ (memmap) などの様々な情報を取得したり、ブートマネージャ変数を変更したり (bcfg)、パーティションプログラムを実行したり (diskpart)、uefi ドライバをロードしたり、テキストファイルを編集したり (edit) するのにも使われます。
+> 
+> [UEFI > UEFI シェル - ArchWiki - Arch Linux](https://wiki.archlinux.jp/index.php/Unified_Extensible_Firmware_Interface#UEFI_.E3.82.B7.E3.82.A7.E3.83.AB)
 
-## UEFIアプリケーション
+先ほど起動したVMのUEFIメニューからUEFI Shellを実行すると次のような画面が表示される。
+
+```
+UEFI Interactive Shell v2.2
+EDK II
+UEFI v2.70 (EDK II, 0x00010000)
+Mapping table
+     BLK0: Alias(s):
+          PciRoot(0x0)/Pci(0x1,0x0)/Floppy(0x0)
+     BLK1: Alias(s):
+          PciRoot(0x0)/Pci(0x1,0x0)/Floppy(0x1)
+     BLK2: Alias(s):
+          PciRoot(0x0)/Pci(0x1,0x1)/Ata(0x0)
+Press ESC in 1 seconds to skip startup.nsh or any other key to continue.
+Shell>
+```
 
 ## 参考文献
 - [UEFI Forum](https://uefi.org/)
