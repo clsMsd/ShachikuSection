@@ -54,10 +54,20 @@ UEFIアプリケーションはEFIファームウェアアーキテクチャ対�
 
 OVMFはVM上で動作するUEFIファームウェアで、これをqemuで起動する。
 
+次のようなファイル構成のディレクトリで`qemu-system-x86_64`から`OVMF_*`を読み込む。
 ```
-qemu-system-x86_64 \                                                                                            
-    -drive if=pflash,format=raw,file=./OVMF_CODE.fd,readonly \                                                  
-    -drive if=pflash,format=raw,file=./OVMF_VARS.fd
+% ls
+image  OVMF_CODE.fd  OVMF_VARS.fd  qemu.sh
+```
+`qemu.sh`の中身。
+```
+#!/bin/sh
+
+qemu-system-x86_64 \
+    -drive if=pflash,format=raw,file=./OVMF_CODE.fd,readonly \
+    -drive if=pflash,format=raw,file=./OVMF_VARS.fd \
+    -hda fat:rw:image \
+    $@
 ```
 
 VMを起動させるとUEFIメニュー画面が表示される。
@@ -76,11 +86,15 @@ UEFI Interactive Shell v2.2
 EDK II
 UEFI v2.70 (EDK II, 0x00010000)
 Mapping table
+      FS0: Alias(s):HD1a1:;BLK3:
+          PciRoot(0x0)/Pci(0x1,0x1)/Ata(0x0)/HD(1,MBR,0xBE1AFDFA,0x3F,0xFBFC1)
      BLK0: Alias(s):
           PciRoot(0x0)/Pci(0x1,0x0)/Floppy(0x0)
      BLK1: Alias(s):
           PciRoot(0x0)/Pci(0x1,0x0)/Floppy(0x1)
      BLK2: Alias(s):
+          PciRoot(0x0)/Pci(0x1,0x1)/Ata(0x0)
+     BLK4: Alias(s):
           PciRoot(0x0)/Pci(0x1,0x1)/Ata(0x0)
 Press ESC in 1 seconds to skip startup.nsh or any other key to continue.
 Shell>
