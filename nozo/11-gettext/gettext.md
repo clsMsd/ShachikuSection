@@ -7,25 +7,36 @@
 > 
 > [gettext - Wikipedia](https://ja.wikipedia.org/wiki/Gettext)
 
-## gettextの利用
+## gettext開発環境の構築
 
-MinGWでは`mingw-developer-toolkit-bin`パッケージにgettextが含まれている。
+Windows10でgettextを利用するときはMSYS2が一番うまく行った。
+
+- MSYS2 http://repo.msys2.org/distrib/x86_64/msys2-x86_64-20180531.exe
+
+MSYS2で次のパッケージをインストールする。
+
+```
+$ pacman -S gcc make gettext-devel
+```
+
+## プログラム
 
 ```c
 #include <stdio.h>
-#include <locale.h>
 #include <libintl.h>
+#include <locale.h>
 
-#define _(String) gettext (String)
+#define _(STRING) gettext(STRING)
 
-int main() {
-    setlocale(LC_ALL, "");
-    bindtextdomain("test", ".");
-    textdomain("test");
+int main()
+{
+  setlocale (LC_ALL, "");
+  bindtextdomain ("hello", ".");
+  textdomain ("hello");
 
-    printf(_("hello world.\n"));
+  printf(_("Hello World\n"));
 
-    return 0;
+  return 0;
 }
 ```
 
@@ -70,4 +81,7 @@ msgstr ""
 ```
 
 ## 参考文献
-- gettext - GNU Project - Free Software Foundation (FSF), https://www.gnu.org/software/gettext/manual/index.html
+- [A Quick Gettext Tutorial](http://www.labri.fr/perso/fleury/posts/programming/a-quick-gettext-tutorial.html)
+
+- [gettext - GNU Project - Free Software Foundation (FSF)](https://www.gnu.org/software/gettext/manual/index.html)
+
