@@ -58,7 +58,7 @@ $ pacman -S gcc make gettext-devel
 int main()
 {
   setlocale (LC_ALL, "");
-  bindtextdomain ("hello", ".");
+  bindtextdomain ("hello", "./locale");
   textdomain ("hello");
 
   printf(_("Hello World\n"));
@@ -100,7 +100,7 @@ msgid "Hello World\n"
 msgstr ""
 ```
 
-テンプレートファイルを編集する。
+`.pot`ファイルを編集する。
 
 ```diff
 $ diff -u hello.pot.orig hello.pot
@@ -120,11 +120,11 @@ $ diff -u hello.pot.orig hello.pot
 `.pot`から日本語を対象に`.po`を生成する。
 
 ```
-$ msginit --input=locale/hello.pot --locale=ja --output=locale/ja/hello.po
+$ msginit --input=locale/hello.pot --locale=ja --output=locale/ja/LC_MESSAGES/hello.po
 ```
 
 ```
-$ cat locale/ja/hello.po 
+$ cat locale/ja/LC_MESSAGES/hello.po 
 # Japanese translations for PACKAGE package.
 # Copyright (C) 2019 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
@@ -150,6 +150,35 @@ msgid "Hello World\n"
 msgstr ""
 ```
 
+`.po`ファイルを編集する。
+
+```diff
+$ diff -u hello.po.orig hello.po
+--- hello.po.orig       2019-04-21 04:30:39.750894167 +0000
++++ hello.po    2019-04-21 04:31:09.981770801 +0000
+@@ -20,4 +20,4 @@
+ #: hello.c:13
+ #, c-format
+ msgid "Hello World\n"
+-msgstr ""
++msgstr "ハロー・ワールド\n"
+```
+
+`.po`から日本語を対象に`.mo`を生成する。
+
+```
+$ msgfmt --output-file=locale/ja/LC_MESSAGES/hello.mo locale/ja/LC_MESSAGES/hello.po
+```
+
+コンパイルして、`LANG`の設定を日本語にしたとき`.po`で翻訳したメッセージが表示される。
+
+```
+$ gcc -o hello hello.c -lintl
+$ ./hello
+Hello World
+$ LANG=ja_JP.UTF-8 ./hello
+ハロー・ワール
+```
 
 ## 参考文献
 - [A Quick Gettext Tutorial](http://www.labri.fr/perso/fleury/posts/programming/a-quick-gettext-tutorial.html)
