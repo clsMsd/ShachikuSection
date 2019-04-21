@@ -7,7 +7,7 @@
 int main()
 {
   setlocale (LC_ALL, "");
-  bindtextdomain ("hello", ".");
+  bindtextdomain ("hello", "./locale");
   textdomain ("hello");
 
   printf(_("Hello World\n"));
