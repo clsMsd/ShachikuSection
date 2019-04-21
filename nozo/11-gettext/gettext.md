@@ -37,6 +37,17 @@ $ pacman -S gcc make gettext-devel
 
 ## プログラム
 
+ディレクトリ構成を以下のようにする。
+
+```
+|--hello.c
+|--locale
+   |--ja
+      |--LC_MESSAGES
+```
+
+翻訳対象のプログラムは次のように記述する。
+
 ```c
 #include <stdio.h>
 #include <libintl.h>
@@ -56,21 +67,14 @@ int main()
 }
 ```
 
-```
-$ gcc -o test main.c -lintl
-$ ./test.exe
-hello world.
-```
-
-`pot`ファイルの作成。
+はじめに`.pot`ファイルを生成する。
 
 ```
-$ xgettext -o messages.pot --keyword=_ main.c
+$ xgettext --keyword=_ --language=C --add-comments --sort-output -o locale/hello.pot hello.c
 ```
 
-`messags.pot`
-
 ```
+$ cat locale/hello.pot
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
@@ -81,7 +85,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-14 18:01+0900\n"
+"POT-Creation-Date: 2019-04-21 04:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -90,11 +94,62 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:12
+#: hello.c:13
 #, c-format
-msgid "hello world.\n"
+msgid "Hello World\n"
 msgstr ""
 ```
+
+テンプレートファイルを編集する。
+
+```diff
+$ diff -u hello.pot.orig hello.pot
+--- hello.pot.orig      2019-04-21 04:10:00.368942282 +0000
++++ hello.pot   2019-04-21 04:10:28.722640351 +0000
+@@ -14,7 +14,7 @@
+ "Language-Team: LANGUAGE <LL@li.org>\n"
+ "Language: \n"
+ "MIME-Version: 1.0\n"
+-"Content-Type: text/plain; charset=CHARSET\n"
++"Content-Type: text/plain; charset=UTF-8\n"
+ "Content-Transfer-Encoding: 8bit\n"
+ 
+ #: hello.c:13
+```
+
+`.pot`から日本語を対象に`.po`を生成する。
+
+```
+$ msginit --input=locale/hello.pot --locale=ja --output=locale/ja/hello.po
+```
+
+```
+$ cat locale/ja/hello.po 
+# Japanese translations for PACKAGE package.
+# Copyright (C) 2019 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <nozo@fluorite.c.isnozo-191211.internal>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-04-21 04:07+0000\n"
+"PO-Revision-Date: 2019-04-21 04:17+0000\n"
+"Last-Translator:  <nozo@fluorite.c.isnozo-191211.internal>\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: hello.c:13
+#, c-format
+msgid "Hello World\n"
+msgstr ""
+```
+
 
 ## 参考文献
 - [A Quick Gettext Tutorial](http://www.labri.fr/perso/fleury/posts/programming/a-quick-gettext-tutorial.html)
