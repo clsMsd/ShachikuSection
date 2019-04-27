@@ -18,7 +18,7 @@ NewtonというPDA向けのプログラミング言語として採用される�
 - 多重継承
 - 多重ディスパッチ
 - マクロあり
-- TIOBE Index Top 50 圏外
+- TIOBE Index Top 100 圏外
 
 ## インストール
 https://opendylan.org/download/index.html から各OS向けのコンパイラをダウンロードできる。
