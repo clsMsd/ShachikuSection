@@ -219,13 +219,13 @@ format-out("%s\n", exist?);
 
 ```javascript
 const find = (arr, target, breakf) => {
-	for(let elem of arr) {
-		if (target === elem) {
-			breakf(true);
-			return;
-        }
-    }
-	breakf(false)
+   for(let elem of arr) {
+      if (target === elem) {
+         breakf(true);
+         return;
+      }
+   }
+   breakf(false)
 }
 
 // JavaScriptでは、「breakf を実行したら制御を戻して引数を取り出す」処理が存在しないので、次のようには書けない。
