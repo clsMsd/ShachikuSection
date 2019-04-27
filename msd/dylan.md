@@ -18,7 +18,7 @@ NewtonというPDA向けのプログラミング言語として採用される�
 - 多重継承
 - 多重ディスパッチ
 - マクロあり
-- TIOBE Index Top 100 圏外
+- TIOBE Index Top 50 圏外
 
 ## インストール
 https://opendylan.org/download/index.html から各OS向けのコンパイラをダウンロードできる。
@@ -219,13 +219,13 @@ format-out("%s\n", exist?);
 
 ```javascript
 const find = (arr, target, breakf) => {
-   for(let elem of arr) {
-      if (target === elem) {
-         breakf(true);
-         return;
-      }
-   }
-   breakf(false)
+	for(let elem of arr) {
+		if (target === elem) {
+			breakf(true);
+			return;
+        }
+    }
+	breakf(false)
 }
 
 // JavaScriptでは、「breakf を実行したら制御を戻して引数を取り出す」処理が存在しないので、次のようには書けない。
@@ -287,6 +287,29 @@ define function main(name :: <string>, arguments :: <vector>)
 end function main;
 ```
 
+ただし、Schemeと違ってDylanの継続は無限エクステントではないので、スコープを抜けてから継続を再実行することはできない。
+
+```dylan
+define variable cont :: <function> = method() end;
+define variable counter :: <integer> = 0;
+
+define functino cont-test()
+   let a = block(break)
+      cont := break;
+      break(counter)
+   end;
+   print(a);
+   counter := counter + 1;
+end;
+
+define function main(name :: <string>, arguments :: <vector>)
+   cont-test();
+   if (counter < 5) 
+      cont(counter); // cont の参照先の break は cont-test から抜けると消えるので、ここで contを再実行することはできない(セグフォる)
+   end;
+end function main;
+```
+
 ## クラス
 
 ### 定義
@@ -341,7 +364,289 @@ p.move(1, 1) // <- このようには書けない
 
 この制約は不便ではあるが、複数のレシーバーに対してメソッド呼び出しを行う多重ディスパッチができるという利点もある(詳細は後述)。
 
-### Todo: 継承と多重継承と総称関数と多重ディスパッチについて書く
+Todo: 継承と多重継承と総称関数と多重ディスパッチについて書く
+
+### 継承
+
+```
+define class <colored-point-2d> (<point-2d>)
+   slot color :: <string>,
+      required-init-keyword: color:;
+end;
+```
+
+```
+define method to-string(point :: <point-2d>) => (res :: <string>)
+   let x-str = integer-to-string(point.x);
+   let y-str = integer-to-string(point.y);
+   concatenate("x: ", x-str, ", y: ", y-str);
+end;
+
+define method to-string(point :: <colored-point-2d>) => (res :: <string>)
+   let x-str = integer-to-string(point.x);
+   let y-str = integer-to-string(point.y);
+   concatenate(next-method(), ", color: ", point.color);
+end;
+```
+
+### 多重ディスパッチ
+多重ディスパッチとは、複数の(引数の)オブジェクトの実行時の型に応じてメソッドの動的ディスパッチを行うことである。
+
+例えば、図形を表すクラスを作ったとする。
+```
+define abstract class <shape> (<object>)
+end;
+
+define generic area(shape :: <shape>) => (res :: <number>);
+
+define class <rectangle> (<shape>)
+   slot width :: <number>,
+      required-init-keyword: width:;
+   slot height :: <number>,
+      required-init-keyword: height:;
+end;
+
+define method area(rect :: <rectangle>) => (res :: <number>)
+   rect.width * rect.height
+end;
+
+define class <circle> (<shape>)
+   slot radius :: <number>,
+      required-init-keyword: radius:;
+end;
+
+define method area(circle :: <circle>) => (res :: <number>) 
+   circle.radius * circle.radius * 3.14
+end;
+```
+
+ここで、ある図形が別の図形を含むかどうかを判定するメソッドを付け足したくなったとする。
+```
+define generic can-contain(s1 :: <shape>, s2 :: <shape>) => (res :: <boolean>);
+
+define method can-contain(s1 :: <rectangle>, s2 :: <rectangle>) => (res :: <boolean>);
+   s1.width > s2.width & s1.height > s2.height
+end;
+
+define method can-contain(s1 :: <circle>, s2 :: <circle>) => (res :: <boolean>)
+   s1.radius > s2.radius
+end;
+
+define method can-contain(s1 :: <rectangle>, s2 :: <circle>) => (res :: <boolean>)
+   s1.height / 2 > s2.radius & s1.width / 2 > s2.radius
+end;
+
+define method can-contain(s1 :: <circle>, s2 :: <rectangle>) => (res :: <boolean>)
+   s1.radius > (s2.height + s2.width) / 2
+end;
+```
+
+こうすることで、実行時の引数の型に応じてメソッドを動的ディスパッチすることができる。
+
+JavaやC#のような普通のOOP言語では、メソッドのレシーバーの実行時の型に応じた分岐は自動的に行われるが、
+メソッドの引数についてはコンパイル時にどのメソッドを呼ぶかが決定されるため、引数の実行時の型に応じた分岐は(リフレクションなどを使わないと)できない。
+メソッドのレシーバは1つしかないので、複数のオブジェクトの実行時の型に応じてメソッドの動的ディスパッチを行うことはできないことになる。
+
+```csharp
+class Base {
+   public virtual void say() { Console.WriteLine("Base"); }
+}
+
+class Derived: Base {
+   public override void say() { Console.WriteLine("Derived"); }
+}
+
+class Program {
+   static void say(Base b) {
+      Console.WriteLine("Base (static)");
+   }
+
+   static void say(Derived d) {
+      Console.WriteLine("Derived (static)");
+   }
+   public static void Main(string[] args) {
+      Base b1 = new Base();
+      b1.say(); //=> Base
+      say(b1);  //=> Base (static)
+      Derived d1 = new Derived();
+      d1.say(); //=> Derived
+      say(d1);  //=> Derived (static)
+
+      Base b2 = new Derived();
+      b2.say(); //=> Derived
+      say(b2);  //=> Base (static)
+   }
+}
+```
+
+C#でDylanと同じことをするなら、基本的に自前で型に応じた分岐を書くことになる。
+```csharp
+abstract class Shape {
+   public abstract double area(); // 面積を返すメソッド
+}
+class Rectangle: Shape {
+   public double height;
+   public double width;
+
+   public Rectangle(double height, double width) {
+      this.height = height;
+      this.width = width;
+   }
+}
+class Circle: Shape {
+   public double radius;
+   public Circle(double radius) {
+      this.radius = radius;
+   }
+}
+
+static class Utils {
+   // 型ごとの実装を用意しておく
+   public static bool canContain(Rectange s1, Rectangle s2) {
+      // 実装
+   }
+   public static bool canContain(Circle s1, Circle s2) {
+      // 実装
+   }
+   public static bool canContain(Rectange s1, Circle s2) {
+      // 実装
+   }
+   public static bool canContain(Circle s1, Rectangle s2) {
+      // 実装
+   }
+
+   public static bool canContain(Shape s1, Shape s2) {
+      // 実行時の方を調べて分岐する
+      if (s1 is Rectangle && s2 is Rectangle) {
+         return canContain((Rectangle)s1, (Rectangle)s2);
+      }
+      else if (s1 is Circle && s2 is Circle) {
+         return canContain((Circle)s1, (Circle)s2);
+      }
+      else if (s1 is Rectangle && s2 is Circle) {
+         return canContain((Rectangle)s1, (Circle)s2);
+      }
+      else if (s1 is Circle && s2 is Rectangle) {
+         return canContain((Circle)s1, (Rectangle)s2);
+      }
+
+      throw new ArgumentException("Invalid Shape.");
+   }
+}
+```
+
+ちなみにC#の場合は`dynamic`型にキャストするともっと楽に書ける。
+```csharp
+static class Utils {
+   public static bool canContain(Shape s1, Shape s2) {
+      return canContain((dynamic)s1, (dynamic)s2);
+   }
+}
+```
+
+## マクロ
+
+```dylan
+define macro inc!
+  { inc! (?place:variable) } =>
+    { ?place := ?place + 1; }
+end;
+
+let a = 1;
+int!(a);
+format-out("%d\n", a); // => 2
+
+define macro swap!
+  { swap! (?place1:variable, ?place2:variable) }
+  => {
+    let value = ?place1;
+    ?place1 := ?place2;
+    ?place2 := value;
+  }
+end;
+
+let b = 100;
+swap!(a, b);
+format-out("%d %d\n", a, b);
+```
+
+Dylanのマクロは基本的に意図しない変数補足を起こさない(このようなマクロを健全な(Hygienic)マクロあるいは衛生的なマクロと呼ぶ)。
+例えばC言語で次のようなswapマクロを実装したとする。
+
+```c
+#define SWAP(a, b) \ { typeof(a) tmp = a; a = b; b = tmp; } // typeofはgccの独自拡張機能で、コンパイル時に引数の型になる
+```
+
+このマクロに `tmp` という変数に対しては次のように展開され、正しく動作しない。
+
+```c
+int x = 1;
+int tmp = 10;
+
+SWAP(tmp, a);
+```
+↓
+```c
+int x = 1;
+int tmp = 10;
+// 読みやすいように適宜改行を入れている。
+{
+  typeof(tmp) tmp = x;
+  x = tmp;
+  tmp = tmp;
+}
+```
+
+このように、マクロ内で使用している変数名と、マクロに与える引数の変数名が衝突することを、(意図しない)変数補足という。
+C言語のマクロはこのような変数補足が起きてしまうため、マクロ内の変数には衝突しにくいユニークな長い変数名を使うか、そもそもマクロを使わないことが推奨される。
+Dylanのコンパイラはマクロ展開の際にこのような変数名の衝突を自動的に回避するようにしている。
+
+意図しない変数補足は危険であるが、一方で意図的に変数補足を起こすことで便利になるマクロもある。
+
+```c
+#define AIF(PRED, STATEMENT) { typeof(PRED) it = PRED; if (it) { STATEMENT; } }   
+
+int main() {
+   AIF(3, printf("%d\n", it));
+
+   return 0;
+}
+```
+このコードはプロプロセッサにより次のように変換される。
+
+```c
+int main() {
+   {
+      typeof(3) it = 3;
+      if (it) { printf("%d\n", it); }
+   };
+
+   return 0;
+}
+```
+よってプログラムを実行すると `3` が表示される。
+このようなマクロのことをアナフォリック(前方照応)マクロという。
+
+Dylanでも、変数補足を起こすマクロを書くこともできる。
+例えば上の`aif`マクロは、Dylanでは次のように書ける。
+```
+define macro aif
+   {
+      aif (?test:expression)
+         ?:body
+      end
+   } => {
+      let ?=it = ?test;
+      if (?=it)
+         ?body
+      end;
+   }
+end;
+
+aif(someCalculation())
+  format-out("%s\n", it); // => 2
+end;
+```
 
 ## とりあえず作ってみた
 Brainfucnkインタープリター
