@@ -294,16 +294,16 @@ x86系CPUでは16bit時代の名残からワード=2byte, ダブルワード=4by
 
 #### 算術系
 計算を行う。整数と浮動少数点数では使用する命令が異なる。
-`add`: `src`の値と`dest`の値の和を`dest`に書き込む。桁上りは無視される。  
+`add`: `src`の値と`dest`の値の和を`dest`に書き込む。桁上りは無視される。   
 `adc`: `src`の値と`dest`の値の和を`dest`に書き込む。桁上りがあった場合にはCF(キャリーフラグ)に1がセットされる。  
 `sub`: `src`の値と`dest`の値の差を`dest`に書き込む。  
 `mul`: `src`の値と`rax`の値を積を`rdx`と`rax`に書き込む(符号無し)。掛け算の場合は演算結果が最長でオペランドの2倍のbit長になるのでこうなっている。  
 `imul`: `src`の値と`rax`の値を積を`rdx`と`rax`に書き込む(符号あり)。  
 `div`:  
 `idiv`:  
-`neg`: オペランドの符号を反転する。
-`inc`: オペランドをインクリメントする。32bit時代は`add $1, src`より速かったが64bit化で遅くなり今ではほぼ使わない...らしい
-`dec`: オペランドをデクリメントする。上に同じ。
+`neg`: オペランドの符号を反転する。  
+`inc`: オペランドをインクリメントする。32bit時代は`add $1, src`より速かったが64bit化で遅くなり今ではほぼ使わない...らしい  
+`dec`: オペランドをデクリメントする。上に同じ。  
 
 `lea`: `src`の実行アドレスを計算し、`dest`に書き込む。(Load Effective Address の略)  
       例えば、`rbx`レジスタの値が`1000`であるとき、`lea $4(%rbx), %rax`を実行すると、`rax`レジスタに`1004`が書き込まれる。  
@@ -1040,18 +1040,17 @@ call	callf
 上のアセンブラをよく読むと分かるが、`callf`関数を呼び出すときの`rdi`レジスタの値は
 `print_and_inc`関数のアドレスではなく`rbp - 44`という値、つまりスタック領域のアドレスになっている。
 
-スタック領域にジャンプするとは？謎の即値の正体は？
-ここでGDB上の実行に続く！
-TODO: gdbでの実行
-  
+スタック領域にジャンプするとは？謎の即値の正体は？  
+ここでGDB上の実行に続く！  
   
   
   
   
 スタック上にジャンプするとかヤバイのではという感じだが、実はスタックに突っ込んでいた謎の即値は
 x86の機械語の命令列で次の命令を表している。
-- `count`のアドレスを(多分`r10`)レジスタに書き込む命令
-- `print_and_inc`へ無条件ジャンプする命令
+- `count`のアドレスを`r10`レジスタに書き込む命令  
+- `print_and_inc`へ無条件ジャンプする命令  
+
 つまり、スタック上にあらかじめ機械語の命令列を用意しておいてから、`callf`関数の引数としてスタック上のアドレスを渡し、
 その機械語の命令列を実行するということをしているのである(つまりC言語は動的言語だったんだよ！！！)。
 こうすれば、`callf`関数に手を加えることなく`main`関数と`print_adnd_inc`関数に細工をするだけで
@@ -1207,16 +1206,16 @@ x86アセンブリ言語での関数コール [https://vanya.jp.net/os/x86call/]
 低レイヤを知りたい人のためのCコンパイラ作成入門 [https://www.sigbus.info/compilerbook/]  
 x64 アセンブリ言語プログラミング [http://herumi.in.coocan.jp/prog/x64.html]  
 実践的低レイヤプログラミング [https://tanakamura.github.io/pllp/docs/]  
-IA32（x86）汎用命令一覧  [http://softwaretechnique.jp/OS_Development/Tips/IA32_instructions.html]
+IA32（x86）汎用命令一覧  [http://softwaretechnique.jp/OS_Development/Tips/IA32_instructions.html]  
 
 ### データのアラインメントについて
 Ｃプログラミング専門課程 4.3 アラインメント [http://www.pro.or.jp/~fuji/mybooks/cpro/cpro.4.3.1.html]  
 データ型のアラインメントとは何か，なぜ必要なのか？ [http://www5d.biglobe.ne.jp/~noocyte/Programming/Alignment.html]  
-x86-64 モードのプログラミングではスタックのアライメントに気を付けよう [http://uchan.hateblo.jp/entry/2018/02/16/232029]
+x86-64 モードのプログラミングではスタックのアライメントに気を付けよう [http://uchan.hateblo.jp/entry/2018/02/16/232029]  
 
 ### GCCの関数内関数とトランポリンについて
-gccの生成するトランポリンコードについて [https://yupo5656.hatenadiary.org/entry/20040602/p1]
-アセンブラを混ぜてコンパイルするとスタックが実行可になってしまう話 [https://qiita.com/rarul/items/e1920e7ae5d5a28eec03]
-兼雑記 2008-07-01 トランポリン [http://shinh.hatenablog.com/entry/20080701/1214845715]
-なんでも継続 [http://practical-scheme.net/docs/cont-j.html]
-Trampoline(computing) [https://en.wikipedia.org/wiki/Trampoline_(computing)]
+gccの生成するトランポリンコードについて [https://yupo5656.hatenadiary.org/entry/20040602/p1]  
+アセンブラを混ぜてコンパイルするとスタックが実行可になってしまう話 [https://qiita.com/rarul/items/e1920e7ae5d5a28eec03]  
+兼雑記 2008-07-01 トランポリン [http://shinh.hatenablog.com/entry/20080701/1214845715]  
+なんでも継続 [http://practical-scheme.net/docs/cont-j.html]  
+Trampoline(computing) [https://en.wikipedia.org/wiki/Trampoline_(computing)]  
