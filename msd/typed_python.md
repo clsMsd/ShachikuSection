@@ -364,8 +364,8 @@ class CoStack(typing.Generic[CoT]):
    def pop(self) -> CoT:
       return self.__items.pop()
 
-s1: CoStack[Animal] = CoStack()
-s2: CoStack[Cat] = s1 # 問題なし
+s1: CoStack[Cat] = CoStack()
+s2: CoStack[Animal] = s1 # 問題なし
 ```
 
 上のコードで`push`がコメントアウトされているが、これは共変の型変数をメソッドの引数の型に使っているためで、  
