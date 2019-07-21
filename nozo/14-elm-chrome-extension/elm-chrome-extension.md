@@ -139,7 +139,7 @@ updateも関数として定義される。型 `Msg -> Model -> Model` は、ボ�
     ]
 ```
 
-## Main
+### Main
 
 ```
 main = Browser.sandbox { init = init, view = view, update = update }
