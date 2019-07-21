@@ -35,17 +35,16 @@ import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 
-main : Program () Model Msg
 main = Browser.sandbox { init = init, view = view, update = update }
 
--- MODEL                                                                             
+-- MODEL
 
 type alias Model = { count : Int }
 
 init : Model
 init = { count = 0 }
 
--- VIEW                                                                              
+-- VIEW
 
 view : Model -> Html Msg
 view model =
@@ -55,7 +54,7 @@ view model =
     , button [ onClick Increment ] [ text "+" ]
     ]
 
--- UPDATE                                                                            
+-- UPDATE
 
 type Msg = Increment | Decrement
 
@@ -68,13 +67,45 @@ update msg model =
 
 ### Model
 
-このアプリケーションは状態をカウンタ
+```elm
+type alias Model = { count : Int }
+
+init : Model
+init = { count = 0 }
+```
+
+この例ではカウンタとして数値を保持したいので `Int` 型のフィールドを一つ持つレコードを `Model` として定義した。扱いたい値が増えたらこのレコードのフィールドを増やせば簡単に拡張できる。
+
+`Model` の初期値をinitで定義している。
 
 ### View
 
-viewは関数として定義される。関数の型 `Model -> Html Msg` が表すように、アプリケーションの状態を入力に受け取り、表示したいHTMLを返している。
+```elm
+view : Model -> Html Msg
+view model =
+  div []
+    [ button [ onClick Decrement ] [ text "-" ]
+    , div [] [ text (String.fromInt model.count) ]
+    , button [ onClick Increment ] [ text "+" ]
+    ]
+```
 
-HTMLのタグや属性もすべて関数として定義されていて、上の例は次のHTMLを表現している。
+viewは関数として定義される。関数の型 `Model -> Html Msg` が表すように、アプリケーションの状態 `Model` を入力に受け取り、表示したいHTMLのかたまり `Html Msg` を返している。`Msg` については後述するがこのHTMLのかたまりは `Msg` で定義されたメッセージを生成しうることを表している。
+
+HTMLのタグや属性もすべて関数として定義されている。
+
+```elm
+> div
+<function> : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+> button
+<function> : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+> text
+<function> : String -> Html msg
+> onClick
+<function> : msg -> Attribute msg
+```
+
+上の例では次のようなHTMLを生成する。
 
 ```html
 <div>
@@ -86,13 +117,52 @@ HTMLのタグや属性もすべて関数として定義されていて、上の�
 
 ### Update
 
-updateも関数として定義される。updateはHTMLのボタンが押されたときなどにModelをどのように変更するかを定義する。
-ボタンが押されたなどの変化は `Msg` 型として表現し、この例では＋ボタンが押されたら  `Increment` が、－ボタンが押されたら `Decrement` が `Msg` としてupdate関数の第1引数に渡される。
-第２引数は現在の `Model` が渡され、 `Msg` の内容に応じて変更した新しい `Model` を返り値として返す。
+```elm
+type Msg = Increment | Decrement
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    Increment -> { count = model.count + 1 }
+    Decrement -> { count = model.count - 1 }
+```
+
+updateも関数として定義される。型 `Msg -> Model -> Model` は、ボタンが押されたときなど発生したメッセージ `Msg` と現在の `Model` を受け取り、新しい `Model` を返すことを表している。
+
+この例では、`Increment` と `Decerement` の２つのメッセージが発生しうるとして `Msg` を定義している。
+そして実際にviewで定義した"+/-"ボタンの `onClick` 属性でこれら２つのメッセージが生成されるように設定している。
+
+```elm
+    [ button [ onClick Decrement ] [ text "-" ]
+    , div [] [ text (String.fromInt model.count) ]
+    , button [ onClick Increment ] [ text "+" ]
+    ]
+```
+
+## Main
+
+```
+main = Browser.sandbox { init = init, view = view, update = update }
+```
+
+Elmのエントリポイント(main)として、上記の `init`, `view`, `update` を `Browser.sandbox` に適用したものを渡す。
+
+`Browser.sandbox`関数は`Program () model msg`を返す。これはアプリケーション全体を表す型である。
+
+```
+> Browser.sandbox
+<function>
+    : { init : model, update : msg -> model -> model, view : model -> Html msg }
+      -> Program () model msg
+```
+
+`Browser.sandbox`は下図のような立ち位置にある。
 
 ![](https://guide.elm-lang.jp/effects/diagrams/sandbox.svg)
 
 引用：https://guide.elm-lang.jp/effects/
 
+Elmの世界で定義した`Html`をランタイムシステムに渡して実際にHTMLを描画させ、ランタイムシステム内でボタンがクリックされたりしたときその結果を`Msg`としてElmの世界に返してくれる。
+
 # 参考文献
-- [ファイアウォール ルールの使用 | VPC | Google Cloud](https://cloud.google.com/vpc/docs/using-firewalls?hl=ja)
+- 公式ドキュメント(翻訳ver)：https://guide.elm-lang.jp/
