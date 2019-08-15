@@ -12,6 +12,7 @@ chrome拡張は以下のスクリプト・HTMLで構成される。
   - 拡張のUI。拡張のアイコンをクリックすると表示されるポップアップがこれにあたる。その他にも右クリックメニュー、キーボードショートカット、omniboxなどを定義する。
 - Content Script
   - ブラウザに表示されたページの内容にアクセスできるスクリプト。ページのDOM情報を取得したり、書き換えたりすることができる。
+  - **アクセスできるchrome APIに制限がある。** (詳細:https://developer.chrome.com/extensions/content_scripts)
 - Options Page
   - 拡張の設定画面。
 
