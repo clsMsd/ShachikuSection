@@ -22,10 +22,30 @@ chrome拡張は以下のスクリプト・HTMLで構成される。
 
 引用：https://developer.chrome.com/extensions/overview
 
+
+また、chrome拡張はmanifest.jsonファイルで読み込むスクリプトや権限の設定を行う。
+例えば、Background Scriptのみで構成されるchrome拡張は以下のように定義される。
+
+```shell
+$ ls
+background1.js  background2.js  manifest.json
+$ cat manifest.json
+{
+    "name" : "Elm extension",
+    "version" : "1.0",
+    "description" : "generate extension from Elm",
+    "manifest_version" : 2,
+    "background" : {
+        "scripts" : ["background1.js", "background2.js"],
+        "persistent" : false
+    }
+}
+```
+
 ## Elmからスクリプトを生成する方法
 
-chrome拡張にはBackground ScriptやContent ScriptのようにJSファイル単体で動作するプログラムがある。
-このようなUIが存在しないプログラムをElmで生成する場合、以下の関数を用いる。
+Background ScriptやContent ScriptはJSファイル単体で動作する。
+このようなUIが存在しないプログラムをElmで生成する場合、以下の関数をエントリポイントとして用いる。
 
 ```elm
 worker :
@@ -38,13 +58,62 @@ worker :
 
 https://package.elm-lang.org/packages/elm/core/latest/Platform
 
+`worker`を用いた何もしないプログラムは以下のように書ける。
+
+```elm
+main = Platform.worker { init = init
+                       , update = update
+                       , subscriptions = subscriptions
+                       }
+
+type alias Model = {}
+type alias Msg = {}
+
+init : () -> (Model, Cmd Msg)
+init _ = Debug.log "Print message from Elm!" ({}, Cmd.none)
+
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model = ({}, Cmd.none)
+
+subscriptions : Model -> Sub Msg
+subscriptions model = Sub.none
+```
+
+このElmプログラムを以下のようにJSへコンパイルすることができる。
 
 ```shell
 $ elm make src/Main.elm --output=main.js
 ```
 
-```js
-var app = Elm.MyThing.init();
+コンパイルしたJSをmanifest.jsonでロードするように設定して、読み込み側のJSから`Elm.Main.init()`を実行することでElmプログラムを初期化することができる。
+
+```shell
+$ cat manifest.json 
+{
+    "name" : "Elm extension",
+    "version" : "1.0",
+    "description" : "generate extension from Elm",
+    "manifest_version" : 2,
+    "background" : {
+        "scripts" : ["main.js", "background.js"],
+        "persistent" : false
+    }
+}
+$ cat background.js 
+// Initialize extension
+chrome.runtime.onInstalled.addListener(function() {
+    console.log("Initializing extension...");
+
+    // Initialize Elm program
+    var app = Elm.Main.init();
+});
+```
+
+このchrome拡張をインストールすると以下のようなログが出力される。
+
+```
+> Initializing extension...
+> Print message from Elm!: ({},<internals>)
 ```
 
 # 参考文献
