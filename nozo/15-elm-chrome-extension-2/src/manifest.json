@@ -1,0 +1,10 @@
+{
+    "name" : "Elm extension",
+    "version" : "1.0",
+    "description" : "generate extension from Elm",
+    "manifest_version" : 2,
+    "background" : {
+	"scripts" : ["main.js", "background.js"],
+	"persistent" : false
+    }
+}
