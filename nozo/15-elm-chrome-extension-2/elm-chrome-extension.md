@@ -22,6 +22,30 @@ chrome拡張は以下のスクリプト・HTMLで構成される。
 
 引用：https://developer.chrome.com/extensions/overview
 
+## Elmからスクリプトを生成する方法
+
+chrome拡張にはBackground ScriptやContent ScriptのようにJSファイル単体で動作するプログラムがある。
+このようなUIが存在しないプログラムをElmで生成する場合、以下の関数を用いる。
+
+```elm
+worker :
+    { init : flags -> ( model, Cmd msg )
+    , update : msg -> model -> ( model, Cmd msg )
+    , subscriptions : model -> Sub msg
+    }
+    -> Program flags model msg
+```
+
+https://package.elm-lang.org/packages/elm/core/latest/Platform
+
+
+```shell
+$ elm make src/Main.elm --output=main.js
+```
+
+```js
+var app = Elm.MyThing.init();
+```
 
 # 参考文献
 - Develop Extensions - Chrome: developer - Google Chrome, https://developer.chrome.com/extensions/devguide
