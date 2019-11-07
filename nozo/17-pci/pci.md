@@ -118,6 +118,75 @@ static inline u32 inl(u16 port)
 }
 ```
 
+```c
+#include <linux/module.h>
+#include <linux/init.h>
+
+MODULE_LICENSE("Dual BSD/GPL");
+
+u32 read_pci_config(u8 bus, u8 slot, u8 func, u8 offset)
+{
+  u32 v;
+  /* CONFIG_ADDRESS レジスタへ書き込み */
+  outl(0x80000000 | (bus<<16) | (slot<<11) | (func<<8) | offset, 0xcf8);
+  /* CONFIG_DATA レジスタの読み込み */
+  v = inl(0xcfc);
+  return v;
+
+}
+
+static int pci_test_init(void)
+{
+  int i;
+  printk("pci_test is loaded.\n");
+
+  /* PCIデバイス 00:00.0 のコンフィグレーション空間にアクセス */
+  for(i = 0; i < 0xff; i+=4) {
+    printk("%02x = %08x",i , read_pci_config(0,0,0,i));
+  }
+
+  return 0;
+}
+module_init(pci_test_init);
+
+static void pci_test_exit(void)
+{
+  printk("pci_test is unloaded.\n");
+}
+module_exit(pci_test_exit);
+```
+
+```
+$ sudo dmesg
+...
+[ 4793.908006] pci_test is loaded.
+[ 4793.908008] 00 = 14501022
+[ 4793.908010] 04 = 00000000
+[ 4793.908011] 08 = 06000000
+[ 4793.908013] 0c = 00800000
+[ 4793.908015] 10 = 00000000
+[ 4793.908016] 14 = 00000000
+[ 4793.908017] 18 = 00000000
+[ 4793.908019] 1c = 00000000
+[ 4793.908020] 20 = 00000000
+[ 4793.908021] 24 = 00000000
+[ 4793.908023] 28 = 00000000
+[ 4793.908024] 2c = 14501849
+[ 4793.908025] 30 = 00000000
+[ 4793.908026] 34 = 00000000
+[ 4793.908027] 38 = 00000000
+[ 4793.908028] 3c = 00000000
+...
+```
+
+```
+$ lspci -x -s 00:00.0       
+00:00.0 Host bridge: Advanced Micro Devices, Inc. [AMD] Family 17h (Models 00h-0fh) Root Complex
+00: 22 10 50 14 00 00 00 00 00 00 00 06 00 00 80 00
+10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+20: 00 00 00 00 00 00 00 00 00 00 00 00 49 18 50 14
+30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
 
 # 参考
 - Linuxデバイスドライバプログラミング, 平田豊
