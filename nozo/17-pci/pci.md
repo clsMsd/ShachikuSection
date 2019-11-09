@@ -131,6 +131,15 @@ static inline u32 inl(u16 port)
 
 上記のようにLinuxカーネルはPCの起動直後の初期化にはIOポートを使ったコンフィグレーション空間アクセスをしているようだ。
 
+IOポートによるアクセスは、CONFIG_ADDRESS(CF8h)とCONFIG_DATA(CFCh)という特定のポート番地への読み書きによって行う。
+まずCONFIG_ADDRESS番地に下図のようなレイアウトでアクセスしたいPCIデバイスのバス番号・デバイス番号・ファンクション番号・レジスタ番号を書き込む。
+
+![](./img/config_address.png)
+
+CONFIG_ADDRESS番地に書き込んだ後にCONFIG_DATA番地の32bitを読み込むと、指定したデバイスのコンフィグレーション空間のレジスタにアクセスすることができる。
+
+実際にPCIデバイス 00:00.0 のコンフィグレーション空間 256byte にアクセスして表示するデバイスドライバを書いてみた。
+
 ```c
 #include <linux/module.h>
 #include <linux/init.h>
@@ -169,6 +178,8 @@ static void pci_test_exit(void)
 module_exit(pci_test_exit);
 ```
 
+上のデバイスドライバをコンパイルして`insmod`すると以下の結果になった。
+
 ```
 $ sudo dmesg
 ...
@@ -192,6 +203,14 @@ $ sudo dmesg
 ...
 ```
 
+例えば`00 = 14501022`はコンフィグレーション空間の先頭32bitの値で、上位`1450`がデバイスID、下位`1022`がベンダーIDである。
+
+それぞれのIDの登録情報は https://pci-ids.ucw.cz/ から確認することができる。
+- ベンダーID `1022 Advanced Micro Devices, Inc. [AMD]`
+- デバイスID `1450 Family 17h (Models 00h-0fh) Root Complex`
+
+実は`lspci`コマンドでも`-x`オプションを使うとコンフィグレーション空間を表示することができる。
+
 ```
 $ lspci -x -s 00:00.0       
 00:00.0 Host bridge: Advanced Micro Devices, Inc. [AMD] Family 17h (Models 00h-0fh) Root Complex
@@ -200,6 +219,9 @@ $ lspci -x -s 00:00.0
 20: 00 00 00 00 00 00 00 00 00 00 00 00 49 18 50 14
 30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 ```
+
+比べてみると同じ値が表示されていることが分かる。
+
 
 # 参考
 - Linuxデバイスドライバプログラミング, 平田豊
