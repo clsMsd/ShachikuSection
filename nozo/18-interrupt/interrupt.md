@@ -1,6 +1,10 @@
-# x86 割込み
+# 割込みについての調査
 
-## LOCAL APIC と I/O APIC
+Intel® 64 and IA-32 Architectures Software Developer Manuals と Linux Kernel の実装をもとに割り込みのしくみを調査する。
+
+## Local APIC と I/O APIC
+
+x86 アーキテクチャでは Advanced Programmable Interrupt Controller (APIC) という割り込みコントローラによって割り込みを制御する。
 
 ![](./img/APIC.png)
 
