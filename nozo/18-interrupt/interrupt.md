@@ -5,8 +5,26 @@ Intel® 64 and IA-32 Architectures Software Developer Manuals と Linux Kernel �
 ## Local APIC と I/O APIC
 
 x86 アーキテクチャでは Advanced Programmable Interrupt Controller (APIC) という割り込みコントローラによって割り込みを制御する。
+割り込みコントローラはシステムで発生した割り込みの優先度や有効無効などを管理してCPUへ通知する役割を持つ。
+
+APICは下図のように Local APIC と I/O APIC で構成されている。
 
 ![](./img/APIC.png)
+Volume 3 : CHAPTER 10
+
+
+I/O APICは外部の周辺デバイスから割り込みイベントを受け取り、Local APICへイベントを配送する。
+Local APICはCPUコアごとに存在して
+
+Local APIC は以下の要素から割り込みを受け取る。
+- Locally connected I/O devices
+- Externally connected I/O devices
+- Inter-processor interrupts (IPIs)
+- APIC timer generated interrupts
+- Performance monitoring counter interrupts
+- Thermal Sensor interrupts
+- APIC internal error interrupts
+
 
 ## IDT
 
