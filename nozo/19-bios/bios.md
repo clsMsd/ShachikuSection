@@ -23,14 +23,14 @@ There is NO WARRANTY, to the extent permitted by law.
 qemuはgdbserverという機能を持っていて、qemuの上で動作するプログラムをリモートからgdbでデバッグすることができる。
 
 次のように`-s`を指定することで`localhost:1234`でgdbserverへの接続を待ち受ける。
-また、`-S`を指定するとqemuの起動直後でプログラムの実行を停止する。（コンピュータの電源をONにした直後の状態みたいになる）
+また、`-S`を指定するとqemuの起動直後でプログラムの実行を停止する。
 
 ```
 $ qemu-system-i386 -s -S -nographic
 
 ```
 
-この状態で別の端末からgdbを起動して、`target remote localhost:1234`コマンドを実行することでリモートからqemu上のプログラムをデバッグできる。
+ここで、別の端末からgdbを起動して`target remote localhost:1234`コマンドを実行することでリモートからqemu上のプログラムをデバッグできる。
 
 ```
 $ gdb
@@ -40,11 +40,64 @@ Remote debugging using localhost:1234
 warning: No executable has been specified and target does not support
 determining executable automatically.  Try using the "file" command.
 0x0000fff0 in ?? ()
-(gdb) 
+(gdb) info registers 
+eax            0x0                 0
+ecx            0x0                 0
+edx            0x663               1635
+ebx            0x0                 0
+esp            0x0                 0x0
+ebp            0x0                 0x0
+esi            0x0                 0
+edi            0x0                 0
+eip            0xfff0              0xfff0
+eflags         0x2                 [ IOPL=0 ]
+cs             0xf000              61440
+ss             0x0                 0
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+fs_base        0x0                 0
+gs_base        0x0                 0
+k_gs_base      0x0                 0
+cr0            0x60000010          [ CD NW ET ]
+cr2            0x0                 0
+cr3            0x0                 [ PDBR=0 PCID=0 ]
+cr4            0x0                 [ ]
+cr8            0x0                 0
 ```
 
-コンピュータの電源をONにした直後のCPUはリアルモード呼ばれる8086互換環境(16bit CPU)として動作する。
-BIOSやブートローダなどのプログラムはこのモードで実行され、一定の手順を踏んでプロテクトモード(32bit CPU)へ移行する。
+qemuを起動した直後(コンピュータの電源をONにした直後)のCPUはリアルモードと呼ばれる8086互換環境(16bit CPU)として動作する。
+BIOSとブートローダの最初の部分はこのモードで実行され、ハードウェアの初期化などを実行したあとプロテクトモード(32bit CPU)へ移行する。
+
+8086のアドレスバスは20bitだったので、リアルモードのアドレス空間は`0x00000`から`0xfffff`までの1MBの大きさになる。
+CPUからのメモリへのアクセスは下に示すように、セグメントベースにオフセット値を加えたリニアアドレスによって指定される。
+
+```
+  リニアアドレス = セグメントベース + オフセット
+```
+
+8086ではセグメントベースをセグメントレジスタ(CS,DSなど)によって指し示す。
+しかし、8086のレジスタは16bitなのでそのままだと20bitのアドレス空間のすべてにアクセスすることはできない。
+そこで、8086ではセグメントレジスタを4bit左にシフトしてからオフセットを加算する。
+
+```
+  リニアアドレス = セグメントベース << 4 + オフセット
+```
+
+例えば、qemuを起動した直後のレジスタ状態を見ると`EIP`と`CS`レジスタは以下の値になっている。
+
+```
+eip            0xfff0
+cs             0xf000
+```
+
+そのため、このときのCPUが実行する命令のアドレスは`0xffff0`になる。
+
+```
+  0xffff0 = 0xf000 << 4 + 0xfff0
+```
+
 
 gdbスクリプト：
 https://github.com/mhugo/gdb_init_real_mode
