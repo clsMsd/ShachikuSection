@@ -1,4 +1,47 @@
-# qemuでbiosをデバッグする
+# qemuでBIOSをデバッグする
+
+ブートプロセスの挙動を追うために、qemuでBIOSをデバッグする手法を調査する。
+
+## 実験環境
+
+```
+$ uname -r
+5.5.2-arch1-1
+$ qemu-system-x86_64 --version
+QEMU emulator version 4.2.0
+Copyright (c) 2003-2019 Fabrice Bellard and the QEMU Project developers
+$ gdb --version
+GNU gdb (GDB) 8.3.1
+Copyright (C) 2019 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+```
+
+## qemuとgdb
+
+qemuはgdbserverという機能を持っていて、qemuの上で動作するプログラムをリモートからgdbでデバッグすることができる。
+
+次のように`-s`を指定することで`localhost:1234`でgdbserverへの接続を待ち受ける。
+また、`-S`を指定するとqemuの起動直後でプログラムの実行を停止する。（コンピュータの電源をONにした直後の状態みたいになる）
+
+```
+$ qemu-system-i386 -s -S -nographic
+
+```
+
+この状態で別の端末からgdbを起動して、`target remote localhost:1234`コマンドを実行することでリモートからqemu上のプログラムをデバッグできる。
+
+```
+$ gdb
+...
+(gdb) target remote localhost:1234
+Remote debugging using localhost:1234
+warning: No executable has been specified and target does not support
+determining executable automatically.  Try using the "file" command.
+0x0000fff0 in ?? ()
+(gdb) 
+```
 
 コンピュータの電源をONにした直後のCPUはリアルモード呼ばれる8086互換環境(16bit CPU)として動作する。
 BIOSやブートローダなどのプログラムはこのモードで実行され、一定の手順を踏んでプロテクトモード(32bit CPU)へ移行する。
@@ -80,6 +123,13 @@ ID <0>  VIP <0> VIF <0> AC <0>  VM <0>  RF <0>  NT <0>  IOPL <0>
    0x100005:    add    BYTE PTR [eax],al
 0x0000fff0 in ?? ()
 real-mode-gdb$
+```
+
+
+```
+$ qemu-system-x86_64 -L help
+/usr/share/qemu-firmware
+/usr/share/qemu
 ```
 
 # 参考文献
