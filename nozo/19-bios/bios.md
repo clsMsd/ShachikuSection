@@ -5,17 +5,26 @@
 ## 実験環境
 
 ```
-$ uname -r
-5.5.2-arch1-1
-$ qemu-system-x86_64 --version
-QEMU emulator version 4.2.0
-Copyright (c) 2003-2019 Fabrice Bellard and the QEMU Project developers
+$ uname -a
+Linux instance-1 4.9.0-11-amd64 #1 SMP Debian 4.9.189-3+deb9u2 (2019-11-11) x86_64 GNU/Linux
+$ qemu-system-i386 --version
+QEMU emulator version 2.8.1(Debian 1:2.8+dfsg-6+deb9u9)
+Copyright (c) 2003-2016 Fabrice Bellard and the QEMU Project developers
 $ gdb --version
-GNU gdb (GDB) 8.3.1
-Copyright (C) 2019 Free Software Foundation, Inc.
+GNU gdb (Debian 7.12-6) 7.12.0.20161007-git
+Copyright (C) 2016 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word".
 ```
 
 ## qemuとgdb
@@ -118,40 +127,19 @@ https://github.com/mhugo/gdb_init_real_mode
 gdb起動時に`-ix`でスクリプトを指定してあげるとリアルモード向けの見やすい表示がされるようになる。
 
 ```
-# gdb -ix gdbinit_real_mode.txt
-GNU gdb (GDB; SUSE Linux Enterprise 15) 8.3.1
-Copyright (C) 2019 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
-Type "show copying" and "show warranty" for details.
-This GDB was configured as "x86_64-suse-linux".
-Type "show configuration" for configuration details.
-For bug reporting instructions, please see:
-<http://bugs.opensuse.org/>.
-Find the GDB manual and other documentation resources online at:
-    <http://www.gnu.org/software/gdb/documentation/>.
-
-For help, type "help".
-Type "apropos word" to search for commands related to "word".
-
+$ gdb -ix gdb_init_real_mode/gdbinit_real_mode.txt 
+...
 warning: A handler for the OS ABI "GNU/Linux" is not built into this configuration
 of GDB.  Attempting to continue with the default i8086 settings.
 
 The target architecture is assumed to be i8086
-real-mode-gdb$ target remote localhost:1234
+real-mode-gdb$ targe remote localhost:1234  # gdbserverに接続
 Remote debugging using localhost:1234
-warning: Remote gdbserver does not support determining executable automatically.
-RHEL <=6.8 and <=7.2 versions of gdbserver do not support such automatic executable detection.
-The following versions of gdbserver support it:
-- Upstream version of gdbserver (unsupported) 7.10 or later
-- Red Hat Developer Toolset (DTS) version of gdbserver from DTS 4.0 or later (only on x86_64)
-- RHEL-7.3 versions of gdbserver (on any architecture)
 warning: No executable has been specified and target does not support
 determining executable automatically.  Try using the "file" command.
 ---------------------------[ STACK ]---
-0000 0000 0000 0000 0000 0000 0000 0000
-0000 0000 0000 0000 0000 0000 0000 0000
+0000 0000 0000 0000 0000 0000 0000 0000 
+0000 0000 0000 0000 0000 0000 0000 0000 
 ---------------------------[ DS:SI ]---
 00000000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
 00000010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
@@ -174,32 +162,138 @@ SS:BP: 0000:0000 (0x00000)
 OF <0>  DF <0>  IF <0>  TF <0>  SF <0>  ZF <0>  AF <0>  PF <0>  CF <0>
 ID <0>  VIP <0> VIF <0> AC <0>  VM <0>  RF <0>  NT <0>  IOPL <0>
 ---------------------------[ CODE ]----
-   0xffff0:     jmp    0x3630:0xf000e05b
-   0xffff7:     das
-   0xffff8:     xor    dh,BYTE PTR [ebx]
-   0xffffa:     das
-   0xffffb:     cmp    DWORD PTR [ecx],edi
+   0xffff0:     jmp    0xf000:0xe05b
+   0xffff5:     xor    BYTE PTR ds:0x322f,dh
+   0xffff9:     xor    bp,WORD PTR [bx]
+   0xffffb:     cmp    WORD PTR [bx+di],di
    0xffffd:     add    ah,bh
-   0xfffff:     add    BYTE PTR [eax],al
-   0x100001:    add    BYTE PTR [eax],al
-   0x100003:    add    BYTE PTR [eax],al
-   0x100005:    add    BYTE PTR [eax],al
+   0xfffff:     add    BYTE PTR [bx+si],al
+   0x100001:    add    BYTE PTR [bx+si],al
+   0x100003:    add    BYTE PTR [bx+si],al
+   0x100005:    add    BYTE PTR [bx+si],al
+   0x100007:    add    BYTE PTR [bx+si],al
 0x0000fff0 in ?? ()
-real-mode-gdb$
+real-mode-gdb$ 
 ```
 
+リセットベクタ(`0xffff0`)の命令は以下のように`0xfe05b`へジャンプすることがわかる。
 
 ```
-$ qemu-system-x86_64 -L help
-/usr/share/qemu-firmware
+---------------------------[ CODE ]----
+   0xffff0:     jmp    0xf000:0xe05b
+```
+
+`ni`コマンドで１命令実行した結果は以下のようになる。
+
+```
+real-mode-gdb$ ni
+---------------------------[ STACK ]---
+0000 0000 0000 0000 0000 0000 0000 0000 
+0000 0000 0000 0000 0000 0000 0000 0000 
+---------------------------[ DS:SI ]---
+00000000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00000010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00000020: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00000030: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+---------------------------[ ES:DI ]---
+00000000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00000010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00000020: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+00000030: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+----------------------------[ CPU ]----
+AX: 0000 BX: 0000 CX: 0000 DX: 0663
+SI: 0000 DI: 0000 SP: 0000 BP: 0000
+CS: F000 DS: 0000 ES: 0000 SS: 0000
+
+IP: E05B EIP:0000E05B
+CS:IP: F000:E05B (0xFE05B)
+SS:SP: 0000:0000 (0x00000)
+SS:BP: 0000:0000 (0x00000)
+OF <0>  DF <0>  IF <0>  TF <0>  SF <0>  ZF <0>  AF <0>  PF <0>  CF <0>
+ID <0>  VIP <0> VIF <0> AC <0>  VM <0>  RF <0>  NT <0>  IOPL <0>
+---------------------------[ CODE ]----
+   0xfe05b:     cmp    DWORD PTR cs:0x70c8,0x0
+   0xfe062:     jne    0xfd414
+   0xfe066:     xor    dx,dx
+   0xfe068:     mov    ss,dx
+   0xfe06a:     mov    esp,0x7000
+   0xfe070:     mov    edx,0xf2d4e
+   0xfe076:     jmp    0xfff00
+   0xfe079:     push   ebp
+   0xfe07b:     push   edi
+   0xfe07d:     push   esi
+0x0000e05b in ?? ()
+real-mode-gdb$ 
+```
+
+qemuがリセットベクタに配置しているBIOSプログラムファイルは`info roms`で調べることができる。
+デフォルトだと`bios-256k.bin`を読み込んでいるように見える。（アドレスの位置が`0xfffc0000`なのは何故？）
+
+```
+$ qemu-system-i386 -s -S -nographic
+QEMU 2.8.1 monitor - type 'help' for more information
+(qemu) info roms
+fw=genroms/kvmvapic.bin size=0x002400 name="kvmvapic.bin"
+addr=00000000fffc0000 size=0x040000 mem=rom name="bios-256k.bin"
+/rom@etc/acpi/tables size=0x200000 name="etc/acpi/tables"
+/rom@etc/table-loader size=0x001000 name="etc/table-loader"
+/rom@etc/acpi/rsdp size=0x000024 name="etc/acpi/rsdp"
+(qemu) 
+```
+
+qemuが読み込むBIOSプログラムファイルの場所は`-L help`で調べることができる。
+
+```
+$ qemu-system-i386 -L help
 /usr/share/qemu
+/usr/share/seabios
+/usr/lib/ipxe/qemu
+$ qemu-system-i386 -L help | xargs ls
+/usr/lib/ipxe/qemu:
+efi-e1000.rom     efi-ne2k_pci.rom  efi-rtl8139.rom  pxe-e1000.rom     pxe-ne2k_pci.rom  pxe-rtl8139.rom
+efi-eepro100.rom  efi-pcnet.rom     efi-virtio.rom   pxe-eepro100.rom  pxe-pcnet.rom     pxe-virtio.rom
+
+/usr/share/qemu:
+keymaps  qemu-icon.bmp  qemu_logo_no_text.svg  trace-events-all
+
+/usr/share/seabios:
+acpi-dsdt.aml  extboot.bin    linuxboot_dma.bin  q35-acpi-dsdt.aml   vgabios-isavga.bin  vgabios-virtio.bin
+bios-256k.bin  kvmvapic.bin   multiboot.bin      vapic.bin           vgabios-qxl.bin     vgabios-vmware.bin
+bios.bin       linuxboot.bin  optionrom          vgabios-cirrus.bin  vgabios-stdvga.bin
+```
+
+`bios-256k.bin`の中身はobjdumpで見ることができる。
+
+```
+$ objdump -D -b binary -m i8086 /usr/share/seabios/bios-256k.bin | less
+
+/usr/share/seabios/bios-256k.bin:     file format binary
+
+
+Disassembly of section .data:
+
+00000000 <.data>:
+        ...
+   18ae0:       f1                      icebp  
+   18ae1:       02 00                   add    (%bx,%si),%al
+   18ae3:       00 4b 03                add    %cl,0x3(%bp,%di)
+   18ae6:       00 00                   add    %al,(%bx,%si)
+   18ae8:       52                      push   %dx
+...
+```
+
+リセットベクタの位置に当たる命令は以下の場所にあった。
+（`0xffff0`と異なる位置にあるのでqemuがこのファイルをロードするときによしなにしてくれるのだと思う）
+
+```
+   3fff0:       ea 5b e0 00 f0          ljmp   $0xf000,$0xe05b
+   3fff5:       30 36 2f 32             xor    %dh,0x322f
+   3fff9:       33 2f                   xor    (%bx),%bp
+   3fffb:       39 39                   cmp    %di,(%bx,%di)
+   3fffd:       00 fc                   add    %bh,%ah
 ```
 
 # 参考文献
 - 新装改訂版　Linuxのブートプロセスをみる (アスキー書籍), 白崎 博生 
 - linux-insides, https://0xax.gitbooks.io/linux-insides/
-
-- stackoverflow - How to disassemble 16-bit x86 boot sector code in GDB with “x/i $pc”? It gets treated as 32-bit
-https://stackoverflow.com/questions/32955887/how-to-disassemble-16-bit-x86-boot-sector-code-in-gdb-with-x-i-pc-it-gets-tr
-
-
+- stackoverflow - How to disassemble 16-bit x86 boot sector code in GDB with “x/i $pc”? It gets treated as 32-bit, https://stackoverflow.com/questions/32955887/how-to-disassemble-16-bit-x86-boot-sector-code-in-gdb-with-x-i-pc-it-gets-tr
