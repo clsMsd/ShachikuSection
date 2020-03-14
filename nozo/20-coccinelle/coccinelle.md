@@ -98,10 +98,15 @@ makeの詳細は https://www.kernel.org/doc/html/latest/dev-tools/coccinelle.htm
 
 ## ユースケース
 
+Coccinelleでは下記のようなCプログラムのエラーの検証に使うことができる。
+
 - testing for unsigned variables for values less than zero or null pointer dereferencing
 - double locks or using the iterator index after a loop
 - API-specific errors (using free() on a devm allocation)
 - API modernization (using kmemdup() rather than kmalloc() and memcpy())
+
+例題集：
+http://coccinelle.lip6.fr/rules/
 
 ## coccigrep
 
