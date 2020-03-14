@@ -2,7 +2,7 @@
 
 [Development tools for the kernel](https://www.kernel.org/doc/html/latest/dev-tools/index.html)の一覧にあるツールについて調べる。
 
-今回は一番上にあるCoccinelleというツールについて。
+今回は一番上にあるCoccinelleというツールについて調査した。
 
 ## 実験環境
 
@@ -17,9 +17,7 @@ spatch version 1.0.4 with Python support and with PCRE support
 
 ## 概要
 
-Coccinelleとは、SmPLという言語で書かれたスクリプトで
-
-Cプログラムのバグを静的に解析するツールである。
+Coccinelleは、Cプログラムのパターンを静的解析してある種のバグを見つけて修正することを支援してくれるツールである。
 
 > Coccinelle is a program matching and transformation engine which provides the language SmPL (Semantic Patch Language) for specifying desired matches and transformations in C code.
 > 
@@ -29,7 +27,12 @@ Coccinelleが見つけることができるバグの簡単な例を示す。
 
 例：[wmi: (!x & y) strikes again](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=e6bafba5b4765a5a252f1b8d31cbf6d2459da337)
 
-このパッチは、～という問題を修正するものである。
+このパッチは、あるビットフラグをチェックするプログラムのバグを修正している。
+
+修正前のプログラムは`!block->flags & ACPI_WMI_METHOD`という式によってビットフラグ`block->flags`のチェックをしようとしている。
+しかし、`!`演算子の結合度は`&`より強いためこの式は`!block->flags`(bool値)と`ACPI_WMI_METHOD`(定数値)のビット論理積になってしまう。
+
+これは意図していない書き方であり、適切な括弧をつけることで修正をしている。
 
 ```diff
 diff --git a/drivers/acpi/wmi.c b/drivers/acpi/wmi.c
@@ -60,7 +63,7 @@ constant C;
 + !(E & C)
 ```
 
-上のスクリプトを`ex1.cocci`として保存して次のように`spatch`を実行するとパッチが生成される。
+上のスクリプトを`ex1.cocci`として保存して次のように`spatch`を実行すると、マッチングした部分を変換するパッチが生成される。
 
 ※ 実験のためわざと`linux-5.5.8/drivers/platform/x86/wmi.c`にバグを仕込んだ。
 
@@ -82,18 +85,35 @@ diff =
         if (block->instance_count <= instance)
 ```
 
+ちなみに、linuxのソースにもcoccinelleのスクリプトが含まれている。
+makeの`coccicheck`サブコマンドを使ってパッチ作成などができる。
+
+```
+$ ls linux-5.5.8/scripts/coccinelle/
+api  free  iterators  locks  misc  null  tests
+$ make coccicheck MODE=patch COCCI=scripts/coccinelle/api/err_cast.cocci
+```
+
+makeの詳細は https://www.kernel.org/doc/html/latest/dev-tools/coccinelle.html 
+
+## ユースケース
+
 - testing for unsigned variables for values less than zero or null pointer dereferencing
 - double locks or using the iterator index after a loop
 - API-specific errors (using free() on a devm allocation)
 - API modernization (using kmemdup() rather than kmalloc() and memcpy())
 
-```
-$ ls linux-5.5.8/scripts/coccinelle/
-api  free  iterators  locks  misc  null  tests
-```
+## coccigrep
+
+coccinelleベースのgrepツール。
+
+https://home.regit.org/software/coccigrep/
 
 # 参考
+
 - Development tools for the kernel » Coccinelle, https://www.kernel.org/doc/html/latest/dev-tools/coccinelle.html
 - KernelNewbies: JuliaLawall, https://kernelnewbies.org/JuliaLawall
+  - Introduction to Coccinelle, https://pages.lip6.fr/Julia.Lawall/tutorial.pdf
 - Keynote: Inside the Mind of a Coccinelle Programmer by Julia Lawall, Developer of Coccinelle, https://youtu.be/xA5FBvuCvMs
 - Inside the mind of a Coccinelle programmer, https://lwn.net/Articles/698724/
+
