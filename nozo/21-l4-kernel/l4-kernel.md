@@ -78,5 +78,6 @@ make[1]: Leaving directory '/home/nozo/pistachio/x86-kernel-build'
 ```
 
 # 参考
+- マイクロカーネルの設計と実装, 技術書典, seiya.me, https://seiya.me/microkernel-book
 - L4Ka Project, https://www.l4ka.org/
-- L4Ka::Pistachio micro-kernel -github-, https://github.com/l4ka/pistachio
+- L4Ka::Pistachio micro-kernel, https://github.com/l4ka/pistachio
