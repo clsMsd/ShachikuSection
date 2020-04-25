@@ -10,10 +10,20 @@
 ![](./mono_micro.PNG)\
 マイクロカーネルの設計と実装(p.6), 技術書典, seiya.me
 
+マイクロカーネルには様々な実装がある。
+今回はL4Ka::PistachioというL4マイクロカーネルファミリの実装を利用してみたい。
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/L4_family_tree.png/600px-L4_family_tree.png)\
+[L4マイクロカーネルファミリー](https://ja.wikipedia.org/wiki/L4%E3%83%9E%E3%82%A4%E3%82%AF%E3%83%AD%E3%82%AB%E3%83%BC%E3%83%8D%E3%83%AB%E3%83%95%E3%82%A1%E3%83%9F%E3%83%AA%E3%83%BC)
 
 # L4Ka::Pistachioのビルド
 
+Pistachioのビルド手順は下記のドキュメントにある。
+(プロジェクトのページは新しく l4hq.org に移行すると書かれているが、このサイトは落ちている)
+
 [Getting Started with L4Ka::Pistachio on x86-x32](https://www.l4ka.org/120.php)
+
+環境：
 
 ```
 $ cat /etc/os-release 
@@ -35,10 +45,22 @@ REDHAT_SUPPORT_PRODUCT="centos"
 REDHAT_SUPPORT_PRODUCT_VERSION="8"
 $ uname -a
 Linux instance-1 4.18.0-147.8.1.el8_1.x86_64 #1 SMP Thu Apr 9 13:49:54 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
-$ sudo yum install git ed make gcc-c++
-$ cd /usr/bin/
-$ sudo ln -s python2 python
 ```
+
+ビルドツールのインストール。
+
+```
+$ sudo yum install git ed make gcc-c++ autoconf
+$ g++ --version
+g++ (GCC) 8.3.1 20190507 (Red Hat 8.3.1-4)
+Copyright (C) 2018 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+$ cd /usr/bin/
+$ sudo ln -s python2 python  # /usr/bin/pythonが求められたのでlink
+```
+
+ソースのダウンロード。
 
 ```
 $ git clone https://github.com/l4ka/pistachio.git
@@ -46,11 +68,15 @@ $ ls pistachio/
 AUTHORS  README  contrib  doc  kernel  tools  user
 ```
 
+Pistachioのビルドは、カーネルとユーザで分かれている。
+
+カーネルビルド：
+
 ```
 $ cd pistachio/kernel/
 $ make BUILDDIR=$(pwd)/../x86-kernel-build
 $ cd ../x86-kernel-build/
-$ make menuconfig  # デフォルト設定で保存
+$ make menuconfig  # Processor TypeをPentium1に設定
 $ make
 -snip-
 /home/nozo/pistachio/kernel/src/api/v4/kernelinterface.cc: At global scope:
@@ -80,6 +106,8 @@ index 9f899a8..754a5d8 100644
  ifeq ("$(CC_VERSION)", "4")
 ```
 
+再ビルド。成功。
+
 ```
 $ make
 -snip-
@@ -88,6 +116,45 @@ ld  -static -O2 -melf_i386  -L/usr/lib/gcc/x86_64-redhat-linux/8/32/ -static -O2
 rm -f lds.tmp
 Done.
 make[1]: Leaving directory '/home/nozo/pistachio/x86-kernel-build'
+```
+
+ユーザビルド：
+
+ドキュメントにはconfigureを実行するとあるが、存在しないのでまずconfigureファイルを生成する。
+
+```
+$ cd pistachio/user/
+$ autoheader
+$ autoconf
+```
+
+```
+$ mkdir pistachio/x86-x32-user-build
+$ cd pistachio/x86-x32-user-build/
+$ ../user/configure
+$ make
+-snip-
+In file included from ../../../user/lib/l4/debug.cc:31:
+../../../user/include/l4/kip.h: In function ‘L4_Bool_t L4_HasFeature(const char*)’:
+../../../user/include/l4/kip.h:561:57: error: ISO C++ forbids comparison between pointer and integer [-fpermissive]
+     for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
+                                                         ^~~~
+In file included from ../../../user/lib/l4/debug.cc:32:
+../../../user/include/l4/tracebuffer.h: In function ‘void L4_Tbuf_StoreRecord(L4_TraceRecord_t*, L4_TraceConfig_t, L4_Word_t, L4_Word_t)’:
+../../../user/include/l4/tracebuffer.h:104:20: warning: conversion from ‘L4_Word_t’ {aka ‘long unsigned int’} to ‘short unsigned int’ may change value [-Wconversion]
+     rec->X.utype = type;
+                    ^~~~
+../../../user/include/l4/tracebuffer.h:105:17: warning: conversion from ‘L4_Word_t’ {aka ‘long unsigned int’} to ‘long unsigned int:48’ may change value [-Wconversion]
+     rec->X.id = id;
+                 ^~
+../../../user/include/l4/tracebuffer.h:106:32: warning: conversion from ‘L4_Word_t’ {aka ‘long unsigned int’} to ‘short unsigned int’ may change value [-Wconversion]
+     rec->X.cpu = L4_ProcessorNo();
+                  ~~~~~~~~~~~~~~^~
+make[2]: *** [../../../user/Mk/l4.build.mk:58: debug.o] Error 1
+make[2]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/lib/l4'
+make[1]: *** [../../user/Mk/l4.subdir.mk:41: subdirs-all] Error 2
+make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/lib'
+make: *** [../user/Mk/l4.subdir.mk:41: subdirs-all] Error 2
 ```
 
 # 参考
