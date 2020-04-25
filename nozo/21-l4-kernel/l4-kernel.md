@@ -128,6 +128,9 @@ $ autoheader
 $ autoconf
 ```
 
+ビルドの実行。
+`error: ISO C++ forbids comparison between pointer and integer [-fpermissive]`エラー。
+
 ```
 $ mkdir pistachio/x86-x32-user-build
 $ cd pistachio/x86-x32-user-build/
@@ -154,6 +157,54 @@ make[2]: *** [../../../user/Mk/l4.build.mk:58: debug.o] Error 1
 make[2]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/lib/l4'
 make[1]: *** [../../user/Mk/l4.subdir.mk:41: subdirs-all] Error 2
 make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/lib'
+make: *** [../user/Mk/l4.subdir.mk:41: subdirs-all] Error 2
+```
+
+場当たり修正。
+
+```diff
+diff --git a/user/apps/l4test/l4test.h b/user/apps/l4test/l4test.h
+index 120c821..a1e09e1 100644
+--- a/user/apps/l4test/l4test.h
++++ b/user/apps/l4test/l4test.h
+@@ -124,7 +124,7 @@ L4_INLINE bool l4_has_feature( const char *feature_name )
+     void *kip = L4_GetKernelInterface();
+     char *name;
+ 
+-    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
++    for( L4_Word_t i = 0; *(name = L4_Feature(kip,i)) != '\0'; i++ )
+        if( !strcmp(feature_name, name) )
+            return true;
+     return false;
+diff --git a/user/include/l4/kip.h b/user/include/l4/kip.h
+index 63e5b62..8a59640 100644
+--- a/user/include/l4/kip.h
++++ b/user/include/l4/kip.h
+@@ -558,7 +558,7 @@ L4_INLINE L4_Bool_t L4_HasFeature (const char *feature_name)
+     void *kip = L4_GetKernelInterface();
+     char *name;
+ 
+-    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
++    for( L4_Word_t i = 0; *(name = L4_Feature(kip,i)) != '\0'; i++ )
+     {
+         const char *n = name;
+         const char *fn = feature_name;
+```
+
+ビルド。
+`error: unable to find string literal operator ‘operator""_MKSTR’ with ‘const char [13]’, ‘unsigned int’ arguments`エラー。
+
+```
+$ make
+-snip-
+../../../user/util/kickstart/kickstart.cc: In function ‘void loader()’:
+../../../user/util/kickstart/kickstart.cc:51:12: error: unable to find string literal operator ‘operator""_MKSTR’ with ‘const char [13]’, ‘unsigned int’ arguments
+     printf("KickStart 0."_MKSTR(REVISION)"\n");
+            ^~~~~~~~~~~~~~~~~~~~
+make[2]: *** [../../../user/Mk/l4.build.mk:58: kickstart.o] Error 1
+make[2]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/util/kickstart'
+make[1]: *** [../../user/Mk/l4.subdir.mk:41: subdirs-all] Error 2
+make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/util'
 make: *** [../user/Mk/l4.subdir.mk:41: subdirs-all] Error 2
 ```
 
