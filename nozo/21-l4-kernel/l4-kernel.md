@@ -1,4 +1,17 @@
-# L4カーネル
+# L4マイクロカーネル
+
+[CとRustで一から作るマイクロカーネルOS](https://seiya.me/writing-a-microkernel-from-scratch)の記事をみてマイクロカーネルが面白そうだったので、L4マイクロカーネルをビルドして動かしてみるメモ。
+
+マイクロカーネルとは
+> マイクロカーネルは従来のモノリシックカーネルが持っているデバイスドライバや，ファイルシステ
+ム，TCP/IP といった主要機能を，ユーザランド（userland）*
+1の普通のプログラムで実装できるように
+したカーネルです。
+![](./mono_micro.PNG)\
+マイクロカーネルの設計と実装(p.6), 技術書典, seiya.me
+
+
+# L4Ka::Pistachioのビルド
 
 [Getting Started with L4Ka::Pistachio on x86-x32](https://www.l4ka.org/120.php)
 
