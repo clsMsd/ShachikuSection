@@ -237,6 +237,9 @@ make[2]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/util/kicksta
 make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/util'
 make[1]: Entering directory '/home/nozo/pistachio/x86-x32-user-build/contrib'
 make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/contrib
+$ sudo make install
+$ ls /usr/local/libexec/l4/
+grabmem  kickstart  l4test  pingpong  sigma0
 ```
 
 # 参考
