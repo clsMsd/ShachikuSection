@@ -208,6 +208,37 @@ make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/util'
 make: *** [../user/Mk/l4.subdir.mk:41: subdirs-all] Error 2
 ```
 
+文字列リテラルの扱いがよくわからないので、フォーマット記法に置き換える。
+
+```diff
+diff --git a/user/util/kickstart/kickstart.cc b/user/util/kickstart/kickstart.cc
+index cc0f262..3566613 100644
+--- a/user/util/kickstart/kickstart.cc
++++ b/user/util/kickstart/kickstart.cc
+@@ -48,7 +48,7 @@ extern "C" void loader (void)
+ {
+     loader_format_t * fmt = NULL;
+ 
+-    printf("KickStart 0."_MKSTR(REVISION)"\n");
++    printf("KickStart 0.%s\n", _MKSTR(REVISION));
+ 
+     // Try to find a valid loader format.
+     for (L4_Word_t n = 0; loader_formats[n].probe; n++)
+```
+
+再ビルド。成功。
+
+```
+$ make
+-snip-
+===> Linking util/kickstart/kickstart
+ld -e_start -N -L../../lib -L/usr/lib/gcc/x86_64-redhat-linux/8 -nostdlib  -melf_x86_64 -b elf32-i386 --oformat elf32-i386 -N -m elf_i386 -L. -Ttext=00100000 -L../../../user/util/kickstart -Tkickstart.ld elf64.o bootinfo64.o crt0-amd64.o kickstart.o kipmgr.o elf.o lib.o bootinfo.o amd64.o mbi.o mbi-amd64.o mbi-loader.o    -lio32  -o kickstart
+make[2]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/util/kickstart'
+make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/util'
+make[1]: Entering directory '/home/nozo/pistachio/x86-x32-user-build/contrib'
+make[1]: Leaving directory '/home/nozo/pistachio/x86-x32-user-build/contrib
+```
+
 # 参考
 - マイクロカーネルの設計と実装, 技術書典, seiya.me, https://seiya.me/microkernel-book
 - L4Ka Project, https://www.l4ka.org/
