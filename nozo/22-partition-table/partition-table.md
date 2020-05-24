@@ -1,17 +1,39 @@
+# パーティションテーブルについて調査
+
+パーティションテーブル
+
+- MBR
+- GPT
+
+0で埋めた空のブロックデバイスを作成する。
 
 ```
 $ dd if=/dev/zero of=./disk.img bs=1M count=32
 32+0 records in
 32+0 records out
-33554432 bytes (34 MB, 32 MiB) copied, 0.890647 s, 37.7 MB/s
-$ fdisk disk.img 
+33554432 bytes (34 MB, 32 MiB) copied, 0.884599 s, 37.9 MB/s
+$ sudo losetup -Pf disk.img
+$ lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+loop0    7:0    0   32M  0 loop              # 空のブロックデバイス
+sda      8:0    0   10G  0 disk 
+├─sda1   8:1    0  200M  0 part /boot/efi
+└─sda2   8:2    0  9.8G  0 part /
+sdb      8:16   0   10G  0 disk 
+└─sdb1   8:17   0   10G  0 part /mnt
+```
+
+MBRでフォーマットする。
+
+```
+$ sudo fdisk /dev/loop0 
 
 Welcome to fdisk (util-linux 2.32.1).
 Changes will remain in memory only, until you decide to write them.
 Be careful before using the write command.
 
 Device does not contain a recognized partition table.
-Created a new DOS disklabel with disk identifier 0x840d6133.
+Created a new DOS disklabel with disk identifier 0xb24a0fb6.
 
 Command (m for help): n
 Partition type
@@ -28,19 +50,56 @@ Created a new partition 1 of type 'Linux' and of size 31 MiB.
 
 Command (m for help): w
 The partition table has been altered.
-Syncing disks.
+Calling ioctl() to re-read partition table.
+$ sudo fdisk -l /dev/loop0
+Disk /dev/loop0: 32 MiB, 33554432 bytes, 65536 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xb24a0fb6
+
+Device       Boot Start   End Sectors Size Id Type
+/dev/loop0p1       2048 65535   63488  31M 83 Linux
 ```
 
+MBRでフォーマットしたブロックデバイスのバイナリ出力
+
 ```
-$ hexdump disk.img 
-0000000 0000 0000 0000 0000 0000 0000 0000 0000
+$ sudo hexdump -C /dev/loop0
+00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 *
-00001b0 0000 0000 0000 0000 6133 840d 0000 2000
-00001c0 0021 1483 0410 0800 0000 f800 0000 0000
-00001d0 0000 0000 0000 0000 0000 0000 0000 0000
+000001b0  00 00 00 00 00 00 00 00  b6 0f 4a b2 00 00 00 20  |..........J.... |
+000001c0  21 00 83 14 10 04 00 08  00 00 00 f8 00 00 00 00  |!...............|
+000001d0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 *
-00001f0 0000 0000 0000 0000 0000 0000 0000 aa55
-0000200 0000 0000 0000 0000 0000 0000 0000 0000
+000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 55 aa  |..............U.|
+00000200  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 *
-2000000
+02000000
 ```
+
+MBRレイアウト
+
+|アドレス|サイズ(byte)詳細||
+|----|----|----|
+|0x000|446|ブートストラップコードエリア(ディスクシグニチャを含む)|
+|0x1BE|16|パーティションエントリ１|
+|0x1CE|16|パーティションエントリ２|
+|0x1DE|16|パーティションエントリ３|
+|0x1EE|16|パーティションエントリ４|
+|0x1FE|2|ブートシグニチャ(0x55,0xAA)|
+
+パーティションエントリレイアウト
+
+|オフセット|サイズ(byte)|詳細|
+|----|----|----|
+|0x0|1|パーティションステータス(0x80=ブート可)|
+|0x1|3|CHS|
+|0x4|1|パーティションタイプ|
+|0x5|3|CHS|
+|0x8|4|LBA|
+|0xC|4|パーティションのセクター数|
+
+# 参考
+- Master boot record, https://en.wikipedia.org/wiki/Master_boot_record
