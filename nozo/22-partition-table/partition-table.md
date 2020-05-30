@@ -118,18 +118,8 @@ MBRパーティションテーブルのレイアウトを以下に示す。
 例えば、オフセット`0x8`はパーティションの最初のLBAアドレスを4バイト(リトルエンディアン)で示していて、今回の場合は`2048 (=0x00000800)`番目のセクタを指している。
 オフセット`0xC`はパーティションのセクタ数を4バイト（リトルエンディアン）で示していて、今回の場合は`‭63488‬ (=0x0000F800)`個のセクタであることを示している。
 
-```
-$ sudo fdisk -l /dev/loop0
-Disk /dev/loop0: 32 MiB, 33554432 bytes, 65536 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disklabel type: dos
-Disk identifier: 0xb24a0fb6
-
-Device       Boot Start   End Sectors Size Id Type
-/dev/loop0p1       2048 65535   63488  31M 83 Linux
-```
+1セクタのサイズは512バイトなので、今回のパーティションのサイズは`‭32505856‬ (=512*63488)`バイト(約32MB)であることがわかる。
+また、パーティションのセクター数は4バイトでしか表せないため、MBRで扱える最大パーティションサイズは`2TiB (=512*2^32)`である。
 
 # 参考
 - Master boot record, https://en.wikipedia.org/wiki/Master_boot_record
