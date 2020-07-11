@@ -224,6 +224,8 @@ end
 |GET|/photos/:id/edit|photos#edit|写真編集用のHTMLフォームを1つ返す|
 |PATCH/PUT|/photos/:id|photos#update|特定の写真を更新する|
 |DELETE|/photos/:id|photos#destroy|特定の写真を削除する|
+  
+  
 ([https://railsguides.jp/routing.html#crud%E3%80%81%E5%8B%95%E8%A9%9E%E3%80%81%E3%82%A2%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3]より引用)
 
 
