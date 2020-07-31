@@ -1,6 +1,12 @@
 # 組み込みRust
 
 ```
+$ rustup target add thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf
+$ cargo install cargo-binutils
+$ rustup component add llvm-tools-preview
+```
+
+```
 $ git clone https://github.com/rust-embedded/cortex-m-quickstart app
 $ tree app/
 app/
@@ -25,41 +31,115 @@ app/
 2 directories, 15 files
 ```
 
+```rust
+//! Prints "Hello, world!" on the host console using semihosting
+
+#![no_main]
+#![no_std]
+
+use panic_halt as _;
+
+use cortex_m_rt::entry;
+use cortex_m_semihosting::{debug, hprintln};
+
+#[entry]
+fn main() -> ! {
+    hprintln!("Hello, world!").unwrap();
+
+    // exit QEMU
+    // NOTE do not run this on hardware; it can corrupt OpenOCD state
+    debug::exit(debug::EXIT_SUCCESS);
+
+    loop {}
+}
 ```
-$ cat .cargo/config 
-[target.thumbv7m-none-eabi]
-# uncomment this to make `cargo run` execute programs on QEMU
-# runner = "qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel"
 
-[target.'cfg(all(target_arch = "arm", target_os = "none"))']
-# uncomment ONE of these three option to make `cargo run` start a GDB session
-# which option to pick depends on your system
-# runner = "arm-none-eabi-gdb -q -x openocd.gdb"
-# runner = "gdb-multiarch -q -x openocd.gdb"
-# runner = "gdb -q -x openocd.gdb"
+```diff
+diff --git a/Cargo.toml b/Cargo.toml
+index bd49d23..e22c8a7 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -1,8 +1,8 @@
+ [package]
+-authors = ["{{authors}}"]
++authors = ["nozo"]
+ edition = "2018"
+ readme = "README.md"
+-name = "{{project-name}}"
++name = "app"
+ version = "0.1.0"
+ 
+ [dependencies]
+@@ -26,7 +26,7 @@ panic-halt = "0.2.0"
+ 
+ # this lets you use `cargo fix`!
+ [[bin]]
+-name = "{{project-name}}"
++name = "app"
+ test = false
+ bench = falsed
+```
 
-rustflags = [
-  # LLD (shipped with the Rust toolchain) is used as the default linker
-  "-C", "link-arg=-Tlink.x",
+```
+$ cargo build --example hello
+$ qemu-system-arm -cpu cortex-m3 \
+                  -machine lm3s6965evb \
+                  -nographic \
+                  -semihosting-config enable=on,target=native \
+                  -kernel target/thumbv7m-none-eabi/debug/examples/hello
+Hello, world!
+```
 
-  # if you run into problems with LLD switch to the GNU linker by commenting out
-  # this line
-  # "-C", "linker=arm-none-eabi-ld",
+```
+$ cargo objdump --example hello -- -d
+hello:  file format ELF32-arm-little
 
-  # if you need to link to pre-compiled C libraries provided by a C toolchain
-  # use GCC as the linker by commenting out both lines above and then
-  # uncommenting the three lines below
-  # "-C", "linker=arm-none-eabi-gcc",
-  # "-C", "link-arg=-Wl,-Tlink.x",
-  # "-C", "link-arg=-nostartfiles",
-]
 
-[build]
-# Pick ONE of these compilation targets
-# target = "thumbv6m-none-eabi"    # Cortex-M0 and Cortex-M0+
-target = "thumbv7m-none-eabi"    # Cortex-M3
-# target = "thumbv7em-none-eabi"   # Cortex-M4 and Cortex-M7 (no FPU)
-# target = "thumbv7em-none-eabihf" # Cortex-M4F and Cortex-M7F (with FPU)
+Disassembly of section .text:
+
+...
+00000474 main:
+     474: 80 b5                         push    {r7, lr}
+     476: 6f 46                         mov     r7, sp
+     478: 00 f0 01 f8                   bl      #2
+     47c: fe de                         trap
+...
+000012a6 Reset:
+    12a6: 80 b5                         push    {r7, lr}
+    12a8: 6f 46                         mov     r7, sp
+    12aa: 00 f0 26 f8                   bl      #76
+    12ae: ff e7                         b       #-2 <Reset+0xa>
+    12b0: 40 f2 00 00                   movw    r0, #0
+    12b4: c2 f2 00 00                   movt    r0, #8192
+    12b8: 40 f2 08 01                   movw    r1, #8
+    12bc: c2 f2 00 01                   movt    r1, #8192
+    12c0: 00 f0 1c f8                   bl      #56
+    12c4: ff e7                         b       #-2 <Reset+0x20>
+    12c6: 40 f2 00 00                   movw    r0, #0
+    12ca: c2 f2 00 00                   movt    r0, #8192
+    12ce: 40 f2 00 01                   movw    r1, #0
+    12d2: c2 f2 00 01                   movt    r1, #8192
+    12d6: 41 f6 28 02                   movw    r2, #6184
+    12da: c0 f2 00 02                   movt    r2, #0
+    12de: 00 f0 32 f8                   bl      #100
+    12e2: ff e7                         b       #-2 <Reset+0x3e>
+    12e4: ff f7 c6 f8                   bl      #-3700
+    12e8: fe de                         trap
+...
+```
+
+```
+$ cargo objdump --example hello -- -s
+hello:  file format ELF32-arm-little
+
+Contents of section .vector_table:
+ 0000 00000120 a7120000 eb120000 e9140000  ... ............
+ 0010 eb120000 eb120000 eb120000 00000000  ................
+ 0020 00000000 00000000 00000000 eb120000  ................
+ 0030 eb120000 00000000 eb120000 eb120000  ................
+ 0040 eb120000 eb120000 eb120000 eb120000  ................
+...
+ 03f0 eb120000 eb120000 eb120000 eb120000  ................
 ```
 
 LM3S6965のブロック図
