@@ -16,6 +16,7 @@ $ rustup component add llvm-tools-preview
 ```
 
 Cortex-M3マイクロコントローラのLM3S6965向けの例でコンパイル・実行してみる。
+テンプレートプロジェクトをダウンロードしてくる。
 
 ```
 $ git clone https://github.com/rust-embedded/cortex-m-quickstart app
@@ -49,7 +50,7 @@ app/
 ベアメタル環境で動作させるプログラムなので、OSが存在することを前提とした標準ライブラリ`std`を使うことはできない。\
 `#![no_std]`を宣言することで、`std`の代わりに`core` (OSなしで動作するライブラリ) を使うことを示す。
 
-- #![no_main]の宣言\
+- `#![no_main]`の宣言\
 標準のmainインターフェースを使わないことを示す。\
 プログラムのエントリポイントは`#[entry]`で指定する。
 
@@ -76,31 +77,8 @@ fn main() -> ! {
 }
 ```
 
-```diff
-diff --git a/Cargo.toml b/Cargo.toml
-index bd49d23..e22c8a7 100644
---- a/Cargo.toml
-+++ b/Cargo.toml
-@@ -1,8 +1,8 @@
- [package]
--authors = ["{{authors}}"]
-+authors = ["nozo"]
- edition = "2018"
- readme = "README.md"
--name = "{{project-name}}"
-+name = "app"
- version = "0.1.0"
- 
- [dependencies]
-@@ -26,7 +26,7 @@ panic-halt = "0.2.0"
- 
- # this lets you use `cargo fix`!
- [[bin]]
--name = "{{project-name}}"
-+name = "app"
- test = false
- bench = falsed
-```
+`hello.rs`をコンパイルして実行する。
+今回はQEMU上で動作確認をする。
 
 ```
 $ cargo build --example hello
@@ -111,6 +89,59 @@ $ qemu-system-arm -cpu cortex-m3 \
                   -kernel target/thumbv7m-none-eabi/debug/examples/hello
 Hello, world!
 ```
+
+QEMUはLM3S6965を含む多数のARMの評価ボードのエミューレーションをサポートしている。
+
+- [Arm System emulator](https://www.qemu.org/docs/master/system/target-arm.html)
+
+実際のLM3S6965のデータシートは以下からダウンロードできる。
+
+- [LM3S6965 データシート](https://www.ti.com/product/LM3S6965)
+
+LM3S6965のブロック図:
+
+![](./img/LM3S6965.png)
+
+コンパイルしたRustプログラムはLM3S6965のFLASH(256KB)領域に配置する必要がある。
+LM3S6965のメモリレイアウトは以下のようになっている。(参照:Table 2-4. Memory Map)
+
+|Start|End|Description|
+|----|----|----|
+|0x0000.0000|0x0003.FFFF|On-chip Flash|
+|0x2000.0000|0x2000.FFFF|Bit-banded on-chip SRAM|
+
+プログラムの配置はリンカスクリプトで指定される。
+Rustのプロジェクト構成だと`memory.x`にリンカスクリプトを記載する。
+
+```
+MEMORY
+{
+  /* NOTE 1 K = 1 KiBi = 1024 bytes */
+  /* TODO Adjust these memory regions to match your device memory layout */
+  /* These values correspond to the LM3S6965, one of the few devices QEMU can emulate */
+  FLASH : ORIGIN = 0x00000000, LENGTH = 256K
+  RAM : ORIGIN = 0x20000000, LENGTH = 64K
+}
+```
+
+読み込むリンカスクリプトはプロジェクトの`.cargo/config`で指定される。
+実際に指定されているのは`memory.x`ではなく`link.x`というファイルのようである。
+
+```
+rustflags = [
+  # LLD (shipped with the Rust toolchain) is used as the default linker
+  "-C", "link-arg=-Tlink.x",
+...
+]
+```
+
+ビルドしたあと
+
+```
+$ find | grep link.x
+./target/thumbv7m-none-eabi/debug/build/cortex-m-rt-ebbf88af06aa4065/out/link.x
+```
+
 
 ```
 $ cargo objdump --example hello -- -d
@@ -164,16 +195,6 @@ Contents of section .vector_table:
  03f0 eb120000 eb120000 eb120000 eb120000  ................
 ```
 
-LM3S6965のブロック図
-
-![](./img/LM3S6965.png)
-
-LM3S6965のメモリレイアウ(参照:Table 2-4. Memory Map)
-
-|Start|End|Description|
-|----|----|----|
-|0x0000.0000|0x0003.FFFF|On-chip Flash|
-|0x2000.0000|0x2000.FFFF|Bit-banded on-chip SRAM|
 
 # 参考
 - 組込みRust / The Embedded Rust Book, https://tomoyuki-nakabayashi.github.io/book/intro/index.html
