@@ -135,13 +135,71 @@ rustflags = [
 ]
 ```
 
-ビルドしたあと
+ビルドしたあと下記のディレクトリに`link.x`が生成されていた。
 
 ```
 $ find | grep link.x
 ./target/thumbv7m-none-eabi/debug/build/cortex-m-rt-ebbf88af06aa4065/out/link.x
 ```
 
+中身を見ると、`link.x`から`memory.x`がインクルードされているようである。
+`link.x`でベクタテーブルや.text領域を配置するよう指定している。
+
+```
+...
+/* Provides information about the memory layout of the device */
+/* This will be provided by the user (see `memory.x`) or by a Board Support Crate */
+INCLUDE memory.x
+
+/* # Entry point = reset vector */
+ENTRY(Reset);
+EXTERN(__RESET_VECTOR); /* depends on the `Reset` symbol */
+...
+/* # Sections */
+SECTIONS
+{
+  PROVIDE(_stack_start = ORIGIN(RAM) + LENGTH(RAM));
+
+  /* ## Sections in FLASH */
+  /* ### Vector table */
+  .vector_table ORIGIN(FLASH) :
+  {
+    /* Initial Stack Pointer (SP) value */
+    LONG(_stack_start);
+
+    /* Reset vector */
+    KEEP(*(.vector_table.reset_vector)); /* this is the `__RESET_VECTOR` symbol */
+    __reset_vector = .;
+
+    /* Exceptions */
+    KEEP(*(.vector_table.exceptions)); /* this is the `__EXCEPTIONS` symbol */
+    __eexceptions = .;
+
+    /* Device specific interrupts */
+    KEEP(*(.vector_table.interrupts)); /* this is the `__INTERRUPTS` symbol */
+  } > FLASH
+
+  PROVIDE(_stext = ADDR(.vector_table) + SIZEOF(.vector_table));
+
+  /* ### .text */
+  .text _stext :
+  {
+    *(.text .text.*);
+    *(.HardFaultTrampoline);
+    *(.HardFault.*);
+    . = ALIGN(4);
+    __etext = .;
+  } > FLASH
+...
+}
+...
+```
+
+Cortex-M3のベクタテーブルは以下のようになっている。
+
+- [Cortex-M3 Devices Generic User Guide - Vector table](https://developer.arm.com/documentation/dui0552/a/the-cortex-m3-processor/exception-model/vector-table)
+
+![](./img/vector_table.svg)
 
 ```
 $ cargo objdump --example hello -- -d
