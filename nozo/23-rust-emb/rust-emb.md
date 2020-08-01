@@ -1,10 +1,21 @@
 # 組み込みRust
 
+組み込み環境(ARM Cortex-M)でRustを動かすチュートリアルを試してみた。
+
+- [組込みRust / The Embedded Rust Book](https://tomoyuki-nakabayashi.github.io/book/intro/index.html)
+
+ツールのインストール。
+
 ```
+# ARM Cortex-M アーキテクチャ向けクロスコンパイル環境のインストール
 $ rustup target add thumbv6m-none-eabi thumbv7m-none-eabi thumbv7em-none-eabi thumbv7em-none-eabihf
+
+# objdump などのバイナリツールのインストール
 $ cargo install cargo-binutils
 $ rustup component add llvm-tools-preview
 ```
+
+Cortex-M3マイクロコントローラのLM3S6965向けの例でコンパイル・実行してみる。
 
 ```
 $ git clone https://github.com/rust-embedded/cortex-m-quickstart app
@@ -30,6 +41,17 @@ app/
 
 2 directories, 15 files
 ```
+
+`example/hello.rs`のプログラム。
+通常のRustプログラムとは以下の点で異なる。
+
+- `#![no_std]`の宣言\
+ベアメタル環境で動作させるプログラムなので、OSが存在することを前提とした標準ライブラリ`std`を使うことはできない。\
+`#![no_std]`を宣言することで、`std`の代わりに`core` (OSなしで動作するライブラリ) を使うことを示す。
+
+- #![no_main]の宣言\
+標準のmainインターフェースを使わないことを示す。\
+プログラムのエントリポイントは`#[entry]`で指定する。
 
 ```rust
 //! Prints "Hello, world!" on the host console using semihosting
