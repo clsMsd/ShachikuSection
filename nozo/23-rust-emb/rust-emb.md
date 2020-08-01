@@ -201,6 +201,32 @@ Cortex-M3のベクタテーブルは以下のようになっている。
 
 ![](./img/vector_table.svg)
 
+コンパイルされたプログラムからobjdumpで`.vector_table`セクションを表示してみる。
+
+```
+$ cargo objdump --example hello -- -s
+hello:  file format ELF32-arm-little
+
+Contents of section .vector_table:
+ 0000 00000120 a7120000 eb120000 e9140000  ... ............
+ 0010 eb120000 eb120000 eb120000 00000000  ................
+ 0020 00000000 00000000 00000000 eb120000  ................
+ 0030 eb120000 00000000 eb120000 eb120000  ................
+ 0040 eb120000 eb120000 eb120000 eb120000  ................
+...
+ 03f0 eb120000 eb120000 eb120000 eb120000  ................
+```
+
+以下のようなアドレスが格納されていた。
+(最下位1ビットはそのアドレスのハンドラがThumb codeであるかどうかを示すフラグ)
+
+|Vector|Address|
+|----|----|
+|Initail SP value|0x2001_0000|
+|Reset|0x0000_12a7|
+
+コンパイルされたプログラムからobjdumpで`.text`セクションを表示してみる。
+
 ```
 $ cargo objdump --example hello -- -d
 hello:  file format ELF32-arm-little
@@ -238,21 +264,6 @@ Disassembly of section .text:
     12e8: fe de                         trap
 ...
 ```
-
-```
-$ cargo objdump --example hello -- -s
-hello:  file format ELF32-arm-little
-
-Contents of section .vector_table:
- 0000 00000120 a7120000 eb120000 e9140000  ... ............
- 0010 eb120000 eb120000 eb120000 00000000  ................
- 0020 00000000 00000000 00000000 eb120000  ................
- 0030 eb120000 00000000 eb120000 eb120000  ................
- 0040 eb120000 eb120000 eb120000 eb120000  ................
-...
- 03f0 eb120000 eb120000 eb120000 eb120000  ................
-```
-
 
 # 参考
 - 組込みRust / The Embedded Rust Book, https://tomoyuki-nakabayashi.github.io/book/intro/index.html
