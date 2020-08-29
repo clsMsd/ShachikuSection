@@ -85,6 +85,33 @@ Prelude> x =:= (1 ? 2 ? 3) & x+x =:= x*x where x free
 {x=2} True
 ```
 
+List型の値に対しても `free varialbe` を使うことができる。
+`++` はList同士の結合関数。
+
+```
+Prelude> [1,2,3] ++ [e] =:= [1,2,3,4] where e free
+{e=4} True
+```
+
+Listの最後の値を返す `last` 関数は次のように定義できる。
+
+```
+last xs | xs =:= _ ++ [e] = e where e free
+```
+
+実行結果は以下の通り。
+
+```
+test> last [1,2,3,4]
+4
+```
+
+また、`last` 関数は以下のように引数のパターンマッチに `++` が現れる形でも書くことができる。
+
+```
+last (_ ++ [e]) = e
+```
+
 
 # 参考
 - Curry A Tutorial Introduction, https://www.informatik.uni-kiel.de/~curry/tutorial/tutorial.pdf
