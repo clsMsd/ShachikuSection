@@ -33,10 +33,8 @@ Type ":h" for help (contact: pakcs@curry-language.org)
 Prelude> 
 ```
 
-## free variables
-
-Curry では `free varialbe` という機能があり、式の中で未定の変数を使うことができる。
-次のように `where ... free` という記法で `free varialbe` を宣言することができる。
+Curry では `free varialbe` という記法があり、式の中で未定の変数を使うことができる。
+次のように `where ... free` で `free varialbe` を宣言することができる。
 
 ```
 Prelude> x && (y || (not x)) where x,y free
@@ -47,6 +45,45 @@ Prelude> x && (y || (not x)) where x,y free
 
 `free varialbe` を含む式を評価すると、それらの変数が取り得る値を探索して、すべての場合の結果が返ってくる。
 
+また、式の中で制約を定義することで、制約を満たす解を導くことができる。
+例えば、次のように `e1 =:= e2` という等号制約を含む式を評価すると、`2+3` と `x` が同じ値になるような値 `x` が導き出される。
+
+```
+Prelude> 2+3=:=x where x free
+{x=5} True
+```
+
+上で見たBooleanの式も、結果が `True` になる場合の `free varialbe` の組み合わせを以下のように導き出せる。
+
+```
+Prelude> (x && (y || (not x))) =:= True where x,y free
+{x=True, y=True} True
+```
+
+Curryの他の特徴として `non-deterministic operations` がある。
+例えば、次のように複数の結果を返す関数を定義することができる。
+
+```
+choose x y = x
+choose x y = y
+```
+
+`choose` を評価すると複数の結果が返ってくる。
+
+```
+test> choose 1 2
+1
+2
+```
+
+上で定義した `choose` は built-in で `?` として定義されている。
+
+これを使うと、`x ∈ {1, 2, 3}` の中から `x + x = x ∗ x` を満たす `x` を導き出す式を以下のように書ける。
+
+```
+Prelude> x =:= (1 ? 2 ? 3) & x+x =:= x*x where x free
+{x=2} True
+```
 
 
 # 参考
