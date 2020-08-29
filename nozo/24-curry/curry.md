@@ -33,5 +33,21 @@ Type ":h" for help (contact: pakcs@curry-language.org)
 Prelude> 
 ```
 
+## free variables
+
+Curry では `free varialbe` という機能があり、式の中で未定の変数を使うことができる。
+次のように `where ... free` という記法で `free varialbe` を宣言することができる。
+
+```
+Prelude> x && (y || (not x)) where x,y free
+{x=True, y=True} True
+{x=True, y=False} False
+{x=False, y=y} False
+```
+
+`free varialbe` を含む式を評価すると、それらの変数が取り得る値を探索して、すべての場合の結果が返ってくる。
+
+
+
 # 参考
 - Curry A Tutorial Introduction, https://www.informatik.uni-kiel.de/~curry/tutorial/tutorial.pdf
