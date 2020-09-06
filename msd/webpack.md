@@ -3,7 +3,7 @@
 ## Webpackとは？
 > webpack is a module bundler. Its main purpose is to bundle JavaScript files for usage in a browser,  
 > yet it is also capable of transforming, bundling, or packaging just about any resource or asset.  
-> ([https://github.com/webpack/webpack]より引用)
+> ([https://github.com/webpack/webpack] より引用)
 
 ## Webpackの無いJavaScript開発
 Webpackが何をするかを説明する前に、Webpackがなかった頃のWeb開発がどのようなものだったかを説明する。  
