@@ -267,7 +267,7 @@ loaderの設定を行う。
 まずは必要なパッケージをインストールして、ソースとビルド成果物を入れるディレクティを作っておく。  
 ```
 $ npm install --save react react-dom
-$ npm install --save-dev webpack webpack-cli babel babel-loader @bebel/core @babel/preset-env @babel/preset-react
+$ npm install --save-dev webpack webpack-cli babel babel-loader @babel/core @babel/preset-env @babel/preset-react
 $ mkdir src dist
 ```
 
