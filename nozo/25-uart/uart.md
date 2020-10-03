@@ -2,11 +2,27 @@
 
 Universal Asynchronous Receiver/Transmitter (UART)
 
+![](./img/UART.PNG)
+
 > ![](./img/SCI-BLK.PNG)\
 > HD64F3069RF25データシート
 
 > ![](./img/REG-ADDR.PNG)\
 > HD64F3069RF25データシート
+
+```c
+struct sci_regs {
+  volatile uint8 smr;
+  volatile uint8 brr;
+  volatile uint8 scr;
+  volatile uint8 tdr;
+  volatile uint8 ssr;
+  volatile uint8 rdr;
+  volatile uint8 scmr;
+};
+
+volatile struct sci_regs *sci0 = 0xffffb0;
+```
 
 # 参考
 
