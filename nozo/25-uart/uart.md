@@ -4,6 +4,8 @@ Universal Asynchronous Receiver/Transmitter (UART)
 
 ![](./img/UART.PNG)
 
+![](./img/UART-TIMING.PNG)
+
 > ![](./img/SCI-BLK.PNG)\
 > HD64F3069RF25データシート
 
