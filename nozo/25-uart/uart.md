@@ -28,11 +28,29 @@ H8/3069Fに内蔵されているシリアルコントローラのブロック図
 > ![](./img/SCI-BLK.PNG)\
 > HD64F3069RF25データシート
 
+ブロック図の左側を見ると、外部に対して受信線(RxD)と送信線(TxD)が出ていることがわかる。
+
+※ このシリアルコントローラではクロック同期式モードによる通信も行えるためクロック信号線(SCK)が出ている。
+
+データを送信するときの流れは以下のとおりである。
+
+1) TDRレジスタに送信したい8bitのデータをセットする
+1) TDRのデータがシフトレジスタであるTSRに転送される
+1) TSRが0bitから順番にTxDに信号を送り出す
+
+ここで、シフトレジスタとは下図のような回路のパラレルデータ(D0-D2)をシリアルデータ(Q)に変換するものである。
+WE(Write Enable)が有効なとき、Dが各フリップフロップに書き込まれ、クロックが立ち上がるたびにQから順にデータが出力される。
+
 > ![](https://www.acri.c.titech.ac.jp/wordpress/wp-content/uploads/2020/03/20Q1_10A_1_shiftregister_ps-768x328.png)\
 > ACRi, シリアル通信で Hello, FPGA (1), https://www.acri.c.titech.ac.jp/wordpress/archives/123
 
+ここから、シリアルコントローラにアクセスするCプログラムをみてみる。
+シリアルコントローラの各種レジスタは下の表に示すようにアドレス`H'FFFB0`番地からアクセスすることができる。
+
 > ![](./img/REG-ADDR.PNG)\
 > HD64F3069RF25データシート
+
+Cプログラムからは下記のように構造体を定義してアクセスすると楽。
 
 ```c
 struct sci_regs {
@@ -48,7 +66,12 @@ struct sci_regs {
 volatile struct sci_regs *sci = 0xffffb0;
 ```
 
+シリアルコントローラの初期化は以下のように書ける。
+
 ```c
+#define SCI_SCR_RE     (1<<4) /* 受信有効 */
+#define SCI_SCR_TE     (1<<5) /* 送信有効 */
+
 int serial_init()
 {
   sci->scr = 0;
@@ -61,7 +84,11 @@ int serial_init()
 }
 ```
 
+データの送信は以下のように書ける。
+
 ```c
+#define H8_3069F_SCI_SSR_TDRE   (1<<7) /* 送信完了 */
+
 int serial_is_send_enable()
 {
   return (sci->ssr & SCI_SSR_TDRE);
