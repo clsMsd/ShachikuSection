@@ -6,6 +6,9 @@ Universal Asynchronous Receiver/Transmitter (UART)
 
 ![](./img/UART-TIMING.PNG)
 
+> ![](https://www.acri.c.titech.ac.jp/wordpress/wp-content/uploads/2020/03/20Q1_10A_1_shiftregister_ps-768x328.png)\
+> ACRi, シリアル通信で Hello, FPGA (1), https://www.acri.c.titech.ac.jp/wordpress/archives/123
+
 > ![](./img/SCI-BLK.PNG)\
 > HD64F3069RF25データシート
 
