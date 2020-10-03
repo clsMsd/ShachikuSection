@@ -29,14 +29,30 @@ struct sci_regs {
 volatile struct sci_regs *sci = 0xffffb0;
 ```
 
-```
+```c
 int serial_init()
 {
   sci->scr = 0;
   sci->smr = 0;
   sci->brr = 64;
-  sci->scr = H8_3069F_SCI_SCR_RE | H8_3069F_SCI_SCR_TE;
+  sci->scr = SCI_SCR_RE | SCI_SCR_TE;
   sci->ssr = 0;
+
+  return 0;
+}
+```
+
+```c
+int serial_is_send_enable()
+{
+  return (sci->ssr & SCI_SSR_TDRE);
+}
+
+int serial_send_byte(unsigned char c)
+{
+  while (!serial_is_send_enable(index)) ;
+  sci->tdr = c;
+  sci->ssr &= ~SCI_SSR_TDRE;
 
   return 0;
 }
