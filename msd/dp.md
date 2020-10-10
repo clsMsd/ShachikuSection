@@ -1,6 +1,6 @@
 # 動的計画法
 
-(この記事のほぼすべては https://qiita.com/drken/items/dc53c683d6de8aeacf5a の丸パクリです)
+(この記事のほぼすべては https://qiita.com/drken/items/dc53c683d6de8aeacf5a のパクリです)
 
 ## A - Frog 1
 
