@@ -337,7 +337,7 @@ function main() {
 
   document.getElementById("app").appendChild(canvas)
 
-  renderMB(canvas.getContext())
+  renderMB(canvas.getContext("2d") as CanvasRenderingContext2D, 400)
 } 
 
 main();
