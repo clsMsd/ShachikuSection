@@ -48,3 +48,27 @@ Definition test_exp := (Add (Val 1) (Val 2)).
 Example test_comp_correctness:
     exec (comp test_exp) [] = [eval test_exp].
 Proof. simpl. reflexivity. Qed. 
+
+
+(* Proof of the compiler correctness *)
+Lemma exec_distr: forall (c1 c2 : code) (s : stack),
+    exec (c1 ++ c2) s = exec c2 (exec c1 s).
+Proof.
+Admitted.
+
+Theorem comp_correctness: forall (e : exp),
+    exec (comp e) [] = [eval e].
+Proof.
+    intros.
+    induction e as [| e1' IHe1' e2' IHe2'].
+    - (* e = Val n *)
+      simpl. reflexivity.
+    - (* e = Add e1' e2' *)
+      simpl.
+      rewrite -> exec_distr.
+      rewrite -> IHe1'.
+      rewrite -> exec_distr.
+      (* Stuck at this point:
+       *   exec [ADD] (exec (comp e2') [eval e1']) = [eval e1' + eval e2']
+       *)
+Admitted.
