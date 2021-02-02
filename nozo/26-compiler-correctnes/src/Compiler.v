@@ -71,4 +71,22 @@ Proof.
       (* Stuck at this point:
        *   exec [ADD] (exec (comp e2') [eval e1']) = [eval e1' + eval e2']
        *)
-Admitted.
+Abort.
+
+Theorem comp_correctness_general: forall (e : exp) (s : stack),
+    exec (comp e) s = (eval e)::s.
+Proof.
+    intro.
+    induction e as [| e1' IHe1' e2' IHe2'].
+    - (* e = Val n *)
+      intro. simpl. reflexivity.
+    - (* e = Add e1' e2' *)
+      intro.
+      simpl.
+      rewrite -> exec_distr.
+      rewrite -> IHe1'.
+      rewrite -> exec_distr.
+      rewrite -> IHe2'.
+      simpl.
+      reflexivity.
+Qed.
