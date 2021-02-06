@@ -1,7 +1,7 @@
 From Coq Require Import Lists.List.
 Import ListNotations.
 
-(* Source Language *)
+(* ソース言語の定義 *)
 Inductive exp : Type :=
     | Val (n : nat)
     | Add (e1 : exp) (e2 : exp).
@@ -14,7 +14,7 @@ Fixpoint eval (e : exp) : nat :=
 
 Compute eval (Add (Val 1) (Val 2)).
 
-(* Target machine code *)
+(* ターゲットコードの定義 *)
 Inductive op : Type :=
     | PUSH (n : nat)
     | ADD.
@@ -34,7 +34,7 @@ Fixpoint exec (c : code) (s : stack) : stack :=
 
 Compute exec [PUSH 1; PUSH 2; ADD] [].
 
-(* Compiler *)
+(* コンパイラの定義 *)
 Fixpoint comp (e : exp) : code :=
     match e with
     | Val n     => [PUSH n]
@@ -43,50 +43,76 @@ Fixpoint comp (e : exp) : code :=
 
 Compute comp (Add (Val 1) (Val 2)).
 
-(* Test compiler *)
+(* コンパイラの正しさのテスト *)
 Definition test_exp := (Add (Val 1) (Val 2)).
 Example test_comp_correctness:
     exec (comp test_exp) [] = [eval test_exp].
-Proof. simpl. reflexivity. Qed. 
+Proof. simpl. reflexivity. Qed.
 
-
-(* Proof of the compiler correctness *)
+(* 分配法則 *)
 Lemma exec_distr: forall (c1 c2 : code) (s : stack),
     exec (c1 ++ c2) s = exec c2 (exec c1 s).
 Proof.
+    intros c1 c2.
+    induction c1 as [| c1' c1s' IHc1'].
+    - (* c1 = [] *)
+      intros s.
+      simpl.
+      reflexivity.
+    - intros s.
+      destruct c1'.
+      + (* c1 = (PUSH n)::c1s' *)
+        simpl.
+        rewrite -> IHc1'.
+        reflexivity.
+      + (* c1 = ADD::c1s' *)
 Admitted.
 
+(* コンパイラの正しさの証明 *)
 Theorem comp_correctness: forall (e : exp),
     exec (comp e) [] = [eval e].
 Proof.
-    intros.
+    intros e.
     induction e as [| e1' IHe1' e2' IHe2'].
-    - (* e = Val n *)
-      simpl. reflexivity.
-    - (* e = Add e1' e2' *)
-      simpl.
-      rewrite -> exec_distr.
-      rewrite -> IHe1'.
-      rewrite -> exec_distr.
-      (* Stuck at this point:
-       *   exec [ADD] (exec (comp e2') [eval e1']) = [eval e1' + eval e2']
+                                (* 帰納法の仮定
+                                 * IHe1': exec (comp e1') [] = [eval e1']
+                                 * IHe2': exec (comp e2') [] = [eval e2']
+                                 *)
+                                (* 途中式 *)
+    - (* e = Val n *)           (* exec (comp (Val n)) [] = [eval (Val n)] *)
+      simpl.                    (* [n] = [n] *)
+      reflexivity.
+    - (* e = Add e1' e2' *)     (* exec (comp (Add e1' e2')) []                  = [eval (Add e1' e2')]  *)
+      simpl.                    (* exec (comp e1' ++ comp e2' ++ [ADD]) []       = [eval e1' + eval e2'] *)
+      rewrite -> exec_distr.    (* exec (comp e2' ++ [ADD]) (exec (comp e1') []) = [eval e1' + eval e2'] *)
+      rewrite -> IHe1'.         (* exec (comp e2' ++ [ADD]) [eval e1']           = [eval e1' + eval e2'] *)
+      rewrite -> exec_distr.    (* exec [ADD] (exec (comp e2') [eval e1'])       = [eval e1' + eval e2'] *)
+      (* 適用できない！
+      rewrite -> IHe2'.
        *)
 Abort.
 
+(* 一般化したコンパイラの正しさの証明 *)
 Theorem comp_correctness_general: forall (e : exp) (s : stack),
     exec (comp e) s = (eval e)::s.
 Proof.
-    intro.
+    intros e.
     induction e as [| e1' IHe1' e2' IHe2'].
+                                (* 帰納法の仮定
+                                 * IHe1': forall s : stack, exec (comp e1') s = eval e1' :: s
+                                 * IHe2': forall s : stack, exec (comp e2') s = eval e2' :: s
+                                 *)
     - (* e = Val n *)
-      intro. simpl. reflexivity.
+      intros s.                 (* 途中式 *)
+      simpl.                    (* exec (comp (Val n)) s = eval (Val n) :: s *)
+      reflexivity.              (* n :: s = n :: s *)
     - (* e = Add e1' e2' *)
-      intro.
-      simpl.
-      rewrite -> exec_distr.
-      rewrite -> IHe1'.
-      rewrite -> exec_distr.
-      rewrite -> IHe2'.
-      simpl.
-      reflexivity.
+      intros s.
+      simpl.                    (* exec (comp (Add e1' e2')) s                  = eval (Add e1' e2') :: s  *)
+      rewrite -> exec_distr.    (* exec (comp e1' ++ comp e2' ++ [ADD]) s       = eval e1' + eval e2' :: s *)
+      rewrite -> IHe1'.         (* exec (comp e2' ++ [ADD]) (exec (comp e1') s) = eval e1' + eval e2' :: s *)
+      rewrite -> exec_distr.    (* exec (comp e2' ++ [ADD]) (eval e1' :: s)     = eval e1' + eval e2' :: s *)
+      rewrite -> IHe2'.         (* exec [ADD] (exec (comp e2') (eval e1' :: s)) = eval e1' + eval e2' :: s *)
+      simpl.                    (* exec [ADD] (eval e2' :: eval e1' :: s)       = eval e1' + eval e2' :: s *)
+      reflexivity.              (* eval e1' + eval e2' :: s                     = eval e1' + eval e2' :: s *)
 Qed.
