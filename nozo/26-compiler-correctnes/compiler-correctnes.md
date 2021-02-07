@@ -182,5 +182,45 @@
   あとは`simpl`して帰納ケースの証明が完了し、コンパイラの正しさが証明できた。
   と言いたいところだけど途中で定義した補題の証明がまだ残っている。
 
+  残っていた補題の証明だが、うまくcoqで書けていない。
+  というのも、ADD命令の場合について証明しようとすると、スタックサイズが2以上であるという仮定が必要になって証明が行き詰ってしまう。
+
+  ```coq
+  Lemma exec_distr: forall (c1 c2 : code) (s : stack),
+      exec (c1 ++ c2) s = exec c2 (exec c1 s).
+  Proof.
+      intros c1 c2.
+      induction c1 as [| c1' c1s' IHc1'].
+      - (* c1 = [] *)
+        intros s.
+        simpl.
+        reflexivity.
+      - intros s.
+        destruct c1'.
+        + (* c1 = (PUSH n)::c1s' *)
+          simpl app.
+          simpl exec.
+          rewrite -> IHc1'.
+          reflexivity.
+        + (* c1 = ADD::c1s' *)
+          simpl app.
+          (* スタックサイズが2以上である仮定が必要
+          simpl exec.
+          *)
+  Admitted.
+  ```
+
+  書籍だと唐突にこの仮定が出現していてcoqに書き下すことが難しい。
+  正しく補題を書こうとすると次のようになる？
+
+  ```coq
+  Lemma exec_distr': forall (c1 c2 : code) (s ss : stack) (n1 n2 : nat),
+      s = n1::n2::ss ->
+      exec (c1 ++ c2) s = exec c2 (exec c1 s).
+  ```
+  
+  証明が間に合わなかったのでまたいつかの機会に紹介したいと思います。
+
 # 参考
-- プログラミングHaskell 第2版, Graham Hutton (著), 山本 和彦 (訳), オーム社
+- プログラミングHaskell 第2版, Graham Hutton (著), 山本 和彦 (訳)
+https://www.lambdanote.com/products/haskell-ebook?variant=28881684987988
