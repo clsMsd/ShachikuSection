@@ -27,8 +27,8 @@ Fixpoint exec (c : code) (s : stack) : stack :=
     | (PUSH n)::cs => exec cs (n::s)
     | ADD     ::cs => match s with
                       | n1::n2::ss => exec cs ((n2+n1)::ss)
-                      (* Ignore op if the stack size is less than 2. *)
-                      | _          => s
+                      (* スタックサイズが2より小さい場合は命令を無視する *)
+                      | _          => exec cs s
                       end
     end.
 
@@ -49,6 +49,16 @@ Example test_comp_correctness:
     exec (comp test_exp) [] = [eval test_exp].
 Proof. simpl. reflexivity. Qed.
 
+(* スタックサイズが2より小さい場合にADD命令を実行するケース *)
+Example test_exec_dirst:
+  exec ([ADD]++[PUSH 1]) [] = exec [PUSH 1] (exec [ADD] []).
+Proof.
+                (* exec ([ADD] ++ [PUSH 1]) [] = exec [PUSH 1] (exec [ADD] []) *)
+  simpl app.    (* exec [ADD; PUSH 1] []       = exec [PUSH 1] (exec [ADD] []) *)
+  simpl exec.   (* [1]                         = [1]                           *)
+  reflexivity.
+Qed.
+
 (* 分配法則 *)
 Lemma exec_distr: forall (c1 c2 : code) (s : stack),
     exec (c1 ++ c2) s = exec c2 (exec c1 s).
@@ -60,13 +70,31 @@ Proof.
       simpl.
       reflexivity.
     - intros s.
+      simpl app.
       destruct c1'.
-      + (* c1 = (PUSH n)::c1s' *)
-        simpl.
+      { (* c1 = (PUSH n)::c1s' *)
+        simpl exec.
         rewrite -> IHc1'.
         reflexivity.
-      + (* c1 = ADD::c1s' *)
-Admitted.
+      }
+      { (* c1 = ADD::c1s' *)
+        destruct s.
+        { simpl.
+          rewrite -> IHc1'.
+          reflexivity.
+        }
+        { destruct s.
+          { simpl.
+            rewrite -> IHc1'.
+            reflexivity.
+          }
+          { simpl.
+            rewrite -> IHc1'.
+            reflexivity.
+          }
+        }
+      }
+Qed.
 
 (* コンパイラの正しさの証明 *)
 Theorem comp_correctness: forall (e : exp),
