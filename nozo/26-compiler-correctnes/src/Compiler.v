@@ -50,45 +50,40 @@ Example test_comp_correctness:
 Proof. simpl. reflexivity. Qed.
 
 (* スタックサイズが2より小さい場合にADD命令を実行するケース *)
-Example test_exec_dirst:
-  exec ([ADD]++[PUSH 1]) [] = exec [PUSH 1] (exec [ADD] []).
-Proof.
-                (* exec ([ADD] ++ [PUSH 1]) [] = exec [PUSH 1] (exec [ADD] []) *)
-  simpl app.    (* exec [ADD; PUSH 1] []       = exec [PUSH 1] (exec [ADD] []) *)
-  simpl exec.   (* [1]                         = [1]                           *)
-  reflexivity.
-Qed.
+Compute exec ([ADD]++[PUSH 1]) [] = exec [PUSH 1] (exec [ADD] []).
 
 (* 分配法則 *)
 Lemma exec_distr: forall (c1 c2 : code) (s : stack),
     exec (c1 ++ c2) s = exec c2 (exec c1 s).
 Proof.
     intros c1 c2.
-    induction c1 as [| c1' c1s' IHc1'].
+    induction c1 as [| o c1' IHc1'].
     - (* c1 = [] *)
       intros s.
       simpl.
       reflexivity.
     - intros s.
-      simpl app.
-      destruct c1'.
-      { (* c1 = (PUSH n)::c1s' *)
-        simpl exec.
+      destruct o.
+      { (* o = PUSH n *)
+        simpl.
         rewrite -> IHc1'.
         reflexivity.
       }
-      { (* c1 = ADD::c1s' *)
+      { (* o = ADD *)
         destruct s.
-        { simpl.
+        { (* s = [] *)
+          simpl.  (* [] = exec c2 [] *)
           rewrite -> IHc1'.
           reflexivity.
         }
         { destruct s.
-          { simpl.
+          { (* s = n::[] *)
+            simpl.
             rewrite -> IHc1'.
             reflexivity.
           }
-          { simpl.
+          { (* s = n::n0::[] *)
+            simpl.
             rewrite -> IHc1'.
             reflexivity.
           }
