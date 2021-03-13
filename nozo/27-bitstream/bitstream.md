@@ -213,7 +213,15 @@ data length       : 0x0021728c
 ...
 ```
 
-## オープンソースなFPGAツール
+## 参考情報：オープンソースなFPGA開発ツール
+
+XilinxのvivadoのようなFPGA開発ツールはオープンソースではなく、その内部実装は公開されていない。
+
+FPGA開発ツールのオープンソースな取り組みとしてSymbiFlowというプロジェクトがある。
+
+SymbiFlow - the GCC of FPGAs, https://symbiflow.github.io/
+
+RTL記述からBitstreamまでの変換における各工程のオープン・クローズなツールの対応が以下のように示されている。
 
 > ![](https://symbiflow.readthedocs.io/en/latest/_images/toolchain-flow.svg)
 > https://symbiflow.readthedocs.io/en/latest/toolchain-desc/design-flow.html より
@@ -221,4 +229,4 @@ data length       : 0x0021728c
 # 参考
 - 天野 英晴, FPGAの原理と構成, https://www.ohmsha.co.jp/book/9784274218644/
 - Xilinx - 7 シリーズ FPGA コンフィギュレーション ユーザー ガイド (日本語版) (v1.9), https://japan.xilinx.com/support/documentation/user_guides/j_ug470_7Series_Config.pdf
-- Lattice - iCE40 LP/HX/LM シリーズ, https://www.latticesemi.com/ja-JP/Products/FPGAandCPLD/iCE40
+- SymbiFlow - the GCC of FPGAs, https://symbiflow.github.io/
