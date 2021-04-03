@@ -1,10 +1,5 @@
 # Rust で週末レイトレーシング
 
-## 前回のお詫び
-前回の発表で、「TypeScriptで2秒程度かかっていたマンデルブロ集合の描画がWasmでは75秒程度かかる」と言っていたが、  
-あれはwebpack-dev-serverが悪さをしていただけで、別のサーバーでホストしたら1秒程度でマンデルブロ集合が描画されました。  
-(全部webpackが悪い)
-
 ## はじめに
 Ray Tracing in One Weekend [https://raytracing.github.io/books/RayTracingInOneWeekend.html]  
 という、週末の1~2日間程度でさくっとレイトレーシングの仕組みを理解して実装してみようぜというあるのだが、  
