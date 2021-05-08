@@ -206,6 +206,32 @@ DWARF section [27] '.debug_info' at offset 0x306a:
                 [ 0] fbreg -20
 ```
 
+例えばプログラム中に定義した構造体の情報は次のように格納されている。
+
+```
+ [    2d]    structure_type       abbrev: 2
+             name                 (strp) "test"
+             byte_size            (data1) 8
+             decl_file            (data1) main.c (1)
+             decl_line            (data1) 1
+             decl_column          (data1) 8
+             sibling              (ref4) [    55]
+ [    3a]      member               abbrev: 3
+               name                 (strp) "field1"
+               decl_file            (data1) main.c (1)
+               decl_line            (data1) 2
+               decl_column          (data1) 10
+               type                 (ref4) [    55]
+               data_member_location (data1) 0
+ [    47]      member               abbrev: 3
+               name                 (strp) "field2"
+               decl_file            (data1) main.c (1)
+               decl_line            (data1) 3
+               decl_column          (data1) 10
+               type                 (ref4) [    5c]
+               data_member_location (data1) 4
+```
+
 # 参考
 - The DWARF Debugging Standard, http://www.dwarfstd.org
 - デバッグ情報の歩き方, https://qiita.com/mhiramat/items/8df17f5113434e93ff0c
