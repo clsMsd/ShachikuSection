@@ -63,6 +63,11 @@ void main( void ) {
 
 http://glslsandbox.com/e#207.3
 
+フラグメントシェーダーは各ピクセルごとに処理が実行されるため、前の描画状態の情報を使えばGLSLだけでライフゲームを表現することができる。
+
+この例では`backbuffer`に前の描画状態が格納されていて、自分のピクセルの周囲8マスの情報から次の色状態を決定している。
+GLSLはGPUで処理されるため大きな盤面のライフゲームでも高速に処理することができる。
+
 ```glsl
 #ifdef GL_ES
 precision mediump float;
