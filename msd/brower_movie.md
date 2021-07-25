@@ -105,7 +105,7 @@ https://www.chromium.org/audio-video
 ライブストリーミングの規格には Microsoft が開発した SmoothStreaming、Apple が開発した　HLS、  
 Adobe が開発した HTTP Dynamic Streaming、MPEG が開発した MPEG-DASH などがあるが、  
 今現在良く用いられるのは MPEG-DASH と HLS である。  
-特に Apple製品を対象とする場合はほぼ確実にHLS対応が必須なので、 
+特に Apple製品を対象とする場合はほぼ確実にHLS対応が必須なので、映像配信サービスを提供する側からするとHLS対応せざるおえない状況になっている。
 
 <!-- ### HLS(HTTP Live Streaming)
 Appleの作ったストリーミング技術。
