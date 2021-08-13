@@ -92,6 +92,15 @@ for (let i = 0; i < dstWidth * dstHeight; ++i) {
 
 ## Transform Feedback を使った方法
 
+Transform FeedbackはWebGL2.0から使えるようになった仕組みで、頂点シェーダの出力をバッファに書く戻すことができる。
+
+> ![](https://ics.media/entry/17505/images/180202_webgl2_transform_feedback_pipeline2__960.png)
+> 
+> サンプルで理解するWebGL 2.0 Transform Feedbackによるパーティクル表現
+
+あるデータ列を２つ受け取ってそれぞれ`+ - *`するシェーダは以下のように書ける。
+
+Vertex Shader :
 ```glsl
 #version 300 es
 
@@ -109,15 +118,73 @@ void main(void){
 }
 ```
 
-```glsl
-#version 300 es
+JS側のプログラムは以下。
 
-precision highp float;
+```js
+const tf = gl.createTransformFeedback();
+gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tf);
 
-void main(void){
+const sumBuf = makeBuffer(gl, a.length * 4);
+const diffBuf = makeBuffer(gl, a.length * 4);
+const prodBuf = makeBuffer(gl, a.length * 4);
+gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, sumBuf);
+gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, diffBuf);
+gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 2, prodBuf);
+
+gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+// render
+gl.bindVertexArray(vao);
+gl.enable(gl.RASTERIZER_DISCARD);
+
+gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, tf);
+gl.beginTransformFeedback(gl.POINTS);
+gl.drawArrays(gl.POINTS, 0, a.length);
+gl.endTransformFeedback();
+gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
+
+gl.disable(gl.RASTERIZER_DISCARD);
+
+console.log(`a: ${a}`);
+console.log(`b: ${b}`);
+printResults(gl, sumBuf, "sumBuf");
+printResults(gl, diffBuf, "diffBuf");
+printResults(gl, prodBuf, "prodBuf");
+
+function printResults(
+  gl: WebGL2RenderingContext,
+  buffer: WebGLBuffer | null,
+  label: string
+) {
+  const results = new Float32Array(a.length);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.getBufferSubData(gl.ARRAY_BUFFER, 0, results);
+  console.log(`${label}: ${results}`);
 }
+
+function makeBuffer(
+  gl: WebGL2RenderingContext,
+  sizeOrData: any
+): WebGLBuffer | null {
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, sizeOrData, gl.STATIC_DRAW);
+  return buf;
+}
+```
+
+実行結果 :
+```
+a: 1,2,3,4,5,6
+b: 3,6,9,12,15,18
+sumBuf: 4,8,12,16,20,24
+diffBuf: -2,-4,-6,-8,-10,-12
+prodBuf: 3,12,27,48,75,108
 ```
 
 # 参考
 
 - https://webgl2fundamentals.org/webgl/lessons/webgl-gpgpu.html
+- https://wgld.org/d/webgl2/w014.html
+- サンプルで理解するWebGL 2.0 Transform Feedbackによるパーティクル表現, https://ics.media/entry/17505/
