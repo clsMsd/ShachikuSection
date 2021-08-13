@@ -1,17 +1,23 @@
 # WebGL GPGPU
 
+WebGLはGPUを使って画面に描画するグラフィックを計算して表示することができるが、グラフィックの計算以外にも汎用的な計算をすることができる。
+
+> ![](https://mdn.mozillademos.org/files/13334/mdn-games-3d-rendering-pipeline.png)
+> 
+> レンダリングパイプライン, https://developer.mozilla.org/ja/docs/Games/Techniques/3D_on_the_web/Basic_theory#rendering_pipeline
+
 ## Texture を使った方法
 
-```glsl
-#version 300 es
+WebGLで画像を描画するためにはTextureが使われる。
+通常、画像データを２次元の配列とみなして１ピクセルごとに色の情報`vec4(r, g, b, a)`がTextureに格納される。
+Textureはシェーダに入力されて、シェーダが各ピクセルの情報を読みながら加工したりして描画される。
 
-in vec4 position;
+しかし、１ピクセルごとに格納されるデータは単なる数値であり、色以外に任意の４次元ベクトルの値を格納することができる。
+そして、そのTextureをシェーダ側で加工することで汎用的な計算をすることができる。
 
-void main(void){
-    gl_Position = position;
-}
-```
+例えば、あるデータ列を受け取ってすべての要素を２倍にするシェーダは以下のように書ける。
 
+Fragment Shader:
 ```glsl
 #version 300 es
 precision highp float;
@@ -26,6 +32,8 @@ void main(void){
     outColor = value * 2.0;
 }
 ```
+
+
 
 ```js
 const srcWidth = 3;
@@ -64,7 +72,34 @@ for (let i = 0; i < dstWidth * dstHeight; ++i) {
 }
 ```
 
+
 ## Transform Feedback を使った方法
+
+```glsl
+#version 300 es
+
+in float a;
+in float b;
+
+out float sum;
+out float diff;
+out float prod;
+
+void main(void){
+  sum = a + b;
+  diff = a - b;
+  prod = a * b;
+}
+```
+
+```glsl
+#version 300 es
+
+precision highp float;
+
+void main(void){
+}
+```
 
 # 参考
 
