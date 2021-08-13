@@ -16,8 +16,9 @@ Textureはシェーダに入力されて、シェーダが各ピクセルの情�
 そして、そのTextureをシェーダ側で加工することで汎用的な計算をすることができる。
 
 例えば、あるデータ列を受け取ってすべての要素を２倍にするシェーダは以下のように書ける。
+`srcTex`からデータを受け取り`outColor`に計算結果を出力している。
 
-Fragment Shader:
+Fragment Shader :
 ```glsl
 #version 300 es
 precision highp float;
@@ -33,7 +34,11 @@ void main(void){
 }
 ```
 
-
+シェーダへのデータの受け渡しと、計算結果の読み込みはJS側で行う。
+1) 入力データ`[1, 2, 3, 4, 5, 6]`を 3x2 のTextureとして作成しシェーダへ渡している。
+1) `drawArrays`を呼び出すとシェーダを使って描画の計算が実行される。
+今回の場合はTextureの各ピクセルのデータを2倍にして`[2, 4, 6, 8, 10, 12]`を出力する。
+1) 計算結果は`readPixels`で読み出す。
 
 ```js
 const srcWidth = 3;
@@ -41,6 +46,7 @@ const srcHeight = 2;
 const dstWidth = 3;
 const dstHeight = 2;
 
+// Texture の作成
 const tex = gl.createTexture();
 gl.bindTexture(gl.TEXTURE_2D, tex);
 gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
@@ -53,7 +59,7 @@ gl.texImage2D(
   0,
   gl.RED,
   gl.UNSIGNED_BYTE,
-  new Uint8Array([1, 2, 3, 4, 5, 6])
+  new Uint8Array([1, 2, 3, 4, 5, 6]) // 入力データ
 );
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -62,16 +68,27 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
 gl.uniform1i(gl.getUniformLocation(shaderProgram, "srcTex"), 0);
 
+// 計算の実行
 gl.drawArrays(gl.TRIANGLES, 0, plane_pos.length);
 
+// 計算結果の読み出し
 const results = new Uint8Array(dstWidth * dstHeight * 4);
 gl.readPixels(0, 0, dstWidth, dstHeight, gl.RGBA, gl.UNSIGNED_BYTE, results);
 
 for (let i = 0; i < dstWidth * dstHeight; ++i) {
-  console.log(i, results[i * 4]);
+  console.log(results[i * 4]);
 }
 ```
 
+実行結果 :
+```
+2
+4
+6
+8
+10
+12
+```
 
 ## Transform Feedback を使った方法
 
