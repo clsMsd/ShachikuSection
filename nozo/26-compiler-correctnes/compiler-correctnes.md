@@ -56,6 +56,8 @@
 
   ちなみに、書籍の実装では以下のようにADD命令についてスタックサイズが2以上であるパターンのみ定義している。coqではパターンは網羅されている必要があるので、スタックサイズが2より小さいときは何もしない実装にしてみた。
 
+**※後の証明でわかるがこの「スタックサイズが2より小さいときは何もしない」の実装には誤りがある。**
+
   ```haskell
   exec :: Code -> Stack -> Stack
   exec []           s           = s
@@ -99,9 +101,9 @@
   この等式は「ある式`e`をコンパイルして得られたコードを評価した結果と、式`e`を評価した結果は等しい」ことを表している。
   つまり、コンパイラの正しさとは「ソース言語の仕様(評価関数の定義)を維持したままターゲット言語に変換する性質」のことと言える。
 
-  コンパイラの正しさをcoqで証明する。
+  コンパイラの正しさとして定義した等式exec (comp e) [] = [eval e]が任意の式eについて成り立つかどうかをcoqで証明する。
 
-  証明は`Expr`についての構造的帰納法を用いて次を証明したらよい。
+  証明は`exp`についての構造的帰納法を用いて次を証明したらよい。
   1. 基底ケース：
    `e = Val n`に対して`comp_correctness`が成り立つ
   2. 帰納ケース：
@@ -220,6 +222,135 @@
   ```
   
   証明が間に合わなかったのでまたいつかの機会に紹介したいと思います。
+  
+  
+  -> 原因はexecの第2引数にサイズが2より小さいスタックが渡された場合の実装に問題があった。
+  いまのexecの実装では次のように補題exec_distrについて反例が見つかってしまう。
+  
+
+```
+Compute exec ([ADD]++[PUSH 1]) [] = exec [PUSH 1] (exec [ADD] []).
+(*
+     = [] = [1]
+     : Prop
+*)
+```
+
+`exec`の`ADD`についての実装を見てみると、スタックサイズが2より小さいときスタックをそのまま返すように実装していた。しかし、これだと`ADD`より後ろの命令`cs`は捨てられてしまう。
+
+```
+    | ADD     ::cs => match s with
+                      | n1::n2::ss => exec cs ((n2+n1)::ss)
+                      (* スタックサイズが2より小さい場合は命令を無視する *)
+                      | _          => s
+                      end
+```
+
+そのため、反例の左辺ではADDを実行するときADDと一緒にPUSHまで捨てられ結果は空になってしまい、右辺ではADDとPUSHは単体で実行されるため結果が1になる。
+
+補題`exec_distr`を満たすような実装は次のようになる。
+
+```diff
+  Fixpoint exec (c : code) (s : stack) : stack :=
+      match c with
+      | []           => s
+      | (PUSH n)::cs => exec cs (n::s)
+      | ADD     ::cs => match s with
+                        | n1::n2::ss => exec cs ((n2+n1)::ss)
+                        (* スタックサイズが2より小さい場合は命令を無視する *)
+-                       | _          => s
++                       | _          => exec cs s
+                        end
+      end.
+```
+
+修正した実装では反例だったものの結果も正しく等式が成り立つようになった。
+
+```
+Compute exec ([ADD]++[PUSH 1]) [] = exec [PUSH 1] (exec [ADD] []).
+(*
+     = [1] = [1]
+     : Prop
+*)
+```
+
+修正した`exec`をもとに補題`exec_distr`を証明すると次のようになる。（もちろん他の証明でも`exec`を使っているので証明が通るか確認は必要。結果はすべてOKだった。）
+
+```coq
+Lemma exec_distr: forall (c1 c2 : code) (s : stack),
+    exec (c1 ++ c2) s = exec c2 (exec c1 s).
+Proof.
+    intros c1 c2.
+    induction c1 as [| o c1' IHc1'].
+    - (* c1 = [] *)
+      intros s.
+      simpl.
+      reflexivity.
+    - intros s.
+      destruct o.
+      { (* o = PUSH n *)
+        simpl.
+        rewrite -> IHc1'.
+        reflexivity.
+      }
+      { (* o = ADD *)
+        destruct s.
+        { (* s = [] *)
+          simpl.  (* [] = exec c2 [] *)
+          rewrite -> IHc1'.
+          reflexivity.
+        }
+        { destruct s.
+          { (* s = n::[] *)
+            simpl.
+            rewrite -> IHc1'.
+            reflexivity.
+          }
+          { (* s = n::n0::[] *)
+            simpl.
+            rewrite -> IHc1'.
+            reflexivity.
+          }
+        }
+      }
+Qed.
+```
+
+これで晴れてすべての証明が完了してコンパイラの正しさが保証された。
+
+# 発展
+
+調べているとより発展的な内容のコンパイラの正しさの証明に関する講座が公開されていた。(InriaはCoqの開発元で、Xavier Leroyさんは証明済みCコンパイラのCompCertの開発リーダー。)
+
+[Proving the correctness of a compiler - Xavier Leroy (Collège de France and Inria Paris)](https://xavierleroy.org/courses/EUTypes-2019/)
+
+下記のようにより一般的なソース・ターゲット言語を扱っている。また、ターゲットとしているVMの定義にプログラムカウンタが取り入れられているなど現実的なコンパイラに近づいた内容になっている。
+
+```
+ソースの命令型言語
+  Arithmetic expressions:
+  a ::= n | x | a1 + a2 | a1 − a2
+  Boolean expressions:
+  b ::= true | false | a1 = a2 | a1 ≤ a2
+      | not b | b1 and b2
+  Commands (statements):
+  c ::= skip                    (do nothing)
+      | x := a                  (assignment)
+      | c1; c2                  (sequence)
+      | if b then c1 else c2 fi (conditional)
+      | while b do c done       (loop)
+
+ターゲットのVMの命令セット
+  i ::= Iconst(n)     push n on stack
+      | Ivar(x)       push value of x
+      | Isetvar(x)    pop value and assign it to x
+      | Iadd          pop two values, push their sum
+      | Iopp          pop one value, push its opposite
+      | Ibranch(δ)    unconditional jump
+      | Ibeq(δ1, δ0)  pop two values, jump δ1 if = , jump δ0 if 6=
+      | Ible(δ1, δ0)  pop two values, jump δ1 if ≤ , jump δ0 if >
+      | Ihalt         end of program
+```
 
 # 参考
 - プログラミングHaskell 第2版, Graham Hutton (著), 山本 和彦 (訳)
