@@ -11,16 +11,21 @@ NEURONは神経細胞・神経回路モデルのシミュレーションをす�
 この活動電位が軸索に沿って伝導して次のニューロンに信号を伝達する。
 
 膜電位は細胞内外のイオン濃度差によって生じる。
+細胞外はナトリウムイオン(Na⁺)が多く、細胞内はカリウムイオン(K⁺)が多く存在する。
+細胞膜にはそれぞれのイオンを通すイオンチャネルが存在して、刺激によってイオンチャネルの活性・不活性が変化して活動電位が生じる。
 
-![](https://upload.wikimedia.org/wikipedia/commons/6/6a/Membrane_Permeability_of_a_Neuron_During_an_Action_Potential.svg)
-
-Hodgkin-Huxleyモデル
-
-> ![](https://upload.wikimedia.org/wikipedia/commons/1/1f/MembraneCircuit.svg)
+> ![](https://upload.wikimedia.org/wikipedia/commons/6/6a/Membrane_Permeability_of_a_Neuron_During_an_Action_Potential.svg)
 > 
 > https://en.wikipedia.org/wiki/Action_potential, Ion movement during an action potential.
 
-NEURONのプログラム
+神経細胞膜をRC回路とみなすことで膜電位の挙動をモデル化することができる。
+Na⁺チャネルとK⁺チャネルの透過性を抵抗値パラメータとして持つ細胞膜の等価回路をHodgkin-Huxleyモデルという。
+
+> ![](https://upload.wikimedia.org/wikipedia/commons/1/1f/MembraneCircuit.svg)
+> 
+> https://en.wikipedia.org/wiki/Action_potential, Equivalent electrical circuit for the Hodgkin–Huxley model of the action potential.
+
+NEURONシミュレータは、神経細胞膜の等価回路から膜電位の挙動を計算することで神経細胞・回路のシミュレーションを行う。
 
 ```
 load_file("nrngui.hoc")
