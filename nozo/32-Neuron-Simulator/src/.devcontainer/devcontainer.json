@@ -1,0 +1,10 @@
+{
+	"name": "Neuron Simulator",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"settings": {
+		"terminal.integrated.defaultProfile.linux": "bash"
+	},
+	"remoteUser": "neuron"
+}

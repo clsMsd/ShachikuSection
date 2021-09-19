@@ -26,6 +26,10 @@ Na⁺チャネルとK⁺チャネルの透過性を抵抗値パラメータと�
 > https://en.wikipedia.org/wiki/Action_potential, Equivalent electrical circuit for the Hodgkin–Huxley model of the action potential.
 
 NEURONシミュレータは、神経細胞膜の等価回路から膜電位の挙動を計算することで神経細胞・回路のシミュレーションを行う。
+プログラムは神経細胞の形状やイオンチャネルの抵抗、与える刺激などのパラメータを指定することで、神経細胞の膜電位の推移をシミュレーションすることができる。
+次のプログラムは、直径20.0[μm], 長さ20.0[μm], Na⁺チャネルコンダクタンス0.12[S/cm²], K⁺チャネルコンダクタンス0.04[S/cm²]の神経細胞に0.05[nA]の刺激を100[msec]与えるプログラムになる。
+
+ソース元：https://cns.neuroinf.jp/modules/pico/index.php?content_id=22
 
 ```
 load_file("nrngui.hoc")
@@ -48,7 +52,11 @@ cell{
 tstop=300
 ```
 
+このプログラムをNEURONでシミュレーションすると次のような結果になる。
+
 ![](./img/neuron0.PNG)
+
+
 
 # 参考文献
 - 神崎亮平, 昆虫の脳をつくる ─君のパソコンに脳をつくってみよう─, https://www.asakura.co.jp/books/isbn/978-4-254-10277-2/

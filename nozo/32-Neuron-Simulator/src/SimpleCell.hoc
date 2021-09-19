@@ -1,0 +1,37 @@
+begintemplate SimpleCell
+public init
+public axon, dend
+
+create axon, dend
+
+proc init(){local x, y, z
+
+	x = $1
+	y = $2
+	z = $3
+	axon{
+		pt3dclear()
+		pt3dadd(0+x, 0+y, 0+z, 12)
+		pt3dadd(15+x, 0+y, 0+z, 12)
+
+		insert hh
+		gnabar_hh = 0.12
+		gkbar_hh = 0.04
+	}
+
+	dend{
+		pt3dclear()
+		pt3dadd(15+x, 0+y, 0+z, 1)
+		pt3dadd(15+200+x, 0+y, 0+z, 1)
+
+		insert pas
+		nseg = 101
+		Ra = 100
+		g_pas = 0.001
+		e_pas = -65
+	}
+
+	connect dend(0), axon(1)
+
+}
+endtemplate SimpleCell

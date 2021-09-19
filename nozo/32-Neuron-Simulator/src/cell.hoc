@@ -1,0 +1,18 @@
+load_file("nrngui.hoc")
+
+create cell
+objref stim
+
+cell{
+    diam=20.0               // 細胞の直径[μm]
+    L=20.0                  // 細胞の長さ[μm]
+    insert hh               // Hodgkin-Huxleyモデルを使う
+    gnabar_hh=0.12          // Na⁺チャネルコンダクタンス[S/cm²]
+    gkbar_hh=0.04           // K⁺チャネルコンダクタンス[S/cm²]
+
+    stim=new IClamp(0.5)    // 細胞の真ん中(0.5)に刺激を与える
+    stim.del=100            // 刺激の開始時刻[msec]
+    stim.dur=100            // 刺激の持続時間[msec]
+    stim.amp=0.05           // 刺激の強度[nA]
+}
+tstop=300
