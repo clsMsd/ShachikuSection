@@ -40,6 +40,40 @@ Fixpoint beval (b : bexp) : bool :=
     end.
 ```
 
+$$
+\frac{}{ANum\ n \Longrightarrow n} \ (E\_ANum)
+$$
+
+$$
+\frac{
+    e_1 \Longrightarrow n_1 \qquad
+    e_2 \Longrightarrow n_2
+    }
+    {
+    APlus\ e_1\ e_2 \Longrightarrow n_1 + n_2
+    }\ (E\_APlus)
+$$
+
+$$
+\frac{
+    e_1 \Longrightarrow n_1 \qquad
+    e_2 \Longrightarrow n_2
+    }
+    {
+    AMinus\ e_1\ e_2 \Longrightarrow n_1 - n_2
+    }\ (E\_AMinus)
+$$
+
+$$
+\frac{
+    e_1 \Longrightarrow n_1 \qquad
+    e_2 \Longrightarrow n_2
+    }
+    {
+    AMult\ e_1\ e_2 \Longrightarrow n_1 * n_2
+    }\ (E\_AMult)
+$$
+
 ```coq
 (* Definition Evaluation as a relation *)
 
