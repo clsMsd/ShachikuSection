@@ -1,0 +1,8 @@
+{
+  "name": "Coq",
+  "image": "coqorg/coq",
+  "extensions": ["maximedenes.vscoq", "siegebell.proof-general-keybindings-for-vscoq"],
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  }
+}

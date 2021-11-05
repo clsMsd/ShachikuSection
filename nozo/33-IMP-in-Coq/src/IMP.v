@@ -1,6 +1,9 @@
-# IMP
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Strings.String.
 
-```coq
 (* Definition Syntax *)
 
 Inductive aexp : Type :=
@@ -16,9 +19,7 @@ Inductive bexp : Type :=
     | BLe : aexp -> aexp -> bexp
     | BNot : bexp -> bexp
     | BAnd : bexp -> bexp -> bexp.
-```
 
-```coq
 (* Definition Evaluation as a function *)
 
 Fixpoint aeval (a : aexp) : nat :=
@@ -38,9 +39,7 @@ Fixpoint beval (b : bexp) : bool :=
     | BNot b1 => negb (beval b1)
     | BAnd b1 b2 => andb (beval b1) (beval b2)
     end.
-```
 
-```coq
 (* Definition Evaluation as a relation *)
 
 Inductive aevalR : aexp -> nat -> Prop :=
@@ -58,9 +57,7 @@ Inductive aevalR : aexp -> nat -> Prop :=
         aevalR e1 n1 ->
         aevalR e2 n2 ->
         aevalR (AMult e1 e2) (n1 * n2).
-```
 
-```coq
 Theorem aeval_iff_aevalR : forall a n,
     aevalR a n <-> aeval a = n.
 Proof.
@@ -115,8 +112,3 @@ Proof.
         * apply IHa1. reflexivity.
         * apply IHa2. reflexivity.
 Qed.
-```
-
-# 参考文献
-- SOFTWARE FOUNDATIONS VOLUME 1 - IMP, https://softwarefoundations.cis.upenn.edu/lf-current/Imp.html
-- 計算と論理, 五十嵐 淳, https://www.fos.kuis.kyoto-u.ac.jp/~igarashi/class/cal20w/
