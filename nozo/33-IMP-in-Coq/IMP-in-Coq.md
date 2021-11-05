@@ -1,7 +1,26 @@
 # IMP
 
+命令型プログラミング言語(IMP)をCoqの上で定義して検証する。
+まずはじめにIMPの項となる算術式とBoolean式を定義する。BNFで書くと以下のようになる。
+
+```
+    a := nat
+        | a + a
+        | a - a
+        | a × a
+
+    b := true
+        | false
+        | a = a
+        | a ≤ a
+        | ¬b
+        | b && b
+```
+
+Coqで定義すると以下のようになる。
+
 ```coq
-(* Definition Syntax *)
+(* Defining Syntax *)
 
 Inductive aexp : Type :=
     | ANum : nat -> aexp
@@ -18,8 +37,10 @@ Inductive bexp : Type :=
     | BAnd : bexp -> bexp -> bexp.
 ```
 
+次に`aexp`と`bexp`の評価を再帰関数として定義すると以下のように書ける。
+
 ```coq
-(* Definition Evaluation as a function *)
+(* Defining Evaluation as a function *)
 
 Fixpoint aeval (a : aexp) : nat :=
     match a with
@@ -40,6 +61,8 @@ Fixpoint beval (b : bexp) : bool :=
     end.
 ```
 
+例えば`1 + 2`は`(APlus (ANum 1) (ANum 2))`で表現することができて、`aeval`を適用すると`3`が返ってくる。
+
 ```coq
 Compute aeval (APlus (ANum 1) (ANum 2)).
 (*
@@ -47,6 +70,8 @@ Compute aeval (APlus (ANum 1) (ANum 2)).
 : nat
  *)
 ```
+
+上記では`aexp`と`bexp`の評価を再帰関数として定義したが、評価を「項」と「値」の間の**関係**として定義することもできる。
 
 $$
 \frac{}{ANum\ n \Longrightarrow n} \ (E\_ANum)
@@ -83,7 +108,7 @@ $$
 $$
 
 ```coq
-(* Definition Evaluation as a relation *)
+(* Defining Evaluation as a relation *)
 
 Inductive aevalR : aexp -> nat -> Prop :=
     | E_ANum : forall n : nat,

@@ -4,7 +4,7 @@ From Coq Require Import Arith.Arith.
 From Coq Require Import Arith.EqNat. Import Nat.
 From Coq Require Import Strings.String.
 
-(* Definition Syntax *)
+(* Defining Syntax *)
 
 Inductive aexp : Type :=
     | ANum : nat -> aexp
@@ -20,7 +20,7 @@ Inductive bexp : Type :=
     | BNot : bexp -> bexp
     | BAnd : bexp -> bexp -> bexp.
 
-(* Definition Evaluation as a function *)
+(* Defining Evaluation as a function *)
 
 Fixpoint aeval (a : aexp) : nat :=
     match a with
@@ -46,7 +46,7 @@ Compute aeval (APlus (ANum 1) (ANum 2)).
 : nat
  *)
 
-(* Definition Evaluation as a relation *)
+(* Defining Evaluation as a relation *)
 
 Inductive aevalR : aexp -> nat -> Prop :=
     | E_ANum : forall n : nat,
