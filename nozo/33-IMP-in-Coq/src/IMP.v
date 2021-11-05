@@ -40,6 +40,12 @@ Fixpoint beval (b : bexp) : bool :=
     | BAnd b1 b2 => andb (beval b1) (beval b2)
     end.
 
+Compute aeval (APlus (ANum 1) (ANum 2)).
+(*
+= 3
+: nat
+ *)
+
 (* Definition Evaluation as a relation *)
 
 Inductive aevalR : aexp -> nat -> Prop :=
@@ -58,6 +64,19 @@ Inductive aevalR : aexp -> nat -> Prop :=
         aevalR e2 n2 ->
         aevalR (AMult e1 e2) (n1 * n2).
 
+Example aevalR_ex : aevalR (APlus (ANum 1) (ANum 2)) 3.
+Proof.
+    apply (E_APlus (ANum 1) (ANum 2) 1 2).
+    - apply E_ANum.
+    - apply E_ANum.
+Qed.
+Print aevalR_ex.
+(* 
+aevalR_ex = 
+E_APlus (ANum 1) (ANum 2) 1 2 (E_ANum 1) (E_ANum 2)
+	 : aevalR (APlus (ANum 1) (ANum 2)) 3
+ *)
+ 
 Theorem aeval_iff_aevalR : forall a n,
     aevalR a n <-> aeval a = n.
 Proof.

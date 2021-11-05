@@ -40,6 +40,14 @@ Fixpoint beval (b : bexp) : bool :=
     end.
 ```
 
+```coq
+Compute aeval (APlus (ANum 1) (ANum 2)).
+(*
+= 3
+: nat
+ *)
+```
+
 $$
 \frac{}{ANum\ n \Longrightarrow n} \ (E\_ANum)
 $$
@@ -92,6 +100,29 @@ Inductive aevalR : aexp -> nat -> Prop :=
         aevalR e1 n1 ->
         aevalR e2 n2 ->
         aevalR (AMult e1 e2) (n1 * n2).
+```
+
+$$
+\frac {\displaystyle
+       \frac {}{ANum \ 1 \Longrightarrow 1} \ (E\_ANum)
+       \qquad
+       \frac {}{ANum \ 2 \Longrightarrow 2} \ (E\_ANum)}
+      {APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2} \ (E\_APlus)
+$$
+
+```coq
+Example aevalR_ex : aevalR (APlus (ANum 1) (ANum 2)) 3.
+Proof.
+    apply (E_APlus (ANum 1) (ANum 2) 1 2).
+    - apply E_ANum.
+    - apply E_ANum.
+Qed.
+Print aevalR_ex.
+(* 
+aevalR_ex = 
+E_APlus (ANum 1) (ANum 2) 1 2 (E_ANum 1) (E_ANum 2)
+	 : aevalR (APlus (ANum 1) (ANum 2)) 3
+*)
 ```
 
 ```coq
