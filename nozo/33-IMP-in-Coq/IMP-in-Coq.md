@@ -71,7 +71,9 @@ Compute aeval (APlus (ANum 1) (ANum 2)).
  *)
 ```
 
-上記では`aexp`と`bexp`の評価を再帰関数として定義したが、評価を「項」と「値」の間の**関係**として定義することもできる。
+上記では`aexp`の評価を再帰関数として定義したが、評価を「項」と「値」の間の**関係**として定義することもできる。
+評価関係 $\Longrightarrow$ を $Aexp$ と $Nat$ の上の２項関係$\Longrightarrow \subseteq Aexp \times Nat$ とすると、以下の推論規則で定義される。
+これらの推論規則はそれぞれ横線の上の関係が成り立つなら下の関係を導き出すことができることを表している。規則 $E\_ANum$ は上段がないが、前提条件なしで関係が成り立つことを表している。
 
 $$
 \frac{}{ANum\ n \Longrightarrow n} \ (E\_ANum)
@@ -107,6 +109,8 @@ $$
     }\ (E\_AMult)
 $$
 
+上記の推論規則をCoqでは以下のように定義できる。
+
 ```coq
 (* Defining Evaluation as a relation *)
 
@@ -127,6 +131,10 @@ Inductive aevalR : aexp -> nat -> Prop :=
         aevalR (AMult e1 e2) (n1 * n2).
 ```
 
+例えば、$APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2$ という評価関係は以下のように推論規則を適用することで導き出すことができる。
+このとき、$APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2$ は導出可能であるという。
+また、下の図を導出木という。
+
 $$
 \frac {\displaystyle
        \frac {}{ANum \ 1 \Longrightarrow 1} \ (E\_ANum)
@@ -134,6 +142,9 @@ $$
        \frac {}{ANum \ 2 \Longrightarrow 2} \ (E\_ANum)}
       {APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2} \ (E\_APlus)
 $$
+
+Coqにおける証明は、ゴールとなる命題が与えられたとき推論規則を使って導出木を構成することと同じである。
+`aevalR (APlus (ANum 1) (ANum 2)) 3`の導出は以下のように書ける。`apply`タクティックは推論規則を適用してゴール(推論規則下段)からサブゴール(推論規則上段)を生成している。
 
 ```coq
 Example aevalR_ex : aevalR (APlus (ANum 1) (ANum 2)) 3.
@@ -149,6 +160,8 @@ E_APlus (ANum 1) (ANum 2) 1 2 (E_ANum 1) (E_ANum 2)
 	 : aevalR (APlus (ANum 1) (ANum 2)) 3
 *)
 ```
+
+`aexp`の評価を再帰関数と評価関係で定義したが、これらが同値であることは以下のように証明できる。
 
 ```coq
 Theorem aeval_iff_aevalR : forall a n,
@@ -207,6 +220,9 @@ Proof.
 Qed.
 ```
 
+続いて、算術式とBoolean式のプログラムに変数を導入する。
+ここでは変数と値を対応付けるために、`string`をキーに`nat`を値としたマップ構造を状態`state`として定義する。途中で出てくる`Notation`は中置記法などユーザ定義の構文を導入するコマンドで、ここでは`x !-> v`と書くことで変数名`x`に値`v`を対応させるようにしている。
+
 ```coq
 (* Defining state *)
 
@@ -232,9 +248,7 @@ Definition state := total_map nat.
 Definition empty_st := (_ !-> 0).
 Notation "x '!->' v" := (x !-> v ; empty_st)
     (at level 100).
-```
 
-```coq
 Definition W : string := "W".
 Definition X : string := "X".
 Definition Y : string := "Y".
@@ -246,6 +260,8 @@ Compute (X !-> 1; Y !-> 2) X.
 : nat
  *)
 ```
+
+変数を導入したときのIMPの構文は以下のようになる。ここでは`AId`を追加した。
 
 ```coq
 (* Defining Syntax *)
@@ -265,6 +281,8 @@ Inductive bexp : Type :=
     | BNot : bexp -> bexp
     | BAnd : bexp -> bexp -> bexp.
 ```
+
+また、算術式とBoolean式をいちいち`APlus (ANum 3) (AMult (AId "X") (ANum 2))`のように抽象構文木の形で書くと見通しが悪いので、`Notation`で`<{ 3 + (X * 2) }>`という形で書けるようにする。
 
 ```coq
 (* Defining Notation *)
@@ -300,6 +318,9 @@ Check <{ 3 + (X * 2) }>.
  *)
 ```
 
+`aexp`と`bexp`の評価を再帰関数で定義すると以下のように書ける。
+`aeval`と`beval`はそれぞれ第１引数に`st : state`を受け取るようになっている。
+
 ```coq
 (* Defining Evaluation as a function *)
 
@@ -329,6 +350,10 @@ Compute aeval (X !-> 5) <{ 3 + (X * 2) }>.
  *)
 ```
 
+続いて、IMPに`if`や`while`などの文(statements)を導入する。
+BNFで書くと以下のようになる。
+
+
 ```
     c := skip
       | x := a
@@ -336,6 +361,8 @@ Compute aeval (X !-> 5) <{ 3 + (X * 2) }>.
       | if b then c else c end
       | while b do c end
 ```
+
+Coqで書くと以下のようになる。
 
 ```coq
 (* Defining Syntax *)
@@ -347,6 +374,8 @@ Inductive com : Type :=
     | CIf : bexp -> com -> com -> com
     | CWhile : bexp -> com -> com.
 ```
+
+`aexp`や`bexp`と同様に、`com`も`Notation`で読み書きしやすいようにする。
 
 ```coq
 (* Defining Notation *)
@@ -379,6 +408,10 @@ Definition fact_in_coq : com :=
     }>.
 ```
 
+`com`の評価を再帰関数で定義しようとすると、エラーが発生する。
+これは、`ceval`の`while`のケースで`ceval st <{ while b do c end }>`のように`ceval`の引数をそのまま再度`ceval`に渡している場合があり`ceval`が停止しない場合があるためである。
+一般に、他のプログラミング言語であれば以下のような再帰関数(停止しない関数)の定義は許されているが、Coqでは`Fixpoint`で定義される関数は停止されることが保証されている必要がある。
+
 ```coq
 (* Defining Evaluation as a function (Error) *)
 
@@ -405,6 +438,11 @@ Fixpoint ceval (st : state) (c : com) : state :=
 Cannot guess decreasing argument of fix.
  *)
 ```
+
+そのため`com`は評価関係で定義するほうが適している。
+`st =[ c ]=> st'`はある状態`st`において`c`を実行すると状態`st'`で停止することを表す。
+このとき、評価関係は以下の推論規則で定義される。
+規則 $EWhileTrue$ は、`b`が`true`に評価できて、かつ、`st`において`while`のボディである`c`を実行すると`st'`で停止して、かつ、`st'`において`while`全体である`while b do c end`を実行すると`st''`で停止するとき、`st`において`while b do c end`を実行すると`st''`で停止することが導出できることを表している。この規則により、停止するプログラムのみ導出可能となる。
 
 $$
 \frac{}{\verb+ st =[ skip ]=> st +}\ (ESkip)
@@ -446,6 +484,8 @@ $$
      {\verb+ st =[ while b do c end ]=> st'' +}\ (EWhileTrue)
 $$
 
+上記の推論規則をCoqでは以下のように定義できる。
+
 ```coq
 Reserved Notation
          "st '=[' c ']=>' st'"
@@ -480,6 +520,8 @@ Inductive ceval : com -> state -> state -> Prop :=
     where "st =[ c ]=> st'" := (ceval c st st').
 ```
 
+例えば、`empty_st =[ X := 2; if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2)`という評価関係は以下のように推論規則を適用することで導き出すことができる。
+
 $$
 \frac{\displaystyle
       \frac{\displaystyle
@@ -504,6 +546,8 @@ $$
      }
      {\verb+ empty_st =[ X := 2; if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2) +} \ (ESeq)
 $$
+
+Coqでは以下のように書ける。
 
 ```coq
 Example ceval_example1:

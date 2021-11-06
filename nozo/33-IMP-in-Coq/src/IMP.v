@@ -364,4 +364,12 @@ Proof.
       + apply E_Asgn. simpl. reflexivity.
 Qed.
 
+Example ceval_loop: forall st st',
+    ~ (st =[
+        while true do skip end
+    ]=> st').
+Proof.
+    intros st st' contra.
+Abort.
+
 End IMP_with_state.
