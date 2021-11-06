@@ -5,16 +5,16 @@
 
 ```
     a := nat
-        | a + a
-        | a - a
-        | a × a
+       | a + a
+       | a - a
+       | a × a
 
     b := true
-        | false
-        | a = a
-        | a ≤ a
-        | ¬b
-        | b && b
+       | false
+       | a = a
+       | a ≤ a
+       | ¬b
+       | b && b
 ```
 
 Coqで定義すると以下のようになる。
@@ -76,7 +76,7 @@ Compute aeval (APlus (ANum 1) (ANum 2)).
 これらの推論規則はそれぞれ横線の上の関係が成り立つなら下の関係を導き出すことができることを表している。規則 $E\_ANum$ は上段がないが、前提条件なしで関係が成り立つことを表している。
 
 $$
-\frac{}{ANum\ n \Longrightarrow n} \ (E\_ANum)
+\frac{}{ANum\ n \Longrightarrow n} \ (EANum)
 $$
 
 $$
@@ -86,7 +86,7 @@ $$
     }
     {
     APlus\ e_1\ e_2 \Longrightarrow n_1 + n_2
-    }\ (E\_APlus)
+    }\ (EAPlus)
 $$
 
 $$
@@ -96,7 +96,7 @@ $$
     }
     {
     AMinus\ e_1\ e_2 \Longrightarrow n_1 - n_2
-    }\ (E\_AMinus)
+    }\ (EAMinus)
 $$
 
 $$
@@ -106,7 +106,7 @@ $$
     }
     {
     AMult\ e_1\ e_2 \Longrightarrow n_1 * n_2
-    }\ (E\_AMult)
+    }\ (EAMult)
 $$
 
 上記の推論規則をCoqでは以下のように定義できる。
@@ -137,10 +137,10 @@ Inductive aevalR : aexp -> nat -> Prop :=
 
 $$
 \frac {\displaystyle
-       \frac {}{ANum \ 1 \Longrightarrow 1} \ (E\_ANum)
+       \frac {}{ANum \ 1 \Longrightarrow 1} \ (EANum)
        \qquad
-       \frac {}{ANum \ 2 \Longrightarrow 2} \ (E\_ANum)}
-      {APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2} \ (E\_APlus)
+       \frac {}{ANum \ 2 \Longrightarrow 2} \ (EANum)}
+      {APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2} \ (EAPlus)
 $$
 
 Coqにおける証明は、ゴールとなる命題が与えられたとき推論規則を使って導出木を構成することと同じである。
@@ -356,10 +356,10 @@ BNFで書くと以下のようになる。
 
 ```
     c := skip
-      | x := a
-      | c ; c
-      | if b then c else c end
-      | while b do c end
+        | x := a
+        | c ; c
+        | if b then c else c end
+        | while b do c end
 ```
 
 Coqで書くと以下のようになる。
