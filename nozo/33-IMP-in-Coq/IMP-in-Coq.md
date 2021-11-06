@@ -226,27 +226,17 @@ Qed.
 ```coq
 (* Defining state *)
 
-Definition total_map (A : Type) := string -> A.
+Definition state := string -> nat.
 
-Definition eqb_string (x y : string) : bool :=
-    if string_dec x y then true else false.
+Definition empty_st : state :=
+    fun _ => 0.
 
-Definition t_empty {A : Type} (v : A) : total_map A :=
-    (fun _ => v).
+Definition update_st (st : state) (x : string) (n : nat) : state :=
+    fun x' => if (string_dec x x') then n else st x'.
 
-Definition t_update {A : Type} (m : total_map A)
-                    (x : string) (v : A)
-                    : total_map A :=
-    fun x' => if (eqb_string x x') then v else m x'.
-
-Notation "'_' '!->' v" := (t_empty v)
-    (at level 100, right associativity).
-Notation "x '!->' v ';' m" := (t_update m x v)
-    (at level 100, v at next level, right associativity).
-
-Definition state := total_map nat.
-Definition empty_st := (_ !-> 0).
-Notation "x '!->' v" := (x !-> v ; empty_st)
+Notation "x '!->' n ';' st" := (update_st st x n)
+    (at level 100, n at next level, right associativity).
+Notation "x '!->' n" := (x !-> n ; empty_st)
     (at level 100).
 
 Definition W : string := "W".
