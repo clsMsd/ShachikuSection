@@ -499,10 +499,10 @@ $$
         } \ (EAsgn)
       }
       {
-        \verb+ if (X <= 1) then Y := 3 else Z := 4 end ]=> (Z !-> 4 ; X !-> 2) +
+        \verb+ (X !-> 2) =[ if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2) +
       } \ (EIfFalse)
      }
-     {\verb+ empty_st =[ X := 2; if (X <= 1) then Y := 3 else Z := 4 end ]=> (Z !-> 4 ; X !-> 2) +} \ (ESeq)
+     {\verb+ empty_st =[ X := 2; if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2) +} \ (ESeq)
 $$
 
 ```coq
