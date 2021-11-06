@@ -253,10 +253,115 @@ Compute aeval (X !-> 5) <{ 3 + (X * 2) }>.
 (* Defining Syntax *)
 
 Inductive com : Type :=
-    | CSkip
-    | CAsgn (x : string) (a : aexp)
-    | CSeq (c1 c2 : com)
-    | CIf (b : bexp) (c1 c2 : com) 
-    | CWhile (b : bexp) (c : com).
+    | CSkip : com
+    | CAsgn : string -> aexp -> com
+    | CSeq : com -> com -> com
+    | CIf : bexp -> com -> com -> com
+    | CWhile : bexp -> com -> com.
+
+(* Defining Notation *)
+
+Notation "'skip'" :=
+         CSkip (in custom com at level 0) : com_scope.
+Notation "x := y" :=
+         (CAsgn x y)
+            (in custom com at level 0, x constr at level 0,
+             y at level 85, no associativity) : com_scope.
+Notation "x ; y" :=
+         (CSeq x y)
+           (in custom com at level 90, right associativity) : com_scope.
+Notation "'if' x 'then' y 'else' z 'end'" :=
+         (CIf x y z)
+           (in custom com at level 89, x at level 99,
+            y at level 99, z at level 99) : com_scope.
+Notation "'while' x 'do' y 'end'" :=
+         (CWhile x y)
+            (in custom com at level 89, x at level 99, y at level 99) : com_scope.
+
+Definition fact_in_coq : com :=
+    <{
+        Z := X;
+        Y := 1;
+        while ~(Z = 0) do
+            Y := Y * Z;
+            Z := Z - 1
+        end
+    }>.
+
+(* Defining Evaluation as a function (Error) *)
+
+(* 
+Fixpoint ceval (st : state) (c : com) : state :=
+    match c with
+        | <{ skip }> =>
+            st
+        | <{ x := a }> =>
+            (x !-> (aeval st a) ; st)
+        | <{ c1 ; c2 }> =>
+            let st' := ceval st c1 in
+            ceval st' c2
+        | <{ if b then c1 else c2 end}> =>
+            if (beval st b)
+            then ceval st c1
+            else ceval st c2
+        | <{ while b do c end }> =>
+            if (beval st b)
+            then ceval st <{ while b do c end }>
+            else st
+    end.
+ *)
+(* 
+Cannot guess decreasing argument of fix.
+ *)
+
+(* Defining Evaluation as a relation *)
+
+Reserved Notation
+         "st '=[' c ']=>' st'"
+         (at level 40, c custom com at level 99,
+          st constr, st' constr at next level).
+Inductive ceval : com -> state -> state -> Prop :=
+    | E_Skip : forall st,
+        st =[ skip ]=> st
+    | E_Asgn : forall st a n x,
+        aeval st a = n ->
+        st =[ x := a ]=> (x !-> n ; st)
+    | E_Seq : forall c1 c2 st st' st'',
+        st =[ c1 ]=> st' ->
+        st' =[ c2 ]=> st'' ->
+        st =[ c1 ; c2 ]=> st''
+    | E_IfTrue : forall st st' b c1 c2,
+        beval st b = true ->
+        st =[ c1 ]=> st' ->
+        st =[ if b then c1 else c2 end]=> st'
+    | E_IfFalse : forall st st' b c1 c2,
+        beval st b = false ->
+        st =[ c2 ]=> st' ->
+        st =[ if b then c1 else c2 end]=> st'
+    | E_WhileFalse : forall b st c,
+        beval st b = false ->
+        st =[ while b do c end ]=> st
+    | E_WhileTrue : forall st st' st'' b c,
+        beval st b = true ->
+        st =[ c ]=> st' ->
+        st' =[ while b do c end ]=> st'' ->
+        st =[ while b do c end ]=> st''
+    where "st =[ c ]=> st'" := (ceval c st st').
+
+Example ceval_example1:
+    empty_st =[
+        X := 2;
+        if (X <= 1)
+            then Y := 3
+            else Z := 4
+        end
+    ]=> (Z !-> 4 ; X !-> 2).
+Proof.
+    apply E_Seq with (X !-> 2).
+    - apply E_Asgn. simpl. reflexivity.
+    - apply E_IfFalse.
+      + simpl. reflexivity.
+      + apply E_Asgn. simpl. reflexivity.
+Qed.
 
 End IMP_with_state.
