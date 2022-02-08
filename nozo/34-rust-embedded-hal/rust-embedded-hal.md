@@ -6,6 +6,10 @@ Rustのembedded-hal(HAL: Hardware Abstraction Layer)の実装がどうなって�
 >
 > 移植性 - The Embedded Rust Book, https://tomoyuki-nakabayashi.github.io/book/assets/rust_layers.svg
 
+Board Support Crateとしてwio_terminal-0.5.0をみてみる。
+
+https://docs.rs/wio_terminal/0.5.0/wio_terminal/index.html
+
 ```rust
 #![no_std]
 #![no_main]
@@ -26,6 +30,32 @@ fn main() -> ! {
     user_led.set_high().unwrap();
 
     loop {}
+}
+```
+
+https://docs.rs/atsamd51p/0.11.0/atsamd51p/struct.Peripherals.html
+
+```rust
+static mut DEVICE_PERIPHERALS: bool = false;
+
+impl Peripherals {
+...
+    pub fn take() -> Option<Self> {
+        cortex_m::interrupt::free(|_| {
+            if unsafe { DEVICE_PERIPHERALS } {
+                None
+            } else {
+                Some(unsafe { Peripherals::steal() })
+            }
+        })
+    }
+...
+    pub unsafe fn steal() -> Self {
+        DEVICE_PERIPHERALS = true;
+        Peripherals {
+...
+        }
+    }
 }
 ```
 
