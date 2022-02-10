@@ -10,6 +10,8 @@ Board Support Crateとしてwio_terminal-0.5.0をみてみる。
 
 https://docs.rs/wio_terminal/0.5.0/wio_terminal/index.html
 
+以下はLEDを点灯するだけのプログラム。
+
 ```rust
 #![no_std]
 #![no_main]
@@ -32,6 +34,9 @@ fn main() -> ! {
     loop {}
 }
 ```
+
+`Peripherals::take()`はATSAMD51PというマイコンのPACで提供される関数。
+マイコンのペリフェラルをまとめた`Peripherals`構造体を返す。
 
 https://docs.rs/atsamd51p/0.11.0/atsamd51p/struct.Peripherals.html
 
@@ -58,6 +63,11 @@ impl Peripherals {
     }
 }
 ```
+
+マイコン上のペリフェラルにはタイマーやUARTなどがあるが、それぞれ物理的に１つしかないものをプログラムのあちこちからアクセスされるとおかしな状態になってしまう。
+そのため、上の`take`関数は1回目の呼び出しでは`Peripherals`構造体を返しているが、2回目以降は`None`を返すように、グローバルな`DEVICE_PERIPHERALS`変数を使って実装されている。
+(rust ではグローバルな変数へのアクセスは unsafe)
+
 
 # 参考
 - 中林 智之／井田 健太，基礎から学ぶ 組込みRust，C&R研究所, https://www.c-r.com/book/detail/1403
