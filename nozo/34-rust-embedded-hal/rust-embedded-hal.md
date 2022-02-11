@@ -28,9 +28,9 @@ fn main() -> ! {
     // 1. マイコンのペリフェラルを取得
     let peripherals = Peripherals::take().unwrap();
     
-    // 2. GPIOペリフェラルを
+    // 2. I/Oピンを取得する
     let pins = wio::Pins::new(peripherals.PORT);
-    // 3. LEDにつながったGPIOピンを出力設定にして取得する
+    // 3. LEDにつながったI/Oピンを出力設定にして取得する
     let mut user_led = pins.user_led.into_push_pull_output();
     // 4. LEDを点灯させる
     user_led.set_high().unwrap();
@@ -42,15 +42,22 @@ fn main() -> ! {
 ## 1. マイコンのペリフェラルを取得
 
 `Peripherals::take()`はATSAMD51PというマイコンのPAC(一番下の層のクレート)で提供される関数。
-マイコンのペリフェラルをまとめた`Peripherals`構造体を返す。
+マイコン上のすべてのペリフェラルにアクセスするためのデータ構造をまとめた`Peripherals`を返す。
 
 https://docs.rs/atsamd51p/0.11.0/atsamd51p/struct.Peripherals.html
 
 ```rust
 static mut DEVICE_PERIPHERALS: bool = false;
+
+pub struct Peripherals {
+    pub AC: AC,
+    pub ADC0: ADC0,
+    pub ADC1: ADC1,
+    pub AES: AES,
 ...
+}
+
 impl Peripherals {
-...
     pub fn take() -> Option<Self> {
         cortex_m::interrupt::free(|_| {
             if unsafe { DEVICE_PERIPHERALS } {
@@ -60,7 +67,7 @@ impl Peripherals {
             }
         })
     }
-...
+
     pub unsafe fn steal() -> Self {
         DEVICE_PERIPHERALS = true;
         Peripherals {
@@ -70,17 +77,13 @@ impl Peripherals {
 }
 ```
 
-マイコン上のペリフェラルにはタイマーやUARTなどがあるが、それぞれ物理的に１つしかないものをプログラムのあちこちからアクセスされるとおかしな状態になってしまう。
-そのため、上の`take`関数は1回目の呼び出しでは`Peripherals`構造体を返しているが、2回目以降は`None`を返すように、グローバルな`DEVICE_PERIPHERALS`変数を使って実装されている。
+マイコン上のペリフェラルにはタイマやシリアル通信デバイスなどがあるが、それぞれ物理的に１つしかないものをプログラムのあちこちからアクセスされるとおかしな状態になってしまう。
+そのため、上の`take`関数は1回目の呼び出しでは`Peripherals`を返しているが、2回目以降は`None`を返すように、グローバルな`DEVICE_PERIPHERALS`変数を使って実装されている。
 (rust ではグローバルな変数へのアクセスは unsafe)
 
-## 2.
+## 2. I/Oピンを取得する
 
-> ![](./img/wio-terminal-cir.png)
-> 
-> Wio Terminalに搭載されているマイコンと周辺機器の接続関係の一部, https://files.seeedstudio.com/wiki/Wio-Terminal/res/ATSAMD51.pdf
-
-`wio::Pins::new(peripherals.PORT)`はBSC(一番上の層のクレート)の機能で、PACで取得したペリフェラルのうちのGPIOピンの集合を
+`wio::Pins::new(peripherals.PORT)`はBSC(一番上の層のクレート)で提供される関数で、PACで取得したペリフェラルの`PORT`(マイコンのI/Oピンコントローラ)を受け取って、ボード上のLEDやボタンがそれぞれどのI/Oピンに割り当てられているかを表す`Pins`を返す。
 
 https://docs.rs/wio_terminal/0.5.0/wio_terminal/struct.Pins.html
 
@@ -94,7 +97,19 @@ pub struct Pins {
 }
 ```
 
-## 3. 
+PACはあくまでマイコンに対するアクセス方法を提供するクレートで、マイコンのI/Oピンが実際にボード上のどのデバイスに接続されているかは知らない。
+そのため、BSCでマイコンのI/Oピンとボード上のデバイスの関係を定義している。
+
+以下はWio Terminalに搭載されているマイコンと周辺機器の接続関係の一部の回路図。
+PA15ピン(PortのAグループの15番ピン)がuser_ledに接続されていることがわかる。
+
+> ![](./img/wio-terminal-cir.png)
+> 
+> https://files.seeedstudio.com/wiki/Wio-Terminal/res/ATSAMD51.pdf
+
+
+
+## 3. LEDにつながったI/Oピンを出力設定にして取得する
 
 `sets.user_led.into_push_pull_output()` は `Pin<PA15, Output<PushPull>>` を返す。
 
@@ -166,7 +181,7 @@ where
 }
 ```
 
-## 4.
+## 4. LEDを点灯させる
 
 ```rust
 pub(super) unsafe trait RegisterInterface {
