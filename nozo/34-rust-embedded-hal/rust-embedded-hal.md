@@ -231,9 +231,46 @@ error[E0599]: the method `set_high` exists for struct `wio_terminal::atsamd_hal:
 
 ## 4. LEDを点灯させる
 
+`user_led.set_high().unwrap()`は上の定義を見ると以下の`_set_high`メソッドが呼ばれる。
+
+再掲：
+```rust
+    pub(crate) fn _set_high(&mut self) {
+        self.regs.write_pin(true);
+    }
+```
+
+`write_pin`メソッドは`RegisterInterface`トレイトのデフォルト実装として提供されている。
+
 ```rust
 pub(super) unsafe trait RegisterInterface {
 ...
+    /// Pointer to the array of [`GROUP`] register blocks
+    const GROUPS: *const GROUP = PORT::ptr() as *const _;
+
+    #[inline]
+    fn group(&self) -> &GROUP {
+        let offset = match self.id().group {
+            DynGroup::A => 0,
+            #[cfg(any(feature = "samd21", feature = "min-samd51g"))]
+            DynGroup::B => 1,
+            #[cfg(feature = "min-samd51n")]
+            DynGroup::C => 2,
+            #[cfg(feature = "min-samd51p")]
+            DynGroup::D => 3,
+        };
+        // Safety: It is safe to create shared references to each PAC register
+        // or register block, because all registers are wrapped in
+        // `UnsafeCell`s. We should never create unique references to the
+        // registers, to prevent any risk of UB.
+        unsafe { &*Self::GROUPS.add(offset) }
+    }
+
+    #[inline]
+    fn mask_32(&self) -> u32 {
+        1 << self.id().num
+    }
+    
     /// Write the logic level of an output pin
     #[inline]
     fn write_pin(&mut self, bit: bool) {
@@ -251,6 +288,30 @@ pub(super) unsafe trait RegisterInterface {
 ...
 }
 ```
+
+`write_pin`メソッドの中では、`mask_32()`で書き込み対象のI/Oピンの`PinId`からビットマスク位置を取得して、`self.group().outset.write(|w| w.bits(mask))`で特定のアドレスに書き込みを行っている。
+
+アドレスの位置は`const GROUPS: *const GROUP = PORT::ptr() as *const _;`で取得したアドレスからのオフセットで計算している。
+
+メモリマップはマイコンに依存するので、各マイコンのPACで以下のように定義される。(以下はATSAMD51PのPACの定義)
+
+https://docs.rs/atsamd51p/0.11.0/atsamd51p/struct.PORT.html
+
+```rust
+impl PORT {
+    #[doc = r"Returns a pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const port::RegisterBlock {
+        0x4100_8000 as *const _
+    }
+}
+```
+
+実際にATSAMD51Pのデータシートを見ると、以下のように`PORT`のメモリマップは`0x4100_8000`に割り当てられている。
+
+> ![](./img/memory-map.png)
+> 
+> 8. Product Memory Mapping Overview, Figure 8-1. Product Mapping, https://files.seeedstudio.com/wiki/Wio-Terminal/res/ATSAMD51.pdf
 
 # 参考
 - 中林 智之／井田 健太，基礎から学ぶ 組込みRust，C&R研究所, https://www.c-r.com/book/detail/1403
