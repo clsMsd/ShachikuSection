@@ -12,8 +12,8 @@ use wio::prelude::*;
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
     
-    let sets = wio::Pins::new(peripherals.PORT).split();
-    let mut user_led = sets.user_led.into_push_pull_output();
+    let pins = wio::Pins::new(peripherals.PORT);
+    let mut user_led = pins.user_led.into_push_pull_output();
     user_led.set_high().unwrap();
 
     loop {}
