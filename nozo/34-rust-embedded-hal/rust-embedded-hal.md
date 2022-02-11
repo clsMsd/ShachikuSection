@@ -81,6 +81,7 @@ impl Peripherals {
 そのため、上の`take`関数は1回目の呼び出しでは`Peripherals`を返しているが、2回目以降は`None`を返すように、グローバルな`DEVICE_PERIPHERALS`変数を使って実装されている。
 (rust ではグローバルな変数へのアクセスは unsafe)
 
+
 ## 2. I/Oピンを取得する
 
 `wio::Pins::new(peripherals.PORT)`はBSC(一番上の層のクレート)で提供される関数で、PACで取得したペリフェラルの`PORT`(マイコンのI/Oピンコントローラ)を受け取って、ボード上のLEDやボタンがそれぞれどのI/Oピンに割り当てられているかを表す`Pins`を返す。
@@ -100,7 +101,7 @@ pub struct Pins {
 PACはあくまでマイコンに対するアクセス方法を提供するクレートで、マイコンのI/Oピンが実際にボード上のどのデバイスに接続されているかは知らない。
 そのため、BSCでマイコンのI/Oピンとボード上のデバイスの関係を定義している。
 
-以下はWio Terminalに搭載されているマイコンと周辺機器の接続関係の一部の回路図。
+以下はWio Terminalに搭載されているマイコンとボード上のデバイスの接続関係を示した回路図(回路の一部で全部ではない)。
 PA15ピン(PortのAグループの15番ピン)がuser_ledに接続されていることがわかる。
 
 > ![](./img/wio-terminal-cir.png)
@@ -108,10 +109,84 @@ PA15ピン(PortのAグループの15番ピン)がuser_ledに接続されてい�
 > https://files.seeedstudio.com/wiki/Wio-Terminal/res/ATSAMD51.pdf
 
 
-
 ## 3. LEDにつながったI/Oピンを出力設定にして取得する
 
-`sets.user_led.into_push_pull_output()` は `Pin<PA15, Output<PushPull>>` を返す。
+`pins.user_led.into_push_pull_output()`は、`Pin<PA15, Disabled<Floating>>`型の`pins.user_led`に対して、`into_push_pull_output()`を実行することで`Pin<PA15, Output<PushPull>>`型のI/Oピンとして設定している。
+`Pin`型は以下のように定義されていて、HAL(中間の層のクレート)で提供されている。
+
+型引数`I`にはI/Oピンの番号が入り、今回の例だとLEDの`PA15`にあたる。
+型引数`M`にはI/Oピンの状態が入り、`Disabled`, `Input`, `Output`などがある。
+
+https://docs.rs/atsamd-hal/0.14.0/atsamd_hal/gpio/v2/pin/struct.Pin.html
+
+```rust
+/// A type-level GPIO pin, parameterized by [`PinId`] and [`PinMode`] types
+pub struct Pin<I, M>
+where
+    I: PinId,
+    M: PinMode,
+{
+    pub(in crate::gpio) regs: Registers<I>,
+    mode: PhantomData<M>,
+}
+```
+
+`Pin`型に`M: PinMode`があるおかげで、「入力設定にしたI/Oピンに対してhighレベルを出力する」というような誤った動作をコンパイル時にエラーとして検出することができる。
+この仕組みは以下のようにして実現している。
+
+任意の`I`, `M`が設定された`Pin`型は以下のメソッドを持つ。
+`into_push_pull_output`などのI/Oピンの状態を変更するメソッドは公開されているが、`_is_low`や`_set_low`などのI/Oピンへの入出力のメソッドは公開されていない(create内のみに公開)ので使用することができない。
+
+```rust
+impl<I, M> Pin<I, M>
+where
+    I: PinId,
+    M: PinMode,
+{
+...
+　　// I/Oピンの状態を変更するメソッド
+    pub fn into_push_pull_output(self) -> Pin<I, PushPullOutput> {
+        self.into_mode()
+    }
+...
+    // I/Oピンの入力を読み取るメソッド(ただしcrate内のみ公開)
+    pub(crate) fn _is_low(&self) -> bool {
+        self.regs.read_pin() == false
+    }
+    pub(crate) fn _is_high(&self) -> bool {
+        self.regs.read_pin() == true
+    }
+
+    // I/Oピンに出力を書き込むメソッド(ただしcrate内のみ公開)
+    pub(crate) fn _set_low(&mut self) {
+        self.regs.write_pin(false);
+    }
+    pub(crate) fn _set_high(&mut self) {
+        self.regs.write_pin(true);
+    }
+...
+}
+```
+
+ではどうやって入出力をするのかというと、入出力のメソッドは以下のように`Pin`の状態が`Output`, `Input`の場合にのみ`set_high`や`is_high`が定義されるようになっていて、入力/出力設定がされたI/Oピンだけがそれらのメッソドを呼べるようになっている。
+
+```rust
+impl<I, C> InputPin for Pin<I, Input<C>>
+where
+    I: PinId,
+    C: InputConfig,
+{
+    type Error = Infallible;
+    #[inline]
+    fn is_high(&self) -> Result<bool, Self::Error> {
+        Ok(self._is_high())
+    }
+    #[inline]
+    fn is_low(&self) -> Result<bool, Self::Error> {
+        Ok(self._is_low())
+    }
+}
+```
 
 ```rust
 impl<I, C> OutputPin for Pin<I, Output<C>>
@@ -133,52 +208,25 @@ where
 }
 ```
 
+上記の定義によって、例えば`Pin<PA15, Disabled<Floating>>`型のI/Oピンに対して`set_high`メソッドを呼ぼうとするとコンパイルエラーになる。
+
+プログラム：
 ```rust
-impl<I, C> InputPin for Pin<I, Input<C>>
-where
-    I: PinId,
-    C: InputConfig,
-{
-    type Error = Infallible;
-    #[inline]
-    fn is_high(&self) -> Result<bool, Self::Error> {
-        Ok(self._is_high())
-    }
-    #[inline]
-    fn is_low(&self) -> Result<bool, Self::Error> {
-        Ok(self._is_low())
-    }
-}
+    let peripherals = Peripherals::take().unwrap();
+    
+    let pins = wio::Pins::new(peripherals.PORT);
+    pins.user_led.set_high().unwrap();
 ```
 
-```rust
-impl<I, M> Pin<I, M>
-where
-    I: PinId,
-    M: PinMode,
-{
-...
-    #[inline]
-    pub(crate) fn _is_low(&self) -> bool {
-        self.regs.read_pin() == false
-    }
-
-    #[inline]
-    pub(crate) fn _is_high(&self) -> bool {
-        self.regs.read_pin() == true
-    }
-
-    #[inline]
-    pub(crate) fn _set_low(&mut self) {
-        self.regs.write_pin(false);
-    }
-
-    #[inline]
-    pub(crate) fn _set_high(&mut self) {
-        self.regs.write_pin(true);
-    }
-...
-}
+コンパイルエラー：
+```
+error[E0599]: the method `set_high` exists for struct `wio_terminal::atsamd_hal::gpio::v2::Pin<PA15, wio_terminal::atsamd_hal::gpio::v2::Disabled<wio_terminal::atsamd_hal::gpio::v2::Floating>>`, but its trait bounds were not satisfied
+   --> src/main.rs:16:19
+    |
+16  |       pins.user_led.set_high().unwrap();
+    |                     ^^^^^^^^ method cannot be called on `wio_terminal::atsamd_hal::gpio::v2::Pin<PA15, wio_terminal::atsamd_hal::gpio::v2::Disabled<wio_terminal::atsamd_hal::gpio::v2::Floating>>` due to unsatisfied trait bounds
+    |
+   ::: /root/.cargo/registry/src/github.com-1ecc6299db9ec823/atsamd-hal-0.14.0/src/gpio/v2/pin.rs:496:1
 ```
 
 ## 4. LEDを点灯させる
