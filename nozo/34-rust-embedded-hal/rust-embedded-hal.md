@@ -25,24 +25,30 @@ use wio::prelude::*;
 
 #[entry]
 fn main() -> ! {
+    // 1. マイコンのペリフェラルを取得
     let peripherals = Peripherals::take().unwrap();
     
-    let sets = wio::Pins::new(peripherals.PORT).split();
-    let mut user_led = sets.user_led.into_push_pull_output();
+    // 2. GPIOペリフェラルを
+    let pins = wio::Pins::new(peripherals.PORT);
+    // 3. LEDにつながったGPIOピンを出力設定にして取得する
+    let mut user_led = pins.user_led.into_push_pull_output();
+    // 4. LEDを点灯させる
     user_led.set_high().unwrap();
 
     loop {}
 }
 ```
 
-`Peripherals::take()`はATSAMD51PというマイコンのPACで提供される関数。
+## 1. マイコンのペリフェラルを取得
+
+`Peripherals::take()`はATSAMD51PというマイコンのPAC(一番下の層のクレート)で提供される関数。
 マイコンのペリフェラルをまとめた`Peripherals`構造体を返す。
 
 https://docs.rs/atsamd51p/0.11.0/atsamd51p/struct.Peripherals.html
 
 ```rust
 static mut DEVICE_PERIPHERALS: bool = false;
-
+...
 impl Peripherals {
 ...
     pub fn take() -> Option<Self> {
@@ -68,9 +74,27 @@ impl Peripherals {
 そのため、上の`take`関数は1回目の呼び出しでは`Peripherals`構造体を返しているが、2回目以降は`None`を返すように、グローバルな`DEVICE_PERIPHERALS`変数を使って実装されている。
 (rust ではグローバルな変数へのアクセスは unsafe)
 
-`wio::Pins::new(peripherals.PORT).split()`
+## 2.
 
-https://docs.rs/wio_terminal/0.5.0/wio_terminal/struct.Sets.html
+> ![](./img/wio-terminal-cir.png)
+> 
+> Wio Terminalに搭載されているマイコンと周辺機器の接続関係の一部, https://files.seeedstudio.com/wiki/Wio-Terminal/res/ATSAMD51.pdf
+
+`wio::Pins::new(peripherals.PORT)`はBSC(一番上の層のクレート)の機能で、PACで取得したペリフェラルのうちのGPIOピンの集合を
+
+https://docs.rs/wio_terminal/0.5.0/wio_terminal/struct.Pins.html
+
+```rust
+pub struct Pins {
+    pub user_led: Pin<PA15, Reset>,
+    pub button1: Pin<PC26, Reset>,
+    pub button2: Pin<PC27, Reset>,
+    pub button3: Pin<PC28, Reset>,
+...
+}
+```
+
+## 3. 
 
 `sets.user_led.into_push_pull_output()` は `Pin<PA15, Output<PushPull>>` を返す。
 
@@ -141,6 +165,8 @@ where
 ...
 }
 ```
+
+## 4.
 
 ```rust
 pub(super) unsafe trait RegisterInterface {
