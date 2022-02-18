@@ -75,39 +75,13 @@ Compute aeval (APlus (ANum 1) (ANum 2)).
 評価関係 $\Longrightarrow$ を $Aexp$ と $Nat$ の上の２項関係$\Longrightarrow \subseteq Aexp \times Nat$ とすると、以下の推論規則で定義される。
 これらの推論規則はそれぞれ横線の上の関係が成り立つなら下の関係を導き出すことができることを表している。規則 $E\_ANum$ は上段がないが、前提条件なしで関係が成り立つことを表している。
 
-$$
-\frac{}{ANum\ n \Longrightarrow n} \ (EANum)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{}{ANum\&space;n&space;\Longrightarrow&space;n}&space;\&space;(EANum)" title="\frac{}{ANum\ n \Longrightarrow n} \ (EANum)" />
 
-$$
-\frac{
-    e_1 \Longrightarrow n_1 \qquad
-    e_2 \Longrightarrow n_2
-    }
-    {
-    APlus\ e_1\ e_2 \Longrightarrow n_1 + n_2
-    }\ (EAPlus)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;&space;&space;&space;e_1&space;\Longrightarrow&space;n_1&space;\qquad&space;&space;&space;&space;e_2&space;\Longrightarrow&space;n_2&space;&space;&space;&space;}&space;&space;&space;&space;{&space;&space;&space;&space;APlus\&space;e_1\&space;e_2&space;\Longrightarrow&space;n_1&space;&plus;&space;n_2&space;&space;&space;&space;}\&space;(EAPlus)" title="\frac{ e_1 \Longrightarrow n_1 \qquad e_2 \Longrightarrow n_2 } { APlus\ e_1\ e_2 \Longrightarrow n_1 + n_2 }\ (EAPlus)" />
 
-$$
-\frac{
-    e_1 \Longrightarrow n_1 \qquad
-    e_2 \Longrightarrow n_2
-    }
-    {
-    AMinus\ e_1\ e_2 \Longrightarrow n_1 - n_2
-    }\ (EAMinus)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;&space;&space;&space;e_1&space;\Longrightarrow&space;n_1&space;\qquad&space;&space;&space;&space;e_2&space;\Longrightarrow&space;n_2&space;&space;&space;&space;}&space;&space;&space;&space;{&space;&space;&space;&space;AMinus\&space;e_1\&space;e_2&space;\Longrightarrow&space;n_1&space;-&space;n_2&space;&space;&space;&space;}\&space;(EAMinus)" title="\frac{ e_1 \Longrightarrow n_1 \qquad e_2 \Longrightarrow n_2 } { AMinus\ e_1\ e_2 \Longrightarrow n_1 - n_2 }\ (EAMinus)" />
 
-$$
-\frac{
-    e_1 \Longrightarrow n_1 \qquad
-    e_2 \Longrightarrow n_2
-    }
-    {
-    AMult\ e_1\ e_2 \Longrightarrow n_1 * n_2
-    }\ (EAMult)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;&space;&space;&space;e_1&space;\Longrightarrow&space;n_1&space;\qquad&space;&space;&space;&space;e_2&space;\Longrightarrow&space;n_2&space;&space;&space;&space;}&space;&space;&space;&space;{&space;&space;&space;&space;AMult\&space;e_1\&space;e_2&space;\Longrightarrow&space;n_1&space;*&space;n_2&space;&space;&space;&space;}\&space;(EAMult)" title="\frac{ e_1 \Longrightarrow n_1 \qquad e_2 \Longrightarrow n_2 } { AMult\ e_1\ e_2 \Longrightarrow n_1 * n_2 }\ (EAMult)" />
 
 上記の推論規則をCoqでは以下のように定義できる。
 
@@ -135,13 +109,7 @@ Inductive aevalR : aexp -> nat -> Prop :=
 このとき、$APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2$ は導出可能であるという。
 また、下の図を導出木という。
 
-$$
-\frac {\displaystyle
-       \frac {}{ANum \ 1 \Longrightarrow 1} \ (EANum)
-       \qquad
-       \frac {}{ANum \ 2 \Longrightarrow 2} \ (EANum)}
-      {APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2} \ (EAPlus)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac&space;{\displaystyle&space;&space;&space;&space;&space;&space;&space;\frac&space;{}{ANum&space;\&space;1&space;\Longrightarrow&space;1}&space;\&space;(EANum)&space;&space;&space;&space;&space;&space;&space;\qquad&space;&space;&space;&space;&space;&space;&space;\frac&space;{}{ANum&space;\&space;2&space;\Longrightarrow&space;2}&space;\&space;(EANum)}&space;&space;&space;&space;&space;&space;{APlus\&space;(ANum&space;\&space;1)\&space;(ANum&space;\&space;2)&space;\Longrightarrow&space;1&space;&plus;&space;2}&space;\&space;(EAPlus)" title="\frac {\displaystyle \frac {}{ANum \ 1 \Longrightarrow 1} \ (EANum) \qquad \frac {}{ANum \ 2 \Longrightarrow 2} \ (EANum)} {APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2} \ (EAPlus)" />
 
 Coqにおける証明は、ゴールとなる命題が与えられたとき推論規則を使って導出木を構成することと同じである。
 `aevalR (APlus (ANum 1) (ANum 2)) 3`の導出は以下のように書ける。`apply`タクティックは推論規則を適用してゴール(推論規則下段)からサブゴール(推論規則上段)を生成している。
@@ -434,45 +402,19 @@ Cannot guess decreasing argument of fix.
 このとき、評価関係は以下の推論規則で定義される。
 規則 $EWhileTrue$ は、`b`が`true`に評価できて、かつ、`st`において`while`のボディである`c`を実行すると`st'`で停止して、かつ、`st'`において`while`全体である`while b do c end`を実行すると`st''`で停止するとき、`st`において`while b do c end`を実行すると`st''`で停止することが導出できることを表している。この規則により、停止するプログラムのみ導出可能となる。
 
-$$
-\frac{}{\verb+ st =[ skip ]=> st +}\ (ESkip)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{}{&space;\texttt{st&space;=[&space;skip&space;]=>&space;st}&space;}\&space;(ESkip)" title="\frac{}{ \texttt{st =[ skip ]=> st} }\ (ESkip)" />
 
-$$
-\frac{\verb+ aeval st a = n +}
-     {\verb+ st =[ x := a ]=> (x !-> n ; st) +}\ (EAsgn)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;\texttt{aeval&space;st&space;a&space;=&space;n}&space;}&space;&space;&space;&space;&space;{&space;\texttt{st&space;=[&space;x&space;:=&space;a&space;]=>&space;(x&space;!->&space;n&space;;&space;st)}&space;}\&space;(EAsgn)" title="\frac{ \texttt{aeval st a = n} } { \texttt{st =[ x := a ]=> (x !-> n ; st)} }\ (EAsgn)" />
 
-$$
-\frac{\verb+ st =[ c1 ]=> st' +\qquad
-      \verb+ st' =[ c2 ]=> st'' +}
-     {\verb+ st =[ c1;c2 ]=> st'' +}\ (ESeq)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;\texttt{st&space;=[&space;c1&space;]=>&space;st'}&space;\qquad&space;&space;&space;&space;&space;&space;&space;\texttt{st'&space;=[&space;c2&space;]=>&space;st''}&space;}&space;&space;&space;&space;&space;{&space;\texttt{st&space;=[&space;c1;c2&space;]=>&space;st''}&space;}\&space;(ESeq)" title="\frac{ \texttt{st =[ c1 ]=> st'} \qquad \texttt{st' =[ c2 ]=> st''} } { \texttt{st =[ c1;c2 ]=> st''} }\ (ESeq)" />
 
-$$
-\frac{\verb+ beval st b = true +\qquad
-      \verb+ st =[ c1 ]=> st' +}
-     {\verb+ st =[ if b then c1 else c2 end ]=> st' +}\ (EIfTrue)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;\texttt{beval&space;st&space;b&space;=&space;true}&space;\qquad&space;&space;&space;&space;&space;&space;&space;\texttt{st&space;=[&space;c1&space;]=>&space;st'}&space;}&space;&space;&space;&space;&space;{&space;\texttt{st&space;=[&space;if&space;b&space;then&space;c1&space;else&space;c2&space;end&space;]=>&space;st'}&space;}\&space;(EIfTrue)" title="\frac{ \texttt{beval st b = true} \qquad \texttt{st =[ c1 ]=> st'} } { \texttt{st =[ if b then c1 else c2 end ]=> st'} }\ (EIfTrue)" />
 
-$$
-\frac{\verb+ beval st b = false +\qquad
-      \verb+ st =[ c2 ]=> st' +}
-     {\verb+ st =[ if b then c1 else c2 end ]=> st' +}\ (EIfFalse)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;\texttt{beval&space;st&space;b&space;=&space;false}&space;\qquad&space;&space;&space;&space;&space;&space;&space;\texttt{st&space;=[&space;c2&space;]=>&space;st'}&space;}&space;&space;&space;&space;&space;{&space;\texttt{st&space;=[&space;if&space;b&space;then&space;c1&space;else&space;c2&space;end&space;]=>&space;st'}&space;}\&space;(EIfFalse)" title="\frac{ \texttt{beval st b = false} \qquad \texttt{st =[ c2 ]=> st'} } { \texttt{st =[ if b then c1 else c2 end ]=> st'} }\ (EIfFalse)" />
 
-$$
-\frac{\verb+ beval st b = false +}
-     {\verb+ st =[ while b do c end ]=> st +}\ (EWhileFalse)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;\texttt{beval&space;st&space;b&space;=&space;false}&space;}&space;&space;&space;&space;&space;{&space;\texttt{st&space;=[&space;while&space;b&space;do&space;c&space;end&space;]=>&space;st}&space;}\&space;(EWhileFalse)" title="\frac{ \texttt{beval st b = false} } { \texttt{st =[ while b do c end ]=> st} }\ (EWhileFalse)" />
 
-$$
-\frac{\verb+ beval st b = true +\qquad
-      \verb+ st =[ c ]=> st' +\qquad
-      \verb+ st' =[ while b do c end ]=> st'' +
-     }
-     {\verb+ st =[ while b do c end ]=> st'' +}\ (EWhileTrue)
-$$
+<img src="https://latex.codecogs.com/svg.image?\frac{&space;\texttt{beval&space;st&space;b&space;=&space;true}&space;\qquad&space;&space;&space;&space;&space;&space;&space;\texttt{st&space;=[&space;c&space;]=>&space;st'}&space;\qquad&space;&space;&space;&space;&space;&space;&space;\texttt{st'&space;=[&space;while&space;b&space;do&space;c&space;end&space;]=>&space;st''}&space;&space;&space;&space;&space;&space;}&space;&space;&space;&space;&space;{&space;\texttt{st&space;=[&space;while&space;b&space;do&space;c&space;end&space;]=>&space;st''}&space;}\&space;(EWhileTrue)" title="\frac{ \texttt{beval st b = true} \qquad \texttt{st =[ c ]=> st'} \qquad \texttt{st' =[ while b do c end ]=> st''} } { \texttt{st =[ while b do c end ]=> st''} }\ (EWhileTrue)" />
 
 上記の推論規則をCoqでは以下のように定義できる。
 
