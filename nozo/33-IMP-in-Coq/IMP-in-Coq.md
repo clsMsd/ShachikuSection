@@ -72,8 +72,8 @@ Compute aeval (APlus (ANum 1) (ANum 2)).
 ```
 
 上記では`aexp`の評価を再帰関数として定義したが、評価を「項」と「値」の間の**関係**として定義することもできる。
-評価関係 $\Longrightarrow$ を $Aexp$ と $Nat$ の上の２項関係$\Longrightarrow \subseteq Aexp \times Nat$ とすると、以下の推論規則で定義される。
-これらの推論規則はそれぞれ横線の上の関係が成り立つなら下の関係を導き出すことができることを表している。規則 $E\_ANum$ は上段がないが、前提条件なしで関係が成り立つことを表している。
+評価関係 <img src="https://latex.codecogs.com/svg.image?\Longrightarrow" title="\Longrightarrow" /> を Aexp と Nat の上の２項関係<img src="https://latex.codecogs.com/svg.image?\Longrightarrow&space;\subseteq&space;Aexp&space;\times&space;Nat" title="\Longrightarrow \subseteq Aexp \times Nat" />とすると、以下の推論規則で定義される。
+これらの推論規則はそれぞれ横線の上の関係が成り立つなら下の関係を導き出すことができることを表している。規則 EANum は上段がないが、前提条件なしで関係が成り立つことを表している。
 
 <img src="https://latex.codecogs.com/svg.image?\frac{}{ANum\&space;n&space;\Longrightarrow&space;n}&space;\&space;(EANum)" title="\frac{}{ANum\ n \Longrightarrow n} \ (EANum)" />
 
@@ -105,8 +105,8 @@ Inductive aevalR : aexp -> nat -> Prop :=
         aevalR (AMult e1 e2) (n1 * n2).
 ```
 
-例えば、$APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2$ という評価関係は以下のように推論規則を適用することで導き出すことができる。
-このとき、$APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2$ は導出可能であるという。
+例えば、<img src="https://latex.codecogs.com/svg.image?APlus\&space;(ANum&space;\&space;1)\&space;(ANum&space;\&space;2)&space;\Longrightarrow&space;1&space;&plus;&space;2" title="APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2" /> という評価関係は以下のように推論規則を適用することで導き出すことができる。
+このとき、<img src="https://latex.codecogs.com/svg.image?APlus\&space;(ANum&space;\&space;1)\&space;(ANum&space;\&space;2)&space;\Longrightarrow&space;1&space;&plus;&space;2" title="APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2" /> は導出可能であるという。
 また、下の図を導出木という。
 
 <img src="https://latex.codecogs.com/svg.image?\frac&space;{\displaystyle&space;&space;&space;&space;&space;&space;&space;\frac&space;{}{ANum&space;\&space;1&space;\Longrightarrow&space;1}&space;\&space;(EANum)&space;&space;&space;&space;&space;&space;&space;\qquad&space;&space;&space;&space;&space;&space;&space;\frac&space;{}{ANum&space;\&space;2&space;\Longrightarrow&space;2}&space;\&space;(EANum)}&space;&space;&space;&space;&space;&space;{APlus\&space;(ANum&space;\&space;1)\&space;(ANum&space;\&space;2)&space;\Longrightarrow&space;1&space;&plus;&space;2}&space;\&space;(EAPlus)" title="\frac {\displaystyle \frac {}{ANum \ 1 \Longrightarrow 1} \ (EANum) \qquad \frac {}{ANum \ 2 \Longrightarrow 2} \ (EANum)} {APlus\ (ANum \ 1)\ (ANum \ 2) \Longrightarrow 1 + 2} \ (EAPlus)" />
@@ -400,7 +400,7 @@ Cannot guess decreasing argument of fix.
 そのため`com`は評価関係で定義するほうが適している。
 `st =[ c ]=> st'`はある状態`st`において`c`を実行すると状態`st'`で停止することを表す。
 このとき、評価関係は以下の推論規則で定義される。
-規則 $EWhileTrue$ は、`b`が`true`に評価できて、かつ、`st`において`while`のボディである`c`を実行すると`st'`で停止して、かつ、`st'`において`while`全体である`while b do c end`を実行すると`st''`で停止するとき、`st`において`while b do c end`を実行すると`st''`で停止することが導出できることを表している。この規則により、停止するプログラムのみ導出可能となる。
+規則 EWhileTrue は、`b`が`true`に評価できて、かつ、`st`において`while`のボディである`c`を実行すると`st'`で停止して、かつ、`st'`において`while`全体である`while b do c end`を実行すると`st''`で停止するとき、`st`において`while b do c end`を実行すると`st''`で停止することが導出できることを表している。この規則により、停止するプログラムのみ導出可能となる。
 
 <img src="https://latex.codecogs.com/svg.image?\frac{}{&space;\texttt{st&space;=[&space;skip&space;]=>&space;st}&space;}\&space;(ESkip)" title="\frac{}{ \texttt{st =[ skip ]=> st} }\ (ESkip)" />
 
@@ -454,30 +454,7 @@ Inductive ceval : com -> state -> state -> Prop :=
 
 例えば、`empty_st =[ X := 2; if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2)`という評価関係は以下のように推論規則を適用することで導き出すことができる。
 
-$$
-\frac{\displaystyle
-      \frac{\displaystyle
-        \verb+ aeval empty_st 2 = 2 +
-      }
-      {
-        \verb+ empty_st =[ X := 2 ]=> (X !-> 2) +
-      } \ (EAsgn)
-      \qquad
-      \frac{\displaystyle
-        \verb+ beval (X !-> 2) <{ X <= 1 }> = false + \qquad
-        \frac{\displaystyle
-          \verb+ aeval (X !-> 2) 4 = 4 +
-        }
-        {
-          \verb+ (X !-> 2) =[ Z := 4 ]=> (Z !-> 4; X !-> 2) +
-        } \ (EAsgn)
-      }
-      {
-        \verb+ (X !-> 2) =[ if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2) +
-      } \ (EIfFalse)
-     }
-     {\verb+ empty_st =[ X := 2; if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2) +} \ (ESeq)
-$$
+<img src="https://latex.codecogs.com/svg.image?\dfrac{&space;&space;&space;&space;&space;&space;\dfrac{\texttt{aeval&space;empty\_st&space;2&space;=&space;2}}&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;{\texttt{empty\_st&space;=[&space;X&space;:=&space;2&space;]=>&space;(X&space;!->&space;2)}}&space;\&space;(EAsgn)&space;&space;&space;&space;&space;&space;\qquad&space;&space;&space;&space;&space;&space;\dfrac{\texttt{beval&space;(X&space;!->&space;2)&space;<{&space;X&space;<=&space;1&space;}>&space;=&space;false}&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;\qquad&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;\dfrac{\texttt{aeval&space;(X&space;!->&space;2)&space;4&space;=&space;4}}&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;{\texttt{(X&space;!->&space;2)&space;=[&space;Z&space;:=&space;4&space;]=>&space;(Z&space;!->&space;4;&space;X&space;!->&space;2)}}&space;\&space;(EAsgn)&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;}&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;{\texttt{(X&space;!->&space;2)&space;=[&space;if&space;X&space;<=&space;1&space;then&space;Y&space;:=&space;3&space;else&space;Z&space;:=&space;4&space;end&space;]=>&space;(Z&space;!->&space;4;&space;X&space;!->&space;2)}&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;}&space;\&space;(EIfFalse)&space;&space;&space;&space;&space;}&space;&space;&space;&space;&space;{\texttt{empty\_st&space;=[&space;X&space;:=&space;2;&space;if&space;X&space;<=&space;1&space;then&space;Y&space;:=&space;3&space;else&space;Z&space;:=&space;4&space;end&space;]=>&space;(Z&space;!->&space;4;&space;X&space;!->&space;2)}&space;&space;&space;&space;&space;}&space;\&space;(ESeq)" title="\dfrac{ \dfrac{\texttt{aeval empty\_st 2 = 2}} {\texttt{empty\_st =[ X := 2 ]=> (X !-> 2)}} \ (EAsgn) \qquad \dfrac{\texttt{beval (X !-> 2) <{ X <= 1 }> = false} \qquad \dfrac{\texttt{aeval (X !-> 2) 4 = 4}} {\texttt{(X !-> 2) =[ Z := 4 ]=> (Z !-> 4; X !-> 2)}} \ (EAsgn) } {\texttt{(X !-> 2) =[ if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2)} } \ (EIfFalse) } {\texttt{empty\_st =[ X := 2; if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2)} } \ (ESeq)" />
 
 Coqでは以下のように書ける。
 
