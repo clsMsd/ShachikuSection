@@ -207,7 +207,7 @@ UsageはレポートのMain Itemが実際にどのように使われるかを表
 > 
 > HID Usage Tables 1.3
 
-Usageの指定方法は、順番に`USAGE (X)`, `USAGE (Y)`, `USAGE (Wheel)`を並べるか、最小と最大を`USAGE_MINIMUM (Button 1)`と`USAGE_MAXIMUM (Button 3)`のように指定する方法がある。
+複数のデータに対するUsageの指定方法は、`USAGE (X)`, `USAGE (Y)`, `USAGE (Wheel)`のように１つずつ順番に並べるか、`USAGE_MINIMUM (Button 1)`と`USAGE_MAXIMUM (Button 3)`のように始まりと終わりを指定する方法がある。
 
 ## Logical Minimum, Logical Maximum
 
