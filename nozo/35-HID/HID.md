@@ -89,7 +89,9 @@ https://www.usb.org/sites/default/files/hid1_11.pdf
 
 レポートディスクリプタはItemというデータが並んでいるもので、Itemのフォーマットは下のようになっていうる。(ItemにはShort ItemとLong Itemがあって、下のはShort Item)
 
-![](https://storage.googleapis.com/zenn-user-upload/e01ca9266c2d-20220610.png)
+> ![](./img/ss01.png)
+> 
+> Device Class Definition for Human Interface Devices (HID) Version 1.11, 6.2.2.2
 
 まず初めの1byteにTag/Type/Sizeという情報が入っている。
 Sizeは後ろに続くDataの大きさを表していて、0byte,1byte,2byte,4byteがある。
@@ -114,8 +116,65 @@ TagはItemの識別を表す(オペコードみたいなもの)。
 
 Type毎の役割は以下の通り。
 
-- MainのItemにはデータの種類を表すInput(デバイスからホストへ), Output(ホストからデバイスへ), Featureと、データのグループを表すCollection, End Collectionがある。
-- LocalとGlobalはMainのItemを修飾するもので、Localは次に来るMainの属性(データサイズや個数)を表し、Globalは後続のすべてのデータの属性を表す。
+- **Main**のItemにはデータの種類を表すInput(デバイスからホストへ), Output(ホストからデバイスへ), Featureと、データのグループを表すCollection, End Collectionがある。
+- **Local**と**Global**はMainのItemを修飾するもので、**Local**は次に来るMainの属性を表し、**Global**は後続のすべてのデータの属性を表す。
+
+例えば、以下のItemの並び(説明のためいろいろ省いている)は、
+最初の`Input`に対して`Report Size (3)`と`Report Count (2)`がかかり、
+後ろの`Input`と`Output`には`Report Count (2)`と`Report Size (8)`がかかる。
+
+```
+[Global] Report Size (3)
+[Global] Report Count (2)
+[Main  ] Input
+[Global] Report Size (8)
+[Main  ] Input
+[Main  ] Output
+```
+
+その結果、レポートは次のようなフィールドになる。
+
+> ![](./img/ss02.png)
+> 
+> Device Class Definition for Human Interface Devices (HID) Version 1.11, 6.2.2
+
+Mouse.cppの例をMain毎に分けると以下のようになる。
+
+```
+    0x05, 0x01,             Global // USAGE_PAGE (Generic Desktop)  // 54
+    0x09, 0x02,              Local // USAGE (Mouse)
+    0xa1, 0x01,               Main // COLLECTION (Application)
+--------------------------------------------------------------------------
+    0x09, 0x01,              Local //   USAGE (Pointer)
+    0xa1, 0x00,               Main //   COLLECTION (Physical)
+--------------------------------------------------------------------------
+    0x85, 0x01,             Global //     REPORT_ID (1)
+    0x05, 0x09,             Global //     USAGE_PAGE (Button)
+    0x19, 0x01,              Local //     USAGE_MINIMUM (Button 1)
+    0x29, 0x03,              Local //     USAGE_MAXIMUM (Button 3)
+    0x15, 0x00,             Global //     LOGICAL_MINIMUM (0)
+    0x25, 0x01,             Global //     LOGICAL_MAXIMUM (1)
+    0x95, 0x03,             Global //     REPORT_COUNT (3)
+    0x75, 0x01,             Global //     REPORT_SIZE (1)
+    0x81, 0x02,               Main //     INPUT (Data,Var,Abs)
+--------------------------------------------------------------------------
+    0x95, 0x01,             Global //     REPORT_COUNT (1)
+    0x75, 0x05,             Global //     REPORT_SIZE (5)
+    0x81, 0x03,               Main //     INPUT (Cnst,Var,Abs)
+--------------------------------------------------------------------------
+    0x05, 0x01,             Global //     USAGE_PAGE (Generic Desktop)
+    0x09, 0x30,              Local //     USAGE (X)
+    0x09, 0x31,              Local //     USAGE (Y)
+    0x09, 0x38,              Local //     USAGE (Wheel)
+    0x15, 0x81,             Global //     LOGICAL_MINIMUM (-127)
+    0x25, 0x7f,             Global //     LOGICAL_MAXIMUM (127)
+    0x75, 0x08,             Global //     REPORT_SIZE (8)
+    0x95, 0x03,             Global //     REPORT_COUNT (3)
+    0x81, 0x06,               Main //     INPUT (Data,Var,Rel)
+--------------------------------------------------------------------------
+    0xc0,                     Main //   END_COLLECTION
+    0xc0,                     Main // END_COLLECTION
+```
 
 # 参考
 - Device Class Definition for HID 1.11 - USB-IF, https://www.usb.org/document-library/device-class-definition-hid-111
