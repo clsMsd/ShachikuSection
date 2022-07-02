@@ -1,14 +1,13 @@
 
 # HID
 Human Interface Device(HID)がPCとどんなやりとりをしているのか気になったので調べる。
-HIDのドキュメントや仕様書は以下のものがあったけど全体像が見えていないのであまりピンとこない。
-
-- Introduction to Human Interface Devices (HID) - Windows Hardware Developer, https://docs.microsoft.com/en-us/windows-hardware/drivers/hid/
-- Device Class Definition for HID 1.11 - USB-IF, https://www.usb.org/document-library/device-class-definition-hid-111
 
 とっかかりとして以下の技術解説記事がわかりやすい。(ほかのUSBの解説記事も参考になる)
 
 - HID (Human Interface Device) クラスについて - インターフェイス株式会社, https://www.itf.co.jp/tech/road-to-usb-master/hid_class
+
+> ![](https://www.itf.co.jp/wordpress/wp-content/uploads/2019/10/hid_geiyou.jpg)
+> 
 > HID (Human Interface Device) クラスでは、レポートと呼ばれる単位でデータを転送します。例えばマウスの場合、各ボタンが押されているかどうか、水平方向の移動量、垂直方向の移動量、ホイールの移動量といった情報をまとめたレポートを定期的に転送します。
 
 wio-terminalのサンプルにHIDマウスの実装例があった。これはArduinoのライブラリを使っているので、ライブラリの実装を追っていく。
@@ -23,6 +22,7 @@ Using cached library dependencies for file: C:\Users\user\AppData\Local\Arduino1
 ```
 
 ライブラリの呼び出しをさかのぼっていくと、だいたい以下のソースが見つかった。
+(下の方はどっちかというとUSB規格のものであまり深堀できなかったので、今回見るのはMouse.cppだけ。)
 
 - https://github.com/arduino-libraries/Mouse/blob/master/src/Mouse.cpp
 - https://github.com/arduino/ArduinoCore-samd/blob/master/libraries/HID/HID.cpp
@@ -67,7 +67,7 @@ static const uint8_t _hidReportDescriptor[] PROGMEM = {
 };
 ```
 
-マウスの例だと以下でレポートを送信している。
+マウスの例だと以下でレポートを送信している。レポートは4byteの大きさで、ボタン、X座標、Y座標、ホイールが1byteずつ並んでる。
 
 https://github.com/arduino-libraries/Mouse/blob/master/src/Mouse.cpp#L96-L104
 ```cpp
@@ -91,7 +91,12 @@ https://www.usb.org/sites/default/files/hid1_11.pdf
 
 ![](https://storage.googleapis.com/zenn-user-upload/e01ca9266c2d-20220610.png)
 
-Mouse.cppで定義されているレポートディスクリプタの一部をフォーマットに当てはめると次のようになる。
+まず初めの1byteにTag/Type/Sizeという情報が入っている。
+Sizeは後ろに続くDataの大きさを表していて、0byte,1byte,2byte,4byteがある。
+TypeはこのItemの種類を表していて、Main,Global,Localがある。
+TagはItemの識別を表す(オペコードみたいなもの)。
+
+例えば、Mouse.cppで定義されているレポートディスクリプタの一部をフォーマットに当てはめると次のようになる。
 
 ```
     Tag  Type Size         Data
@@ -107,9 +112,10 @@ Mouse.cppで定義されているレポートディスクリプタの一部を�
     1100|  00|  00 (0xc0),                          // END_COLLECTION
 ```
 
-- Sizeが後ろに続くDataの数を表している。この例だとEND_COLLECTIONというItem以外はすべてSizeが1なのでデータは1byteのみである。
-- TypeとTagでItemの種別を表し、Dataが種別ごとのItemで使われる値を表している。これから各Type/Tag/Dataの定義を見ていく。
+Type毎の役割は以下の通り。
 
+- MainのItemにはデータの種類を表すInput(デバイスからホストへ), Output(ホストからデバイスへ), Featureと、データのグループを表すCollection, End Collectionがある。
+- LocalとGlobalはMainのItemを修飾するもので、Localは次に来るMainの属性(データサイズや個数)を表し、Globalは後続のすべてのデータの属性を表す。
 
 # 参考
 - Device Class Definition for HID 1.11 - USB-IF, https://www.usb.org/document-library/device-class-definition-hid-111
