@@ -11,7 +11,7 @@ Human Interface Device(HID)がPCとどんなやりとりをしているのか気
 
 また、wio-terminalのサンプルにHIDマウスの実装例があった。これはArduinoのライブラリを使っているので、ライブラリの実装を見てみる。
 
-https://wiki.seeedstudio.com/Wio-Terminal-USBH-Mouse/
+https://wiki.seeedstudio.com/Wio-Terminal-USBCLIENT-Mouse/
 
 まずサンプルをコンパイルすると以下のログが出るので使っているライブラリがMouse.cppとHID.cppであることがわかる。
 HID.cppはパスにsamdが入っているのでマイコンごとの実装っぽい。
