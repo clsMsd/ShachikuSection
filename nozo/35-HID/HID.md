@@ -178,8 +178,6 @@ Mouse.cppの例をMain毎に分けると以下のようになる。
     0xc0,                     Main // END_COLLECTION
 ```
 
-上の例の個々のItemについて見てみる。
-
 ## Collection
 
 CollectionはCollectionとEnd Collectionで囲まれたMain Item(Input, Output, Feature)を入れ子構造でグループ化している。
