@@ -144,6 +144,48 @@ check RootTop //OK
 ```
 
 
+```Alloy
+abstract sig Object {}
+sig File, Dir extends Object {}
+one sig Root extends Dir {}
+
+sig FileSystem {
+    contents : Dir -> set Object,
+    live : set Object
+} {
+    all o : live | o in Root.*contents
+    no o : live | o in o.^contents
+    contents in (live -> live)
+}
+
+run {} for 5 but 1 FileSystem
+
+assert SomeDir {
+    all fs : FileSystem |
+    all o : fs.live - Root | some (fs.contents).o
+}
+check SomeDir
+
+assert RootTop {
+    all fs : FileSystem |
+    no o: fs.live | Root in o.(fs.contents)
+}
+check RootTop
+
+pred delFile(fs1, fs2 : FileSystem, o : Object) {
+    o in (fs1.live - Root) and
+    fs2.contents = fs1.contents - (Object -> o)
+}
+run delFile for 5 but 2 FileSystem
+
+assert removeOkay {
+    all disj fs1, fs2: FileSystem, o: Object |
+    delFile [fs1, fs2, o] => not o in Root.*(fs2.contents)
+} 
+check removeOkay
+```
+
+
 # 参考
 - https://alloytools.org/about.html
 - 抽象によるソフトウェア設計 ― Alloyではじめる形式手法 第1版, https://www.ohmsha.co.jp/book/9784274068584/
