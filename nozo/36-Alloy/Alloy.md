@@ -34,7 +34,7 @@ sig Dir extends Object {
 }
 
 pred SomeDirInDir {
-    some disj d1, d2 : Dir | d1.contents = d2
+    some disj d1, d2 : Dir | d2 in d1.contents
 }
 run SomeDirInDir
 ```
@@ -84,7 +84,7 @@ sig Dir extends Object {
 one sig Root extends Dir {}
 
 fact {
-    all o : Object | o in Root.(*contents)
+    all o : Object | o in Root.*contents
 }
 
 assert SomeDir {
@@ -113,7 +113,7 @@ sig Dir extends Object {
 one sig Root extends Dir {}
 
 fact {
-    all o : Object | o in Root.(*contents)
+    all o : Object | o in Root.*contents
 }
 
 assert RootTop {
@@ -133,8 +133,8 @@ sig Dir extends Object {
 one sig Root extends Dir {}
 
 fact {
-    all o : Object | o in Root.(*contents)
-    no o : Object | o in o.(^contents)
+    all o : Object | o in Root.*contents
+    no o : Object | o in o.^contents
 }
 
 assert RootTop {
