@@ -60,7 +60,7 @@ sig Dir extends Object {
 assert SomeDir {
     all o : Object | some contents.o
 }
-check SomeDir
+check SomeDir //NG
 ```
 ```
 Starting the solver...
@@ -90,7 +90,7 @@ fact {
 assert SomeDir {
     all o : Object - Root | some contents.o
 }
-check SomeDir
+check SomeDir //OK
 ```
 ```
 Starting the solver...
@@ -100,6 +100,49 @@ Solver=sat4j Bitwidth=4 MaxSeq=4 SkolemDepth=1 Symmetry=20 Mode=batch
 Generating CNF...
 No counterexample found. Assertion may be valid. 0ms.
 ```
+
+
+```Alloy
+abstract sig Object {}
+
+sig File extends Object {}
+sig Dir extends Object {
+    contents : set Object
+}
+
+one sig Root extends Dir {}
+
+fact {
+    all o : Object | o in Root.(*contents)
+}
+
+assert RootTop {
+    no o: Object | Root in o.contents
+}
+check RootTop //NG
+```
+
+```Alloy
+abstract sig Object {}
+
+sig File extends Object {}
+sig Dir extends Object {
+    contents : set Object
+}
+
+one sig Root extends Dir {}
+
+fact {
+    all o : Object | o in Root.(*contents)
+    no o : Object | o in o.(^contents)
+}
+
+assert RootTop {
+    no o: Object | Root in o.contents
+}
+check RootTop //OK
+```
+
 
 # 参考
 - https://alloytools.org/about.html
