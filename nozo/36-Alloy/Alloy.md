@@ -149,44 +149,44 @@ abstract sig Object {}
 sig File, Dir extends Object {}
 one sig Root extends Dir {}
 
-sig FileSystem {
+sig FS {
     contents : Dir -> set Object,
     live : set Object
 } {
     all o : live | o in Root.*contents
     no o : live | o in o.^contents
     contents in (live -> live)
+    Root in live
 }
 
-run {} for 5 but 1 FileSystem
-
 assert SomeDir {
-    all fs : FileSystem |
+    all fs : FS |
     all o : fs.live - Root | some (fs.contents).o
 }
 check SomeDir
 
 assert RootTop {
-    all fs : FileSystem |
+    all fs : FS |
     no o: fs.live | Root in o.(fs.contents)
 }
 check RootTop
 
-pred delFile(fs1, fs2 : FileSystem, o : Object) {
-    o in (fs1.live - Root) and
-    fs2.contents = fs1.contents - (Object -> o)
+pred rmFile(fs1, fs2 : FS, f : File) {
+    f in fs1.live and
+    fs2.contents = fs1.contents - ((fs1.contents).f -> f)
 }
-run delFile for 5 but 2 FileSystem
 
-assert removeOkay {
-    all disj fs1, fs2: FileSystem, o: Object |
-    delFile [fs1, fs2, o] => not o in Root.*(fs2.contents)
+assert rmFileOkay {
+    all disj fs1, fs2: FS, o: File |
+    rmFile [fs1, fs2, o] => fs2.live = fs1.live - o
 } 
-check removeOkay
+check rmFileOkay
 ```
 
 
 # 参考
-- https://alloytools.org/about.html
+- Alloy, https://alloytools.org/about.html
 - 抽象によるソフトウェア設計 ― Alloyではじめる形式手法 第1版, https://www.ohmsha.co.jp/book/9784274068584/
-- http://softwareabstractions.org/models/a4-models-index.html
+- Software Abstractions: Models Repository, http://softwareabstractions.org/models/a4-models-index.html
+- Tutorial for Alloy Analyzer 4.0, https://alloytools.org/tutorials/online/index.html
+
