@@ -1,14 +1,27 @@
 # Alloy
 
+Alloy は、構造を記述するための言語であり、構造を探索するためのツールです。セキュリティメカニズムの穴の発見から電話交換網の設計まで、幅広い用途で使用されています。
+
 > Alloy is a language for describing structures and a tool for exploring them. It has been used in a wide range of applications from finding holes in security mechanisms to designing telephone switching networks.
 > 
 > https://alloytools.org/about.html
+
+Alloyは次のような特徴を持つ。
+
+- 一階の関係論理に基づく仕様言語
+- SATソルバーによって制約の充足例や反例を網羅的に探索する
+
+Alloyでファイルシステムのモデルを記述して、特定の性質を検証する例を見ていく。
+まずは、ファイルとディレクトリを次のように定義する。
 
 ```Alloy
 sig File, Dir {}
 ```
 
 `sig`で宣言されるシグネチャはオブジェクトの集合を表す。
+シグネチャのインスタンスは`File0`や`Dir0`などで表される。
+
+次に、ディレクトリは複数のファイルを持つ、という性質を集合`Dir`と集合`File`の間の関係(relation)`contents`として定義する。
 
 ```Alloy
 sig File {}
@@ -16,8 +29,6 @@ sig Dir {
     contents : set File
 }
 ```
-
-集合`Dir`と集合`File`の間の関係(relation)として`contents`が定義される。
 
 集合多重度
 - set 任意個
