@@ -1,4 +1,4 @@
-# WebAssembly not for Web
+# WebAssembly not for WebBrowser
 
 ## WebAssembly とは？
 
